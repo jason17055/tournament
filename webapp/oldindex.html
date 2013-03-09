@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html manifest="webtd.manifest">
+<head>
+<title>WebTD</title>
+<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="code.js"></script>
+<link rel="stylesheet" type="text/css" href="webtd.css">
+</head>
+<body>
+<h1>WebTD</h1>
+<p>
+<a href="event.html?e=1">Event Info</a>
+|
+<a href="scoreboard.html">Scoreboard</a>
+|
+<a href="canvas.html">Canvas</a>
+|
+<a href="javascript:make_game_results_file()">AGA Results File</a>
+</p>
+
+<h2>Roster</h2>
+<table border="1" id="roster_table">
+<tr>
+<th>Full Name</th>
+<th>Org Number</th>
+<th><span class="player_param1_label">Entry Rank</span></th>
+</tr>
+</table>
+<script type="text/javascript"><!--
+refresh_players_table("roster_table");
+//--></script>
+<p>
+<a href="newplayer.html">New Player</a>
+</p>
+
+<h2>Games Played</h2>
+<table border="1" id="plays_table">
+<tr>
+<th>Number</th>
+<th>Played White</th>
+<th>Played Black</th>
+<th>Winner</th>
+<th>Handicap</th>
+<th>Komi</th>
+</tr>
+</table>
+<script type="text/javascript"><!--
+refresh_plays_table();
+//--></script>
+<p>
+<a href="play.html">New Play</a>
+</p>
+
+</body>
+</html>

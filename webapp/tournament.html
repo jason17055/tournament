@@ -2,19 +2,21 @@
 <html manifest="webtd.manifest">
 <head>
 <title>WebTD</title>
+<link rel="stylesheet" type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.8.16.css">
 <script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="jquery/js/jquery-ui-1.8.16.min.js"></script>
 <script type="text/javascript" src="code.js"></script>
 <script type="text/javascript"><!--
 $(function() {
-	$(document.event_form.startDate).datepicker({ dateFormat: 'mm/dd/yy' });
-	$(document.event_form.endDate).datepicker({ dateFormat: 'mm/dd/yy' });
+	$(document.event_form.startDate).datepicker({ dateFormat: 'yy-mm-dd' });
+	$(document.event_form.endDate).datepicker({ dateFormat: 'yy-mm-dd' });
 });
 //--></script>
-<link rel="stylesheet" type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.8.16.css">
 </head>
 <body>
+<header>
 <h1>WebTD</h1>
+</header>
 <form name="event_form" onsubmit="on_event_submit(); return false">
 <table>
 <tr>
