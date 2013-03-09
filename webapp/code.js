@@ -8,6 +8,11 @@ function next_id_helper(prefix, key)
 	return id;
 }
 
+function next_tournament_id()
+{
+	return next_id_helper("webtd.event", "created");
+}
+
 function next_player_id()
 {
 	return next_id_helper("webtd.roster", "name");
@@ -50,6 +55,19 @@ function get_player(pid)
 	return p;
 }
 
+function get_all_tournaments()
+{
+	var list_str = localStorage.getItem("webtd.all_tournaments");
+	var list = list_str ? list_str.split(',') : [];
+	var rv = [];
+	for (var i in list)
+	{
+		var eid = list[i];
+		rv.push(get_event(eid));
+	}
+	return rv;
+}
+
 function get_all_players(eventId)
 {
 	var roster_str = localStorage.getItem("webtd.event."+eventId+".roster");
@@ -83,6 +101,7 @@ function save_event_from_form(eid, form)
 	"endTime": form.endTime.value
 	};
 
+	localStorage.setItem("webtd.event."+eid+".created", 1);
 	localStorage.setItem("webtd.event."+eid+".name", e.name);
 	localStorage.setItem("webtd.event."+eid+".location", e.location);
 	localStorage.setItem("webtd.event."+eid+".startDate", e.startDate);
@@ -164,12 +183,32 @@ function on_player_submit()
 	window.location = ".";
 }
 
-function on_event_submit()
+function on_tournament_submit()
 {
 	var eid = get_url_param("e");
+	if (!eid) {
+		eid = next_tournament_id();
+	}
+
 	save_event_from_form(eid, document.event_form);
 
+	maybe_add_to_set("webtd.all_tournaments", eid);
+
 	window.location = ".";
+	return false;
+}
+
+function maybe_add_to_set(k, x)
+{
+	var list_str = localStorage.getItem(k);
+	var list = list_str ? list_str.split(',') : [];
+	for (var i in list)
+	{
+		if (list[i] == x) return false;
+	}
+	list.push(x);
+	localStorage.setItem(k, list.join(","));
+	return true;
 }
 
 function on_player_delete()
@@ -222,6 +261,24 @@ function get_all_plays()
 		plays.push(get_play(plays_arr[i]));
 	}
 	return plays;
+}
+
+function refresh_tournaments_table()
+{
+	$('tr.oddRow', $(this)).remove();
+	var tournaments = get_all_tournaments();
+	for (var i in tournaments)
+	{
+		var e = tournaments[i];
+		var $row = $('tr.aTemplate', $(this)).clone();
+		$row.removeClass('aTemplate');
+		$row.addClass('oddRow');
+		$('.name_col a', $row).text(e.name);
+		$('.name_col a', $row).attr("href", "tournament.html?e=" + escape(e.eid));
+		$('.location_col', $row).text(e.location);
+		$('.date_col', $row).text(e.startDate);
+		$(this).append($row);
+	}
 }
 
 function refresh_players_table(tableId)
@@ -462,8 +519,11 @@ function createTableBox(tableName)
 	$tableBox.show();
 
 	var el = $tableBox.get(0);
+if (el)
+{
 	el.addEventListener('dragover', onTableBoxDragOver, false);
 	el.addEventListener('drop', onTableBoxDragOver, false);
+}
 
 	return $tableBox;
 }
@@ -520,6 +580,8 @@ function onPlayerBoxClicked(evt)
 
 function addPlayerBoxEventListeners(pbEl)
 {
+	if (!pbEl) { return; }
+
 	$(pbEl).click(onPlayerBoxClicked);
 	pbEl.addEventListener('dragstart', onPlayerBoxDragStart, false);
 	pbEl.addEventListener('dragend', onPlayerBoxDragEnd, false);
@@ -554,6 +616,9 @@ function makeTables()
 }
 
 $(function() {
+
+	$('form[name="event_form"]').submit(on_tournament_submit);
+	$('table.tournaments_list').each(refresh_tournaments_table);
 
 	makeTables();
 });
