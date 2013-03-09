@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html manifest="webtd.manifest">
+<head>
+<title>WebTD</title>
+<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="jquery/js/jquery-ui-1.8.16.min.js"></script>
+<script type="text/javascript" src="code.js"></script>
+<script type="text/javascript"><!--
+var memberlist_raw = null;
+function make_suggestion(s, ss)
+{
+	return {
+	value: ss[0],
+	label: (ss[0] + " [" + s + "]"),
+	number:s,
+	data:  ss
+	};
+}
+function autocomplete_select(event, ui)
+{
+	var f = document.newplayer_form;
+
+	var name_parts = ui.item.value.split(",", 2);
+	if (name_parts.length == 2)
+	{
+		ui.item.value = name_parts[0];
+		f.givenName.value = name_parts[1].replace(/^\s+/,'');
+	}
+	else
+	{
+		ui.item.value = ui.item.value;
+		f.givenName.value = "";
+	}
+
+	f.number.value = ui.item.number;
+
+	var rating = parseFloat(ui.item.data[2]);
+	f.entryRank.value = rating < 0 ?
+		(Math.floor(-rating) + "k") :
+		(Math.floor(rating) + "d");
+}
+function autocomplete_callback(req, resp)
+{
+	var t = req.term.toLowerCase();
+	if (t.match(/^\d+$/) && memberlist_raw[t])
+	{
+		var suggestions = [
+			make_suggestion(t, memberlist_raw[t])
+			];
+		resp(suggestions);
+		return;
+	}
+
+	var tt = t.replace(/[^a-z]/g, '');
+	if (tt.length < 2) { resp([]); return; }
+	tt = tt.substr(0,2);
+
+	var suggestions = new Array();
+	var candidates = memberlist_raw[tt];
+	for (var i in candidates)
+	{
+		var s = candidates[i];
+		var ss = memberlist_raw[s];
+		if (ss[0].toLowerCase().indexOf(t) != -1)
+		{
+			suggestions.push(make_suggestion(s, ss));
+		}
+	}
+	resp(suggestions);
+}
+function memberlist_loaded(data)
+{
+	memberlist_raw = data;
+	$(document.newplayer_form.name).autocomplete({
+			source: autocomplete_callback,
+			select: autocomplete_select
+			});
+	$('#loading_message').css('visibility','hidden');
+}
+function load_memberlist()
+{
+	$.ajax({
+	url: 'aga_tdlist.php',
+	success: memberlist_loaded,
+	dataType: "json",
+	error: function(a,b,c) { alert('ajax error ' + b + c); }
+	});
+}
+$(load_memberlist);
+
+function add_player_to_roster(p)
+{
+	var $row = $('<tr><td class="name_col"></td><td class="givenName_col"></td><td class="number_col"></td><td class="entryRank_col"></td></tr>');
+	$('.name_col',$row).text(p.name);
+	$('.givenName_col',$row).text(p.givenName);
+	$('.number_col',$row).text(p.number);
+	$('.entryRank_col',$row).text(p.entryRank);
+	$('#newplayer_table_header').before($row);
+	$('#hidden_table_header').show();
+}
+function load_roster()
+{
+	var players = get_all_players();
+	for (var i in players)
+	{
+		add_player_to_roster(players[i]);
+	}
+}
+$(load_roster);
+
+function reset_form()
+{
+	var f = document.newplayer_form;
+	f.name.value = "";
+	f.givenName.value = "";
+	f.number.value = "";
+	f.entryRank.value = "";
+	f.name.focus();
+}
+function on_newplayer_submit()
+{
+	var pid = next_player_id();
+	save_player_from_form(pid, document.newplayer_form);
+
+	var roster_str = localStorage.getItem("webtd.roster");
+	var roster = roster_str != null ? roster_str.split(",") : new Array();
+	roster.push(pid);
+	localStorage.setItem("webtd.roster", roster.join(","));
+
+	add_player_to_roster(get_player(pid));
+	reset_form();
+}
+
+$(reset_form);
+//--></script>
+<link rel="stylesheet" type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.8.16.css">
+<style type="text/css">
+.ui-autocomplete {
+		max-height: 300px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		padding-right: 20px;
+		font-size: 8pt;
+	};
+</style>
+</head>
+<body>
+<h1>WebTD</h1>
+<div id="loading_message"><img src="throbber.gif" alt="">Loading membership database...</div>
+<form name="newplayer_form" onsubmit="on_newplayer_submit(); return false">
+<table border="1">
+<tr id="hidden_table_header" style="display:hidden">
+<th>Last Name</th>
+<th>First Name</th>
+<th>AGA #</th>
+<th>Entry Rank</th>
+</tr>
+<tr id="newplayer_table_header">
+<th>Last Name</th>
+<th>First Name</th>
+<th>AGA #</th>
+<th>Entry Rank</th>
+</tr>
+<tr>
+<td><input type="text" name="name" value="" size="32"></td>
+<td><input type="text" name="givenName" value="" size="12"></td>
+<td><input type="text" name="number" value="" size="6"></td>
+<td><input type="text" name="entryRank" value="" size="6"></td>
+</tr>
+</table>
+<p>
+<button type="submit">Add Player</button>
+<button type="button" onclick="on_player_cancel()">Go Back</button>
+</form>
+</body>
+</html>

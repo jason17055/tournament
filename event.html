@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html manifest="webtd.manifest">
+<head>
+<title>WebTD</title>
+<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="jquery/js/jquery-ui-1.8.16.min.js"></script>
+<script type="text/javascript" src="code.js"></script>
+<script type="text/javascript"><!--
+$(function() {
+	$(document.event_form.startDate).datepicker({ dateFormat: 'mm/dd/yy' });
+	$(document.event_form.endDate).datepicker({ dateFormat: 'mm/dd/yy' });
+});
+//--></script>
+<link rel="stylesheet" type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.8.16.css">
+</head>
+<body>
+<h1>WebTD</h1>
+<form name="event_form" onsubmit="on_event_submit(); return false">
+<table>
+<tr>
+<th colspan="2">Event Information</th>
+</tr>
+<tr>
+<td><label for="name_entry">Name:</label></td>
+<td><input type="text" id="name_entry" name="name" size="40"></td>
+</tr>
+<tr>
+<td><label for="location_entry">Location:</label></td>
+<td><input type="text" id="location_entry" name="location" size="40"></td>
+</tr>
+<tr>
+<td>Starts:</td>
+<td>
+  <label>Date:
+  <input type="text" id="startDate_entry" name="startDate"></label>
+  <label>Time:
+  <input type="text" id="startTime_entry" name="startTime"></label>
+</td>
+</tr>
+<tr>
+<td>Ends:</td>
+<td>
+  <label>Date:
+  <input type="text" id="endDate_entry" name="endDate"></label>
+  <label>Time:
+  <input type="text" id="endTime_entry" name="endTime"></label>
+</td>
+</tr>
+<tr>
+<th colspan="2">Player Parameters</th>
+</tr>
+<tr>
+<td>Custom Attribute 1</td>
+<td><input type="text" name="player_param1" disabled="disabled"></td>
+</tr>
+</table>
+<p>
+<button type="submit">Save Changes</button>
+<button type="button" onclick="on_event_cancel()">Cancel</button>
+</form>
+<script type="text/javascript"><!--
+refresh_event_form();
+//--></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+#main_org_area {
+	min-height: 5in;
+	width: 100%;
+	background-color: #082;
+}
+
+.play_box {
+	border: 1px solid black;
+	background-color: #ff8;
+	float: left;
+	margin-left: 10pt;
+	margin-top: 10pt;
+}
+
+.template {
+	display: none;
+}
+
+.play_box_table_name {
+}
+
+.player_box {
+	min-height: 20pt;
+	line-height: 18pt;
+	padding-top: 1pt;
+	padding-bottom: 1pt;
+	padding-left: 4pt;
+	padding-right: 4pt;
+	border: 1px solid #666;
+	background-color: #ff8;
+	color: black;
+}
+
+.player_box.beingDragged {
+}
+
+.draggable {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: default;
+}
+
+body#canvas_page {
+	padding: 0;
+	margin: 0;
+}
+
+.player_box.isEditing .player_name {
+	display: none;
+}
+
+.play_box_addl_player_ctrl {
+	min-height: 10pt;
+}
+
+.play_box_addl_player_ctrl form {
+	display: none;
+}
+

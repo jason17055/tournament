@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>Tournament Designer</title>
+<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="tournaments.js"></script>
+<style type="text/css">
+</style>
+</head>
+<body id="tournament_designer_page">
+<div>
+Size of games: 4
+</div>
+<div>
+Number of players: 12
+</div>
+<div>
+Number of rounds: 3
+</div>
+<div>
+<button type="button" onclick="reportPairings()">Generate Pairings</button>
+<button type="button" onclick="doMutate()">Mutate</button>
+</div>
+<div>
+Fitness:
+<span id="overallFitness"></span>
+</div>
+
+
+<div id="pairingsGoHere"></div>
+
+</body>
+</html>

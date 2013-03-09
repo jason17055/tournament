@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html manifest="webtd.manifest">
+<head>
+<title>WebTD</title>
+<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="code.js"></script>
+</head>
+<body>
+<h1>WebTD</h1>
+<form name="play_form" onsubmit="on_play_submit(); return false">
+<table>
+<tr>
+<td>Played White:</td>
+<td><select name="player1"></select></td>
+</tr>
+<tr>
+<td>Played Black:</td>
+<td><select name="player2"></select></td>
+</tr>
+<tr>
+<td>Handicap Stones:</td>
+<td><input type="text" name="handicapStones" value=""></td>
+</tr>
+<tr>
+<td>Komi:</td>
+<td><input type="text" name="komi" value=""></td>
+</tr>
+<tr>
+<td>Winner:</td>
+<td><select name="winner">
+<option value="w">White</option>
+<option value="b">Black</option></select></td>
+</tr>
+</table>
+
+<p>
+<button type="submit">Save Changes</button>
+<button type="button" onclick="on_play_delete()">Delete</button>
+<button type="button" onclick="on_play_cancel()">Cancel</button>
+</form>
+<script type="text/javascript"><!--
+refresh_players_list(document.play_form.player1);
+refresh_players_list(document.play_form.player2);
+refresh_play_form();
+//--></script>
+</body>
+</html>

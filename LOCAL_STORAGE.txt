@@ -1,0 +1,36 @@
+=item webtd.event.EID.roster
+
+Contains a comma-delimited list of PIDs.
+
+=item webtd.event.EID.plays
+
+Comma-separated list of play IDs.
+
+=item webtd.roster.PID.name
+
+Contains a player's name. PID is a positive integer.
+
+=item webtd.roster.PID.number
+
+Contains the player's AGA number.
+
+=item webtd.plays.ID.player1
+
+The Player ID of White.
+
+=item webtd.plays.ID.player2
+
+The Player ID of Black.
+
+=item webtd.plays.ID.winner
+
+Either 'w' or 'b', indicating the winner.
+
+=item webtd.plays.ID.handicapStones
+
+The non-negative integer number of handicap Stones.
+
+=item webtd.plays.ID.komi
+
+The integer number of komi points given to White.
+

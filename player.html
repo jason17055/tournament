@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html manifest="webtd.manifest">
+<head>
+<title>WebTD</title>
+<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="code.js"></script>
+</head>
+<body>
+<h1>WebTD</h1>
+<form name="player_form" onsubmit="on_player_submit(); return false">
+<table>
+<tr>
+<td>Last Name:</td>
+<td><input type="text" name="name" value=""></td>
+</tr>
+<tr>
+<td>First Name:</td>
+<td><input type="text" name="givenName" value=""></td>
+</tr>
+<tr>
+<td>AGA number:</td>
+<td><input type="text" name="number" value=""></td>
+</tr>
+<tr>
+<td>Entry rank:</td>
+<td><input type="text" name="entryRank" value=""></td>
+</tr>
+</table>
+<p>
+<button type="submit">Save Changes</button>
+<button type="button" onclick="on_player_delete()">Delete</button>
+<button type="button" onclick="on_player_cancel()">Cancel</button>
+</form>
+<script type="text/javascript"><!--
+refresh_player_form();
+//--></script>
+</body>
+</html>
