@@ -1,0 +1,28 @@
+<project name="webtd" default="build">
+
+<property name="warfile" value="${ant.project.name}.war" />
+
+<path id="catalina-ant-classpath">
+<fileset dir="tomcat_libs">
+	<include name="*.jar" />
+</fileset>
+</path>
+
+<taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask"
+	classpathref="catalina-ant-classpath" />
+
+<target name="build" depends="">
+<war destfile="${warfile}" webxml="web.xml">
+<fileset dir="html" />
+</war>
+</target>
+
+<target name="deploy" depends="build">
+<deploy url="http://localhost:8080/manager/text"
+	username="tomcat" password="secret430"
+	path="/${ant.project.name}" update="true"
+	war="${warfile}"
+	/>
+</target>
+
+</project>
