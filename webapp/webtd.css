@@ -59,3 +59,29 @@ body#canvas_page {
 	display: none;
 }
 
+.aTable {
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+}
+
+.aTable th {
+	border: 1px solid #ccc;
+	background-color: #006;
+	color: #fff;
+	padding-left: 8pt;
+	padding-right: 8pt;
+}
+
+.aTable th a {
+	color: #fff;
+}
+
+.aTable td {
+	border: 1px solid #ccc;
+	padding-left: 2pt;
+	padding-right: 2pt;
+}
+
+.aTemplate {
+	display: none;
+}
