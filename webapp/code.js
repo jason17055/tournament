@@ -152,6 +152,7 @@ function refresh_player_form()
 	document.player_form.entryRank.value = p.entryRank;
 }
 
+// can be called multiple times
 function refresh_tournament_form(form)
 {
 	var eid = get_url_param("e");
@@ -163,6 +164,12 @@ function refresh_tournament_form(form)
 	form.startTime.value = e.startTime;
 	form.endDate.value = e.endDate;
 	form.endTime.value = e.endTime;
+
+	if (eid) {
+		$('.delete_btn', $(form)).show();
+	} else {
+		$('.delete_btn', $(form)).hide();
+	}
 }
 
 function on_tournament_cancel()
@@ -175,9 +182,11 @@ function on_tournament_delete()
 {
 	if (confirm("Really delete this tournament?"))
 	{
-		//todo
+		var eid = get_url_param("e");
+		maybe_remove_from_set("webtd.all_tournaments", eid);
 	}
 
+	window.location = ".";
 	return false;
 }
 
@@ -220,6 +229,25 @@ function maybe_add_to_set(k, x)
 	list.push(x);
 	localStorage.setItem(k, list.join(","));
 	return true;
+}
+
+function maybe_remove_from_set(k, x)
+{
+	var list_str = localStorage.getItem(k);
+	var list = list_str ? list_str.split(',') : [];
+	var changed = false;
+	for (var i = list.length-1; i >= 0; i--)
+	{
+		if (list[i] == x) {
+			list.splice(i, 1);
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		localStorage.setItem(k, list.join(','));
+	}
+	return changed;
 }
 
 function on_player_delete()
@@ -626,6 +654,7 @@ function makeTables()
 	createPlayer(t3, "Blah");
 }
 
+// should only be called once
 function initialize_tournament_form()
 {
 	refresh_tournament_form(this);
