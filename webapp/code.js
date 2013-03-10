@@ -10,7 +10,7 @@ function next_id_helper(prefix, key)
 
 function next_tournament_id()
 {
-	return next_id_helper("webtd.event", "created");
+	return next_id_helper("webtd.tournament", "created");
 }
 
 function next_player_id()
@@ -23,15 +23,15 @@ function next_play_id()
 	return next_id_helper("webtd.plays", "player1");
 }
 
-function get_event(eid)
+function get_tournament(eid)
 {
 	var e = {
-	"name":      localStorage.getItem("webtd.event."+eid+".name"),
-	"location":  localStorage.getItem("webtd.event."+eid+".location"),
-	"startDate": localStorage.getItem("webtd.event."+eid+".startDate"),
-	"endDate":   localStorage.getItem("webtd.event."+eid+".endDate"),
-	"startTime": localStorage.getItem("webtd.event."+eid+".startTime"),
-	"endTime":   localStorage.getItem("webtd.event."+eid+".endTime"),
+	"name":      localStorage.getItem("webtd.tournament."+eid+".name"),
+	"location":  localStorage.getItem("webtd.tournament."+eid+".location"),
+	"startDate": localStorage.getItem("webtd.tournament."+eid+".startDate"),
+	"endDate":   localStorage.getItem("webtd.tournament."+eid+".endDate"),
+	"startTime": localStorage.getItem("webtd.tournament."+eid+".startTime"),
+	"endTime":   localStorage.getItem("webtd.tournament."+eid+".endTime"),
 	"eid": eid
 	};
 	return e;
@@ -63,14 +63,14 @@ function get_all_tournaments()
 	for (var i in list)
 	{
 		var eid = list[i];
-		rv.push(get_event(eid));
+		rv.push(get_tournament(eid));
 	}
 	return rv;
 }
 
 function get_all_players(eventId)
 {
-	var roster_str = localStorage.getItem("webtd.event."+eventId+".roster");
+	var roster_str = localStorage.getItem("webtd.tournament."+eventId+".roster");
 	var roster = roster_str != null ? roster_str.split(',') : new Array();
 	var players = new Array();
 	for (var i in roster)
@@ -89,7 +89,7 @@ function get_all_players(eventId)
 		});
 }
 
-function save_event_from_form(eid, form)
+function save_tournament_from_form(eid, form)
 {
 	var e = {
 	"eid": eid,
@@ -101,13 +101,13 @@ function save_event_from_form(eid, form)
 	"endTime": form.endTime.value
 	};
 
-	localStorage.setItem("webtd.event."+eid+".created", 1);
-	localStorage.setItem("webtd.event."+eid+".name", e.name);
-	localStorage.setItem("webtd.event."+eid+".location", e.location);
-	localStorage.setItem("webtd.event."+eid+".startDate", e.startDate);
-	localStorage.setItem("webtd.event."+eid+".endDate", e.endDate);
-	localStorage.setItem("webtd.event."+eid+".startTime", e.startTime);
-	localStorage.setItem("webtd.event."+eid+".endTime", e.endTime);
+	localStorage.setItem("webtd.tournament."+eid+".created", 1);
+	localStorage.setItem("webtd.tournament."+eid+".name", e.name);
+	localStorage.setItem("webtd.tournament."+eid+".location", e.location);
+	localStorage.setItem("webtd.tournament."+eid+".startDate", e.startDate);
+	localStorage.setItem("webtd.tournament."+eid+".endDate", e.endDate);
+	localStorage.setItem("webtd.tournament."+eid+".startTime", e.startTime);
+	localStorage.setItem("webtd.tournament."+eid+".endTime", e.endTime);
 }
 
 function save_player_from_form(pid, form)
@@ -152,22 +152,33 @@ function refresh_player_form()
 	document.player_form.entryRank.value = p.entryRank;
 }
 
-function refresh_event_form()
+function refresh_tournament_form(form)
 {
 	var eid = get_url_param("e");
-	var e = get_event(eid);
+	var e = get_tournament(eid);
 
-	document.event_form.name.value = e.name;
-	document.event_form.location.value = e.location;
-	document.event_form.startDate.value = e.startDate;
-	document.event_form.startTime.value = e.startTime;
-	document.event_form.endDate.value = e.endDate;
-	document.event_form.endTime.value = e.endTime;
+	form.name.value = e.name;
+	form.location.value = e.location;
+	form.startDate.value = e.startDate;
+	form.startTime.value = e.startTime;
+	form.endDate.value = e.endDate;
+	form.endTime.value = e.endTime;
 }
 
-function on_event_cancel()
+function on_tournament_cancel()
 {
 	window.location = ".";
+	return false;
+}
+
+function on_tournament_delete()
+{
+	if (confirm("Really delete this tournament?"))
+	{
+		//todo
+	}
+
+	return false;
 }
 
 function on_player_cancel()
@@ -190,7 +201,7 @@ function on_tournament_submit()
 		eid = next_tournament_id();
 	}
 
-	save_event_from_form(eid, document.event_form);
+	save_tournament_from_form(eid, document.tournament_form);
 
 	maybe_add_to_set("webtd.all_tournaments", eid);
 
@@ -218,7 +229,7 @@ function on_player_delete()
 
 	var pid = get_url_param("p");
 	var eventId = get_current_event_id();
-	var roster = localStorage.getItem("webtd.event."+eventId+".roster").split(",");
+	var roster = localStorage.getItem("webtd.tournament."+eventId+".roster").split(",");
 	for (var i in roster)
 	{
 		if (roster[i] == pid)
@@ -227,7 +238,7 @@ function on_player_delete()
 			break;
 		}
 	}
-	localStorage.setItem("webtd.event."+eventId+".roster", roster.join(","));
+	localStorage.setItem("webtd.tournament."+eventId+".roster", roster.join(","));
 	localStorage.removeItem("webtd.roster."+pid+".name");
 	localStorage.removeItem("webtd.roster."+pid+".givenName");
 	localStorage.removeItem("webtd.roster."+pid+".number");
@@ -253,7 +264,7 @@ function get_play(id)
 function get_all_plays()
 {
 	var eid = get_current_event_id();
-	var plays_str = localStorage.getItem("webtd.event."+eid+".plays");
+	var plays_str = localStorage.getItem("webtd.tournament."+eid+".plays");
 	var plays_arr = plays_str != null ? plays_str.split(",") : new Array();
 	var plays = new Array();
 	for (var i in plays_arr)
@@ -394,7 +405,7 @@ function on_play_submit()
 		var plays_str = localStorage.getItem("webtd.event."+eid+".plays");
 		var plays_arr = plays_str != null ? plays_str.split(",") : new Array();
 		plays_arr.push(id);
-		localStorage.setItem("webtd.event."+eid+".plays", plays_arr.join(","));
+		localStorage.setItem("webtd.tournament."+eid+".plays", plays_arr.join(","));
 	}
 
 
@@ -408,7 +419,7 @@ function on_play_delete()
 
 	var eid = get_current_event_id();
 	var play_id = get_url_param("id");
-	var plays_arr = localStorage.getItem("webtd.event."+eid+".plays").split(",");
+	var plays_arr = localStorage.getItem("webtd.tournament."+eid+".plays").split(",");
 	for (var i in plays_arr)
 	{
 		if (plays_arr[i] == play_id)
@@ -417,7 +428,7 @@ function on_play_delete()
 			break;
 		}
 	}
-	localStorage.setItem("webtd.event."+eid+".plays", plays_arr.join(","));
+	localStorage.setItem("webtd.tournament."+eid+".plays", plays_arr.join(","));
 	localStorage.removeItem("webtd.plays."+play_id+".player1");
 	localStorage.removeItem("webtd.plays."+play_id+".player2");
 	localStorage.removeItem("webtd.plays."+play_id+".handicapStones");
@@ -448,7 +459,7 @@ function strpad_r(str, len)
 function make_game_results_file()
 {
 	var eid = '1';
-	var e = get_event(eid);
+	var e = get_tournament(eid);
 	var rules = "AGA";
 
 	var w = window.open(null, null, "width=360,height=480,scrollbars=yes");
@@ -615,9 +626,19 @@ function makeTables()
 	createPlayer(t3, "Blah");
 }
 
+function initialize_tournament_form()
+{
+	refresh_tournament_form(this);
+	$(this).submit(on_tournament_submit);
+	$('.cancel_btn', $(this)).click(on_tournament_cancel);
+	$('.delete_btn', $(this)).click(on_tournament_delete);
+	$('input[name="startDate"]', $(this)).datepicker({ dateFormat: 'yy-mm-dd' });
+	$('input[name="endDate"]', $(this)).datepicker({ dateFormat: 'yy-mm-dd' });
+}
+
 $(function() {
 
-	$('form[name="event_form"]').submit(on_tournament_submit);
+	$('form[name="tournament_form"]').each(initialize_tournament_form);
 	$('table.tournaments_list').each(refresh_tournaments_table);
 
 	makeTables();

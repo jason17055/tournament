@@ -6,21 +6,15 @@
 <script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="jquery/js/jquery-ui-1.8.16.min.js"></script>
 <script type="text/javascript" src="code.js"></script>
-<script type="text/javascript"><!--
-$(function() {
-	$(document.event_form.startDate).datepicker({ dateFormat: 'yy-mm-dd' });
-	$(document.event_form.endDate).datepicker({ dateFormat: 'yy-mm-dd' });
-});
-//--></script>
 </head>
 <body>
 <header>
 <h1>WebTD</h1>
 </header>
-<form name="event_form">
+<form name="tournament_form" method="post">
 <table>
 <tr>
-<th colspan="2">Event Information</th>
+<th colspan="2">Tournament Information</th>
 </tr>
 <tr>
 <td><label for="name_entry">Name:</label></td>
@@ -58,10 +52,8 @@ $(function() {
 </table>
 <p>
 <button type="submit">Save Changes</button>
-<button type="button" onclick="on_event_cancel()">Cancel</button>
+<button type="submit" class="delete_btn">Delete Tournament</button>
+<button type="submit" class="cancel_btn">Cancel</button>
 </form>
-<script type="text/javascript"><!--
-refresh_event_form();
-//--></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
-=item webtd.event.EID.roster
+=item webtd.tournament.EID.roster
 
 Contains a comma-delimited list of PIDs.
 
-=item webtd.event.EID.plays
+=item webtd.tournament.EID.plays
 
 Comma-separated list of play IDs.
 
