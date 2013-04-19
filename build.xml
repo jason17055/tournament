@@ -1,6 +1,14 @@
-<project name="webtd" default="build">
+<project name="tournament" default="build">
 
+<property name="package-version" value="0.1" />
+<property name="jarfile" value="${ant.project.name}.jar" />
 <property name="warfile" value="${ant.project.name}.war" />
+
+<path id="build-classpath">
+  <fileset dir="lib">
+    <include name="*.jar" />
+  </fileset>
+</path>
 
 <path id="catalina-ant-classpath">
 <fileset dir="tomcat_libs">
@@ -8,14 +16,45 @@
 </fileset>
 </path>
 
+<target name="init-builddir">
+<mkdir dir="build" />
+</target>
+
+<target name="compile" depends="init-builddir">
+<javac srcdir="src" destdir="build"
+	classpathref="build-classpath"
+	includeantruntime="false"
+	debug="true" debuglevel="lines,vars,source"
+	source="1.7" target="1.7"
+	>
+	<compilerarg value="-Xlint:unchecked" />
+	<compilerarg value="-Xlint:deprecation" />
+</javac>
+</target>
+
+<target name="copy-resources" depends="init-builddir">
+<copy todir="build">
+	<fileset dir="strings" />
+</copy>
+</target>
+
+<target name="build" depends="copy-resources,compile">
+<pathconvert property="runtime-classpath" pathsep=" " refid="build-classpath">
+<map from="${basedir}" to="." />
+</pathconvert>
+
+<jar destfile="${jarfile}" basedir="build">
+	<manifest>
+		<attribute name="Main-Class" value="dragonfin.tournament.MainWindow" />
+		<attribute name="Class-Path" value="${runtime-classpath}" />
+		<attribute name="Implementation-Version" value="${package-version}" />
+	</manifest>
+</jar>
+</target>
+
+<!-- not being used -->
 <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask"
 	classpathref="catalina-ant-classpath" />
-
-<target name="build" depends="">
-<war destfile="${warfile}" webxml="web.xml">
-<fileset dir="webapp" />
-</war>
-</target>
 
 <target name="deploy" depends="build">
 <deploy url="http://localhost:8080/manager/text"

@@ -1,2 +1,6 @@
 *.war
+*.jar
+*.swp
+lib
 tomcat_libs
+build
