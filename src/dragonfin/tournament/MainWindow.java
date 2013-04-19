@@ -17,9 +17,20 @@ public class MainWindow extends JFrame
 	Tournament tournament;
 	File currentFile;
 
+	RosterModel rosterModel;
+	JTable rosterTable;
+	JScrollPane rosterScrollPane;
+
 	public MainWindow()
 	{
 		setTitle(PRODUCT_NAME);
+
+		rosterModel = new RosterModel();
+		rosterTable = new JTable(rosterModel);
+
+		rosterScrollPane = new JScrollPane(rosterTable);
+		rosterTable.setFillsViewportHeight(true);
+		getContentPane().add(rosterScrollPane, BorderLayout.CENTER);
 
 		makeMenu();
 		pack();
@@ -232,6 +243,9 @@ public class MainWindow extends JFrame
 
 		this.currentFile = file;
 		this.tournament = newTournament;
+
+		rosterModel.setTournament(newTournament);
+
 		refresh();
 	}
 }
