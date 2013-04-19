@@ -14,6 +14,7 @@ public class MainWindow extends JFrame
 	static final String PRODUCT_NAME = strings.getString("PRODUCT");
 	static final String EXTENSION = "tourney";
 
+	Tournament tournament;
 	File currentFile;
 
 	public MainWindow()
@@ -30,6 +31,8 @@ public class MainWindow extends JFrame
 				closeWindow();
 			}
 			});
+
+		setTournament(null, new Tournament());
 	}
 
 	void makeMenu()
@@ -87,15 +90,9 @@ public class MainWindow extends JFrame
 		dispose();
 	}
 
-	boolean needsSaved()
-	{
-		//TODO
-		return false;
-	}
-
 	boolean maybeSave()
 	{
-		if (needsSaved()) {
+		if (tournament.isDirty()) {
 
 			int rv = JOptionPane.showConfirmDialog(
 					this,
@@ -115,12 +112,18 @@ public class MainWindow extends JFrame
 
 	void onNewFileClicked()
 	{
-		//TODO
+		if (!maybeSave()) {
+			return;
+		}
+
+		setTournament(null, new Tournament());
 	}
 
 	void doSave(File file)
+		throws IOException
 	{
-		//TODO
+		currentFile = file;
+		tournament.saveFile(file);
 	}
 
 	void onOpenFileClicked()
@@ -138,10 +141,11 @@ public class MainWindow extends JFrame
 			int rv = fc.showOpenDialog(this);
 			if (rv == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
-				//TODO
 
-				currentFile = file;
-				refresh();
+				Tournament t = new Tournament();
+				t.loadFile(file);
+
+				setTournament(file, t);
 			}
 		}
 		catch (Exception e)
@@ -158,8 +162,16 @@ public class MainWindow extends JFrame
 			return onSaveAsFileClicked();
 		}
 
-		//TODO
-		return true;
+		try {
+			tournament.saveFile(currentFile);
+			return true;
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(this, e,
+				strings.getString("main.error_caption"),
+				JOptionPane.ERROR_MESSAGE);
+		}
+		return false;
 	}
 
 	/** @return true if file was saved, false if user canceled */
@@ -212,5 +224,14 @@ public class MainWindow extends JFrame
 			public void run() {
 				new MainWindow().setVisible(true);
 			}});
+	}
+
+	public void setTournament(File file, Tournament newTournament)
+	{
+		assert newTournament != null;
+
+		this.currentFile = file;
+		this.tournament = newTournament;
+		refresh();
 	}
 }
