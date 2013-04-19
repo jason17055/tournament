@@ -3,6 +3,7 @@
 <head>
 <title>WebTD</title>
 <link rel="stylesheet" type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.8.16.css">
+<link rel="stylesheet" type="text/css" href="webtd.css">
 <script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="jquery/js/jquery-ui-1.8.16.min.js"></script>
 <script type="text/javascript" src="code.js"></script>
@@ -47,7 +48,7 @@
 </tr>
 <tr>
 <td>Custom Attribute 1</td>
-<td><input type="text" name="player_param1" disabled="disabled"></td>
+<td><input type="text" name="player_param1"></td>
 </tr>
 </table>
 <p>
@@ -55,5 +56,26 @@
 <button type="submit" class="delete_btn">Delete Tournament</button>
 <button type="submit" class="cancel_btn">Cancel</button>
 </form>
+
+<form>
+<table class="aTable">
+<tr>
+<th>Player</th>
+<th>Attribute 1</th>
+<th>Round 1 Assignment</th>
+</tr>
+<tr class="aTemplate">
+<td class="name_col"><a></a></td>
+<td class="attr1_col"></td>
+<td class="round1_col"></td>
+</tr>
+<tr class="aEntry">
+<td class="name_col"><input type="text" name="name"></td>
+<td class="attr1_col"><input type="text" name="attr1"></td>
+<td class="round1_col"><input type="text" name="round1"></td>
+</tr>
+</table>
+</form>
+
 </body>
 </html>

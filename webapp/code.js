@@ -32,6 +32,7 @@ function get_tournament(eid)
 	"endDate":   localStorage.getItem("webtd.tournament."+eid+".endDate"),
 	"startTime": localStorage.getItem("webtd.tournament."+eid+".startTime"),
 	"endTime":   localStorage.getItem("webtd.tournament."+eid+".endTime"),
+	"player_param1": localStorage.getItem("webtd.tournament."+eid+".player_param1"),
 	"eid": eid
 	};
 	return e;
@@ -98,7 +99,8 @@ function save_tournament_from_form(eid, form)
 	"startDate": form.startDate.value,
 	"endDate": form.endDate.value,
 	"startTime": form.startTime.value,
-	"endTime": form.endTime.value
+	"endTime": form.endTime.value,
+	"player_param1": form.player_param1.value
 	};
 
 	localStorage.setItem("webtd.tournament."+eid+".created", 1);
@@ -108,6 +110,7 @@ function save_tournament_from_form(eid, form)
 	localStorage.setItem("webtd.tournament."+eid+".endDate", e.endDate);
 	localStorage.setItem("webtd.tournament."+eid+".startTime", e.startTime);
 	localStorage.setItem("webtd.tournament."+eid+".endTime", e.endTime);
+	localStorage.setItem("webtd.tournament."+eid+".player_param1", e.player_param1);
 }
 
 function save_player_from_form(pid, form)
@@ -164,6 +167,7 @@ function refresh_tournament_form(form)
 	form.startTime.value = e.startTime;
 	form.endDate.value = e.endDate;
 	form.endTime.value = e.endTime;
+	form.player_param1.value = e.player_param1;
 
 	if (eid) {
 		$('.delete_btn', $(form)).show();
