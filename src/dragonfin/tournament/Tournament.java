@@ -1,6 +1,7 @@
 package dragonfin.tournament;
 
 import java.io.*;
+import java.util.*;
 import com.fasterxml.jackson.core.*;
 
 public class Tournament
@@ -11,6 +12,8 @@ public class Tournament
 	String eventBeginTime;
 	String eventEndDate;
 	String eventEndTime;
+	List<Player> players = new ArrayList<Player>();
+	String[] playerCustomFields = new String[0];
 
 	transient boolean dirty;
 
@@ -65,10 +68,52 @@ public class Tournament
 			else if (fieldName.equals("eventEndTime")) {
 				eventEndTime = in.getText();
 			}
+			else if (fieldName.equals("players")) {
+				parsePlayers(in);
+			}
+			else if (fieldName.equals("playerCustomFields")) {
+				parsePlayerCustomFields(in);
+			}
 			else {
 				in.skipChildren();
 			}
 		}
+	}
+
+	private void parsePlayers(JsonParser in)
+		throws IOException
+	{
+		if (in.getCurrentToken() != JsonToken.START_ARRAY) {
+			throw new JsonParseException("players: not an array",
+				in.getCurrentLocation()
+				);
+		}
+
+		players.clear();
+		while (in.nextToken() != JsonToken.END_ARRAY) {
+			Player p = new Player(this);
+			p.parse(in);
+			players.add(p);
+		}
+	}
+
+	private void parsePlayerCustomFields(JsonParser in)
+		throws IOException
+	{
+		if (in.getCurrentToken() != JsonToken.START_ARRAY) {
+			throw new JsonParseException("playerCustomFields: not an array",
+				in.getCurrentLocation()
+				);
+		}
+
+		ArrayList<String> tmp = new ArrayList<String>();
+		while (in.nextToken() != JsonToken.END_ARRAY) {
+			String s = in.getText();
+			tmp.add(s);
+			in.skipChildren();
+		}
+
+		playerCustomFields = tmp.toArray(new String[0]);
 	}
 
 	public void write(JsonGenerator out)
@@ -81,6 +126,16 @@ public class Tournament
 		out.writeStringField("eventBeginTime", eventBeginTime);
 		out.writeStringField("eventEndDate", eventEndDate);
 		out.writeStringField("eventEndTime", eventEndTime);
+
+		if (!players.isEmpty()) {
+			out.writeFieldName("players");
+			out.writeStartArray();
+			for (Player p : players) {
+				p.write(out);
+			}
+			out.writeEndArray();
+		}
+
 		out.writeEndObject();
 	}
 }

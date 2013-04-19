@@ -8,14 +8,9 @@ public class RosterModel extends AbstractTableModel
 	Tournament tournament;
 	static ResourceBundle strings = MainWindow.strings;
 
-	public RosterModel()
+	public RosterModel(Tournament tournament)
 	{
-	}
-
-	public void setTournament(Tournament newTournament)
-	{
-		this.tournament = newTournament;
-		fireTableStructureChanged();
+		this.tournament = tournament;
 	}
 
 	@Override
@@ -31,7 +26,7 @@ public class RosterModel extends AbstractTableModel
 	@Override
 	public int getRowCount()
 	{
-		return 0;
+		return tournament.players.size() + 1;
 	}
 
 	@Override
@@ -49,6 +44,31 @@ public class RosterModel extends AbstractTableModel
 	@Override
 	public Object getValueAt(int row, int col)
 	{
-		return "foo";
+		if (row < tournament.players.size()) {
+			Player p = tournament.players.get(row);
+			return p.getName();
+		}
+		else {
+			return null;
+		}
+	}
+
+	@Override
+	public void setValueAt(Object value, int row, int col)
+	{
+		Player p;
+		if (row < tournament.players.size()) {
+			p = tournament.players.get(row);
+		}
+		else {
+			p = new Player(tournament);
+			tournament.players.add(p);
+			fireTableRowsInserted(
+				tournament.players.size(),
+				tournament.players.size()
+				);
+		}
+		p.setName(value.toString());
+		fireTableCellUpdated(row, col);
 	}
 }

@@ -25,8 +25,7 @@ public class MainWindow extends JFrame
 	{
 		setTitle(PRODUCT_NAME);
 
-		rosterModel = new RosterModel();
-		rosterTable = new JTable(rosterModel);
+		rosterTable = new JTable();
 
 		rosterScrollPane = new JScrollPane(rosterTable);
 		rosterTable.setFillsViewportHeight(true);
@@ -244,7 +243,8 @@ public class MainWindow extends JFrame
 		this.currentFile = file;
 		this.tournament = newTournament;
 
-		rosterModel.setTournament(newTournament);
+		rosterModel = new RosterModel(newTournament);
+		rosterTable.setModel(rosterModel);
 
 		refresh();
 	}
