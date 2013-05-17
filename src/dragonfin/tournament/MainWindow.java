@@ -20,19 +20,36 @@ public class MainWindow extends JFrame
 	Tournament tournament;
 	File currentFile;
 
+	CardLayout mainCardLayout;
+	JPanel mainPane;
+
 	ResultSetModel rosterModel;
 	JTable rosterTable;
 	JScrollPane rosterScrollPane;
+
+	JTable gamesTable;
+
+	static final String CARD_PLAYERS = "players";
+	static final String CARD_GAMES = "games";
 
 	public MainWindow()
 	{
 		setTitle(PRODUCT_NAME);
 
+		mainCardLayout = new CardLayout();
+		mainPane = new JPanel(mainCardLayout);
+		getContentPane().add(mainPane, BorderLayout.CENTER);
+
 		rosterTable = new JTable();
 
 		rosterScrollPane = new JScrollPane(rosterTable);
 		rosterTable.setFillsViewportHeight(true);
-		getContentPane().add(rosterScrollPane, BorderLayout.CENTER);
+		mainPane.add(rosterScrollPane, CARD_PLAYERS);
+
+		gamesTable = new JTable();
+		JScrollPane sp = new JScrollPane(gamesTable);
+		gamesTable.setFillsViewportHeight(true);
+		mainPane.add(sp, CARD_GAMES);
 
 		makeToolbar();
 		makeMenu();
@@ -82,40 +99,57 @@ public class MainWindow extends JFrame
 		menuBar.add(fileMenu);
 
 		JMenuItem menuItem;
-		menuItem = new JMenuItem(strings.getString("menu.file.new"));
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				onNewFileClicked();
-			}});
-		fileMenu.add(menuItem);
-
-		menuItem = new JMenuItem(strings.getString("menu.file.open"));
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				onOpenFileClicked();
-			}});
-		fileMenu.add(menuItem);
-
-		menuItem = new JMenuItem(strings.getString("menu.file.save"));
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				onSaveFileClicked();
-			}});
-		fileMenu.add(menuItem);
-
-		menuItem = new JMenuItem(strings.getString("menu.file.save_as"));
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				onSaveAsFileClicked();
-			}});
-		fileMenu.add(menuItem);
-
+	//	menuItem = new JMenuItem(strings.getString("menu.file.new"));
+	//	menuItem.addActionListener(new ActionListener() {
+	//		public void actionPerformed(ActionEvent ev) {
+	//			onNewFileClicked();
+	//		}});
+	//	fileMenu.add(menuItem);
+//
+//		menuItem = new JMenuItem(strings.getString("menu.file.open"));
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent ev) {
+//				onOpenFileClicked();
+//			}});
+//		fileMenu.add(menuItem);
+//
+//		menuItem = new JMenuItem(strings.getString("menu.file.save"));
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent ev) {
+//				onSaveFileClicked();
+//			}});
+//		fileMenu.add(menuItem);
+//
+//		menuItem = new JMenuItem(strings.getString("menu.file.save_as"));
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent ev) {
+//				onSaveAsFileClicked();
+//			}});
+//		fileMenu.add(menuItem);
+//
 		menuItem = new JMenuItem(strings.getString("menu.file.exit"));
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				closeWindow();
 			}});
 		fileMenu.add(menuItem);
+
+		JMenu viewMenu = new JMenu(strings.getString("menu.view"));
+		menuBar.add(viewMenu);
+
+		menuItem = new JMenuItem(strings.getString("menu.view.players"));
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				onViewPlayersClicked();
+			}});
+		viewMenu.add(menuItem);
+
+		menuItem = new JMenuItem(strings.getString("menu.view.games"));
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				onViewGamesClicked();
+			}});
+		viewMenu.add(menuItem);
 
 		setJMenuBar(menuBar);
 	}
@@ -295,5 +329,15 @@ public class MainWindow extends JFrame
 		rosterTable.setModel(rosterModel);
 
 		refresh();
+	}
+
+	private void onViewPlayersClicked()
+	{
+		mainCardLayout.show(mainPane, CARD_PLAYERS);
+	}
+
+	private void onViewGamesClicked()
+	{
+		mainCardLayout.show(mainPane, CARD_GAMES);
 	}
 }
