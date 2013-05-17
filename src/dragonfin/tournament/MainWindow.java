@@ -213,9 +213,22 @@ public class MainWindow extends JFrame
 		ResultSetModel playsModel = tournament.getPlaysModel();
 		playsTable.setModel(playsModel);
 
+		enhanceTable(playsTable, playsModel, "PLAY");
+
+		}
+		catch (SQLException e) {
+			showException(this, e);
+		}
+	}
+
+	void enhanceTable(JTable playsTable, ResultSetModel playsModel, String tableName)
+		throws SQLException
+	{
 		for (int i = 1; i < playsModel.getColumnCount(); i++) {
 
-		String x = tournament.getColumnTypeData("PLAY."+playsModel.getColumnName(i));
+			String columnName = playsModel.getColumnName(i);
+
+		String x = tournament.getColumnTypeData(tableName+"."+columnName);
 		if (x != null) {
 			String [] parts = x.substring(5).split(",");
 			JComboBox<String> comboBox = new JComboBox<String>();
@@ -225,12 +238,56 @@ public class MainWindow extends JFrame
 			playsTable.getColumnModel().getColumn(i).setCellEditor(
 				new DefaultCellEditor(comboBox)
 				);
-		}
+			continue;
 		}
 
+		if (tableName.equals("PLAY") && columnName.equals("PLAYERS")) {
+			playsTable.getColumnModel().getColumn(i).setCellEditor(
+				new PlayParticipantsEditor()
+				);
 		}
-		catch (SQLException e) {
-			showException(this, e);
+
+		} //end for
+	}
+
+	static class PlayParticipantsEditor extends AbstractCellEditor
+		implements javax.swing.table.TableCellEditor
+	{
+		JButton button;
+
+		PlayParticipantsEditor()
+		{
+			this.button = new JButton();
+			this.button.addActionListener( new ActionListener() {
+				public void actionPerformed(ActionEvent evt) {
+					onButtonClicked();
+				}});
+		}
+
+		private void onButtonClicked()
+		{
+			PlayParticipantsDialog dlg;
+			dlg = new PlayParticipantsDialog(
+				SwingUtilities.windowForComponent(button)
+				);
+			dlg.setVisible(true);
+
+			fireEditingCanceled();
+		}
+
+		@Override
+		public Object getCellEditorValue()
+		{
+			//TODO
+			return null;
+		}
+
+		//implements TableCellEditor
+		public Component getTableCellEditorComponent(
+				JTable table, Object value,
+				boolean isSelected, int row, int column)
+		{
+			return button;
 		}
 	}
 

@@ -328,7 +328,8 @@ public class Tournament
 		try {
 			Statement stmt = dbConn.createStatement();
 			stmt.execute(
-			"SELECT * FROM play"
+			"SELECT id,game,board,status,"
+			+" NULL AS players,started,finished FROM play"
 			);
 			ResultSetModel m = new ResultSetModel(stmt.getResultSet());
 			m.updateHandler = new MyPlayUpdater();
