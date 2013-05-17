@@ -43,23 +43,10 @@ public class MainWindow extends JFrame
 			}
 			});
 
-		setTournament(null, new Tournament());
-		connectDatabase();
-	}
-
-	void connectDatabase()
-	{
-		try {
-
-		String fileName = "db/tournamentdb";
-
-		Class cl = Class.forName("org.hsqldb.jdbc.JDBCDriver");
-		Connection c = DriverManager.getConnection("jdbc:hsqldb:file:"+fileName, "SA", "");
-
-		}
-		catch (Exception e) {
-			throw new RuntimeException("cannot load database:"+e, e);
-		}
+		Tournament t = new Tournament();
+		t.connectDatabase();
+		t.upgradeSchema();
+		setTournament(null, t);
 	}
 
 	void makeMenu()

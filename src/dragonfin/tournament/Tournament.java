@@ -3,6 +3,7 @@ package dragonfin.tournament;
 import java.io.*;
 import java.util.*;
 import com.fasterxml.jackson.core.*;
+import java.sql.*;
 
 public class Tournament
 {
@@ -16,6 +17,7 @@ public class Tournament
 	String[] playerCustomFields = new String[0];
 
 	transient boolean dirty;
+	transient Connection dbConn;
 
 	public boolean isDirty()
 	{
@@ -137,5 +139,71 @@ public class Tournament
 		}
 
 		out.writeEndObject();
+	}
+
+	void connectDatabase()
+	{
+		try {
+
+		String fileName = "db/tournamentdb";
+
+		Class cl = Class.forName("org.hsqldb.jdbc.JDBCDriver");
+		this.dbConn = DriverManager.getConnection("jdbc:hsqldb:file:"+fileName, "SA", "");
+
+		}
+		catch (Exception e) {
+			throw new RuntimeException("cannot load database:"+e, e);
+		}
+	}
+
+	int getSchemaVersion()
+	{
+		try {
+
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"SELECT version FROM master"
+			);
+			ResultSet rs = stmt.getResultSet();
+			rs.next();
+			return rs.getInt(1);
+
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+
+	}
+
+	void upgradeSchema()
+	{
+		int schemaVersion = getSchemaVersion();
+
+		try {
+
+		if (schemaVersion < 1)
+		{
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"CREATE TABLE master ("
+			+" version INTEGER NOT NULL,"
+			+" eventName VARCHAR(200),"
+			+" eventLocation VARCHAR(200),"
+			+" eventStartTime TIMESTAMP WITH TIME ZONE"
+			+" )"
+			);
+			stmt.execute(
+			"INSERT INTO master (version)"
+			+" VALUES (1)"
+			);
+
+			dbConn.commit();
+		}
+
+		}
+		catch (SQLException e) {
+			System.err.println(e);
+		}
 	}
 }
