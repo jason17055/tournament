@@ -8,7 +8,7 @@ import javax.swing.*;
 public class PlayParticipantsDialog extends JDialog
 {
 	Play play;
-	JTable participantsTable;
+	SmartTable participantsTable;
 	ResultSetModel participantsModel;
 
 	static ResourceBundle strings = MainWindow.strings;
@@ -21,7 +21,7 @@ public class PlayParticipantsDialog extends JDialog
 		makeToolbar();
 
 		participantsModel = play.getParticipantsModel();
-		participantsTable = new JTable(participantsModel);
+		participantsTable = new SmartTable(participantsModel);
 		JScrollPane sp = new JScrollPane(participantsTable);
 		participantsTable.setFillsViewportHeight(true);
 		getContentPane().add(sp, BorderLayout.CENTER);

@@ -28,10 +28,10 @@ public class MainWindow extends JFrame
 	String currentlyVisible = CARD_PLAYERS;
 
 	ResultSetModel rosterModel;
-	JTable rosterTable;
+	SmartTable rosterTable;
 	JScrollPane rosterScrollPane;
 
-	JTable playsTable;
+	SmartTable playsTable;
 
 	public MainWindow()
 	{
@@ -41,13 +41,13 @@ public class MainWindow extends JFrame
 		mainPane = new JPanel(mainCardLayout);
 		getContentPane().add(mainPane, BorderLayout.CENTER);
 
-		rosterTable = new JTable();
+		rosterTable = new SmartTable();
 
 		rosterScrollPane = new JScrollPane(rosterTable);
 		rosterTable.setFillsViewportHeight(true);
 		mainPane.add(rosterScrollPane, CARD_PLAYERS);
 
-		playsTable = new JTable();
+		playsTable = new SmartTable();
 		JScrollPane sp = new JScrollPane(playsTable);
 		playsTable.setFillsViewportHeight(true);
 		mainPane.add(sp, CARD_PLAYS);
