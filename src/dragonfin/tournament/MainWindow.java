@@ -158,6 +158,8 @@ public class MainWindow extends JFrame
 		catch (Exception e) {
 			showException(this, e);
 		}
+
+		onRefreshClicked();
 	}
 
 	void onRefreshClicked()
