@@ -10,12 +10,6 @@
   </fileset>
 </path>
 
-<path id="catalina-ant-classpath">
-<fileset dir="tomcat_libs">
-	<include name="*.jar" />
-</fileset>
-</path>
-
 <target name="init-builddir">
 <mkdir dir="build" />
 </target>
@@ -50,18 +44,6 @@
 		<attribute name="Implementation-Version" value="${package-version}" />
 	</manifest>
 </jar>
-</target>
-
-<!-- not being used -->
-<taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask"
-	classpathref="catalina-ant-classpath" />
-
-<target name="deploy" depends="build">
-<deploy url="http://localhost:8080/manager/text"
-	username="tomcat" password="secret430"
-	path="/${ant.project.name}" update="true"
-	war="${warfile}"
-	/>
 </target>
 
 </project>
