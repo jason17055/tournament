@@ -213,16 +213,19 @@ public class MainWindow extends JFrame
 		ResultSetModel playsModel = tournament.getPlaysModel();
 		playsTable.setModel(playsModel);
 
-		String x = tournament.getColumnTypeData("PLAY.STATUS");
+		for (int i = 1; i < playsModel.getColumnCount(); i++) {
+
+		String x = tournament.getColumnTypeData("PLAY."+playsModel.getColumnName(i));
 		if (x != null) {
 			String [] parts = x.substring(5).split(",");
 			JComboBox<String> comboBox = new JComboBox<String>();
 			for (String p : parts) {
 				comboBox.addItem(p);
 			}
-			playsTable.getColumnModel().getColumn(3).setCellEditor(
+			playsTable.getColumnModel().getColumn(i).setCellEditor(
 				new DefaultCellEditor(comboBox)
 				);
+		}
 		}
 
 		}
