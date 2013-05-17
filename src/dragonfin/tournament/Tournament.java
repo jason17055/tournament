@@ -15,6 +15,7 @@ public class Tournament
 	String eventEndTime;
 	List<Player> players = new ArrayList<Player>();
 	String[] playerCustomFields = new String[0];
+	String[] seatNames;
 
 	transient boolean dirty;
 	transient Connection dbConn;
@@ -177,10 +178,9 @@ public class Tournament
 	}
 
 	void upgradeSchema()
+		throws SQLException
 	{
 		int schemaVersion = getSchemaVersion();
-
-		try {
 
 		if (schemaVersion < 1)
 		{
@@ -286,10 +286,40 @@ public class Tournament
 			dbConn.commit();
 		}
 
+		if (schemaVersion < 5)
+		{
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"ALTER TABLE master"
+			+" ADD COLUMN seat_names VARCHAR(4000) DEFAULT 'White,Black' NOT NULL"
+			);
+			stmt.execute(
+			"ALTER TABLE play"
+			+" ADD COLUMN round VARCHAR(200)"
+			);
+			stmt.execute(
+			"UPDATE master SET version=5"
+			);
+			dbConn.commit();
 		}
-		catch (SQLException e) {
-			System.err.println(e);
-		}
+	}
+
+	void loadMasterData()
+		throws SQLException
+	{
+		Statement stmt = dbConn.createStatement();
+		stmt.execute(
+		"SELECT event_name,event_location,event_start_time,seat_names"
+		+" FROM master"
+		);
+		ResultSet rs = stmt.getResultSet();
+		rs.next();
+		eventName = rs.getString(1);
+		eventLocation = rs.getString(2);
+		eventBeginDate = rs.getString(3);
+
+		String tmp = rs.getString(4);
+		seatNames = tmp.split(",");
 	}
 
 	public String getColumnTypeData(String columnName)
@@ -329,7 +359,7 @@ public class Tournament
 			Statement stmt = dbConn.createStatement();
 			stmt.execute(
 			"SELECT id,game,board,status,"
-			+" NULL AS players,started,finished FROM play"
+			+" NULL AS \"SEAT:White\",started,finished FROM play"
 			);
 			ResultSetModel m = new ResultSetModel(stmt.getResultSet());
 			m.updateHandler = new MyPlayUpdater();

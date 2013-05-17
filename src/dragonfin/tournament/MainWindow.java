@@ -64,10 +64,17 @@ public class MainWindow extends JFrame
 			}
 			});
 
+		try
+		{
 		Tournament t = new Tournament();
 		t.connectDatabase();
 		t.upgradeSchema();
+		t.loadMasterData();
 		setTournament(null, t);
+
+		} catch (SQLException e) {
+			showException(this, e);
+		}
 	}
 
 	void makeToolbar()
