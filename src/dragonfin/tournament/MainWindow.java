@@ -257,10 +257,11 @@ public class MainWindow extends JFrame
 		} //end for
 	}
 
-	static class PlayParticipantsEditor extends AbstractCellEditor
+	class PlayParticipantsEditor extends AbstractCellEditor
 		implements javax.swing.table.TableCellEditor
 	{
 		JButton button;
+		Play currentPlay;
 
 		PlayParticipantsEditor()
 		{
@@ -275,7 +276,8 @@ public class MainWindow extends JFrame
 		{
 			PlayParticipantsDialog dlg;
 			dlg = new PlayParticipantsDialog(
-				SwingUtilities.windowForComponent(button)
+				SwingUtilities.windowForComponent(button),
+				currentPlay
 				);
 			dlg.setVisible(true);
 
@@ -294,6 +296,9 @@ public class MainWindow extends JFrame
 				JTable table, Object value,
 				boolean isSelected, int row, int column)
 		{
+			currentPlay = tournament.getPlay(
+					((Number)value).intValue()
+					);
 			return button;
 		}
 	}

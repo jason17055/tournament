@@ -171,7 +171,6 @@ public class Tournament
 
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
 			return 0;
 		}
 
@@ -233,13 +232,14 @@ public class Tournament
 			);
 			stmt.execute(
 			"CREATE TABLE playparticipant ("
+			+" id IDENTITY,"
 			+" play INTEGER NOT NULL,"
-			+" seat VARCHAR(200),"
 			+" player INTEGER,"
+			+" seat VARCHAR(200),"
+			+" handicap VARCHAR(200),"
 			+" turn_order INTEGER,"
 			+" score VARCHAR(200),"
 			+" rank INTEGER,"
-			+" PRIMARY KEY (play, seat),"
 			+" FOREIGN KEY (play) REFERENCES play (id),"
 			+" FOREIGN KEY (player) REFERENCES player (id)"
 			+" )"
@@ -359,7 +359,7 @@ public class Tournament
 			Statement stmt = dbConn.createStatement();
 			stmt.execute(
 			"SELECT id,game,board,status,"
-			+" NULL AS \"SEAT:White\",started,finished FROM play"
+			+" id+0 AS players,started,finished FROM play"
 			);
 			ResultSetModel m = new ResultSetModel(stmt.getResultSet());
 			m.updateHandler = new MyPlayUpdater();
@@ -424,5 +424,10 @@ public class Tournament
 	{
 		assert s != null;
 		return "\"" + s + "\"";
+	}
+
+	public Play getPlay(int playId)
+	{
+		return new Play(this, playId);
 	}
 }
