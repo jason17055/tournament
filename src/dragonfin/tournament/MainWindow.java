@@ -9,6 +9,8 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import static dragonfin.tournament.UnexpectedExceptionDialog.showException;
+
 public class MainWindow extends JFrame
 {
 	static ResourceBundle strings = ResourceBundle.getBundle("dragonfin.tournament.GuiStrings");
@@ -32,6 +34,7 @@ public class MainWindow extends JFrame
 		rosterTable.setFillsViewportHeight(true);
 		getContentPane().add(rosterScrollPane, BorderLayout.CENTER);
 
+		makeToolbar();
 		makeMenu();
 		pack();
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -47,6 +50,28 @@ public class MainWindow extends JFrame
 		t.connectDatabase();
 		t.upgradeSchema();
 		setTournament(null, t);
+	}
+
+	void makeToolbar()
+	{
+		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
+		toolBar.setFloatable(false);
+
+		JButton btn1 = new JButton(strings.getString("tool.add"));
+		btn1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				onAddClicked();
+			}});
+		toolBar.add(btn1);
+
+		JButton btn2 = new JButton(strings.getString("tool.refresh"));
+		btn2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				onRefreshClicked();
+			}});
+		toolBar.add(btn2);
+
+		getContentPane().add(toolBar, BorderLayout.PAGE_START);
 	}
 
 	void makeMenu()
@@ -122,6 +147,23 @@ public class MainWindow extends JFrame
 			}
 		}
 		return true;
+	}
+
+	void onAddClicked()
+	{
+		try
+		{
+			tournament.addPlayer();
+		}
+		catch (Exception e) {
+			showException(this, e);
+		}
+	}
+
+	void onRefreshClicked()
+	{
+		rosterModel = tournament.getPlayersModel();
+		rosterTable.setModel(rosterModel);
 	}
 
 	void onNewFileClicked()

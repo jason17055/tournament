@@ -232,10 +232,43 @@ public class Tournament
 			stmt.execute(
 			"SELECT * FROM player"
 			);
-			return new ResultSetModel(stmt.getResultSet());
+			ResultSetModel m = new ResultSetModel(stmt.getResultSet());
+			m.updateHandler = new MyPlayerUpdater();
+			return m;
 		}
 		catch (SQLException e) {
 			throw new RuntimeException("SQL exception: "+e, e);
 		}
+	}
+
+	public void addPlayer()
+		throws SQLException
+	{
+		Statement stmt = dbConn.createStatement();
+		stmt.execute(
+			"INSERT INTO player DEFAULT VALUES"
+			);
+	}
+
+	class MyPlayerUpdater implements ResultSetModel.UpdateHandler
+	{
+		public void update(Object key, String attrName, Object newValue)
+			throws SQLException
+		{
+			PreparedStatement stmt = dbConn.prepareStatement(
+				"UPDATE player SET "
+				+quoteSchemaName(attrName)+"=?"
+				+" WHERE id=?"
+				);
+			stmt.setObject(1, newValue);
+			stmt.setObject(2, key);
+			stmt.executeUpdate();
+		}
+	}
+
+	static String quoteSchemaName(String s)
+	{
+		assert s != null;
+		return "\"" + s + "\"";
 	}
 }

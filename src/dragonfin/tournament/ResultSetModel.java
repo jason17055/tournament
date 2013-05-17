@@ -10,6 +10,7 @@ public class ResultSetModel extends AbstractTableModel
 	int columnCount;
 	String [] columnNames;
 	Object [][] data;
+	boolean showInsertRow;
 
 	public ResultSetModel(ResultSet rs)
 		throws SQLException
@@ -47,7 +48,7 @@ public class ResultSetModel extends AbstractTableModel
 	@Override
 	public int getRowCount()
 	{
-		return data.length + 1;
+		return data.length + (showInsertRow ? 1 : 0);
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class ResultSetModel extends AbstractTableModel
 	@Override
 	public boolean isCellEditable(int row, int col)
 	{
-		return col != 0;
+		return col != 0 && updateHandler != null;
 	}
 
 	@Override
@@ -79,9 +80,22 @@ public class ResultSetModel extends AbstractTableModel
 		if (row < data.length) {
 			data[row][col] = value;
 			fireTableCellUpdated(row, col);
+
+			try {
+			updateHandler.update(data[row][0], columnNames[col], data[row][col]);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		else {
-			//TODO
+			//TODO- insert a row
 		}
 	}
+
+	public interface UpdateHandler
+	{
+		void update(Object key, String attrName, Object newValue)
+			throws SQLException;
+	}
+	UpdateHandler updateHandler;
 }
