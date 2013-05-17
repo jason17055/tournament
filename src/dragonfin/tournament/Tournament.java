@@ -246,7 +246,7 @@ public class Tournament
 	{
 		Statement stmt = dbConn.createStatement();
 		stmt.execute(
-			"INSERT INTO player DEFAULT VALUES"
+			"INSERT INTO player (name) VALUES (NULL)"
 			);
 	}
 
