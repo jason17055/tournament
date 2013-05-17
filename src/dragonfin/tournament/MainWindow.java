@@ -204,11 +204,31 @@ public class MainWindow extends JFrame
 
 	void onRefreshClicked()
 	{
+		try
+		{
+
 		rosterModel = tournament.getPlayersModel();
 		rosterTable.setModel(rosterModel);
 
 		ResultSetModel playsModel = tournament.getPlaysModel();
 		playsTable.setModel(playsModel);
+
+		String x = tournament.getColumnTypeData("PLAY.STATUS");
+		if (x != null) {
+			String [] parts = x.substring(5).split(",");
+			JComboBox<String> comboBox = new JComboBox<String>();
+			for (String p : parts) {
+				comboBox.addItem(p);
+			}
+			playsTable.getColumnModel().getColumn(3).setCellEditor(
+				new DefaultCellEditor(comboBox)
+				);
+		}
+
+		}
+		catch (SQLException e) {
+			showException(this, e);
+		}
 	}
 
 	void onNewFileClicked()

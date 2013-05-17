@@ -265,10 +265,46 @@ public class Tournament
 			dbConn.commit();
 		}
 
+		if (schemaVersion < 4)
+		{
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"CREATE TABLE column_type ("
+			+" name VARCHAR(200) NOT NULL PRIMARY KEY,"
+			+" type_data VARCHAR(4000)"
+			+" )"
+			);
+			stmt.execute(
+			"INSERT INTO column_type (name,type_data) VALUES ("
+			+" 'PLAY.STATUS',"
+			+" 'enum:proposed,assigned,started,suspended,aborted,completed'"
+			+" )"
+			);
+			stmt.execute(
+			"UPDATE master SET version=4"
+			);
+			dbConn.commit();
+		}
+
 		}
 		catch (SQLException e) {
 			System.err.println(e);
 		}
+	}
+
+	public String getColumnTypeData(String columnName)
+		throws SQLException
+	{
+		PreparedStatement stmt = dbConn.prepareStatement(
+			"SELECT type_data FROM column_type"
+			+" WHERE name=?"
+			);
+		stmt.setString(1, columnName);
+		ResultSet rs = stmt.executeQuery();
+		if (rs.next()) {
+			return rs.getString(1);
+		}
+		return null;
 	}
 
 	public ResultSetModel getPlayersModel()
