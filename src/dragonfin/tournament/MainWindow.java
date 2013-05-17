@@ -20,17 +20,18 @@ public class MainWindow extends JFrame
 	Tournament tournament;
 	File currentFile;
 
+	static final String CARD_PLAYERS = "players";
+	static final String CARD_PLAYS = "plays";
+
 	CardLayout mainCardLayout;
 	JPanel mainPane;
+	String currentlyVisible = CARD_PLAYERS;
 
 	ResultSetModel rosterModel;
 	JTable rosterTable;
 	JScrollPane rosterScrollPane;
 
-	JTable gamesTable;
-
-	static final String CARD_PLAYERS = "players";
-	static final String CARD_GAMES = "games";
+	JTable playsTable;
 
 	public MainWindow()
 	{
@@ -46,10 +47,10 @@ public class MainWindow extends JFrame
 		rosterTable.setFillsViewportHeight(true);
 		mainPane.add(rosterScrollPane, CARD_PLAYERS);
 
-		gamesTable = new JTable();
-		JScrollPane sp = new JScrollPane(gamesTable);
-		gamesTable.setFillsViewportHeight(true);
-		mainPane.add(sp, CARD_GAMES);
+		playsTable = new JTable();
+		JScrollPane sp = new JScrollPane(playsTable);
+		playsTable.setFillsViewportHeight(true);
+		mainPane.add(sp, CARD_PLAYS);
 
 		makeToolbar();
 		makeMenu();
@@ -187,19 +188,27 @@ public class MainWindow extends JFrame
 	{
 		try
 		{
-			tournament.addPlayer();
+			if (currentlyVisible == CARD_PLAYERS) {
+				tournament.addPlayer();
+			}
+			else if (currentlyVisible == CARD_PLAYS) {
+				tournament.addPlay();
+			}
+
+			onRefreshClicked();
 		}
 		catch (Exception e) {
 			showException(this, e);
 		}
-
-		onRefreshClicked();
 	}
 
 	void onRefreshClicked()
 	{
 		rosterModel = tournament.getPlayersModel();
 		rosterTable.setModel(rosterModel);
+
+		ResultSetModel playsModel = tournament.getPlaysModel();
+		playsTable.setModel(playsModel);
 	}
 
 	void onNewFileClicked()
@@ -325,19 +334,19 @@ public class MainWindow extends JFrame
 		this.currentFile = file;
 		this.tournament = newTournament;
 
-		rosterModel = newTournament.getPlayersModel();
-		rosterTable.setModel(rosterModel);
-
+		onRefreshClicked();
 		refresh();
 	}
 
 	private void onViewPlayersClicked()
 	{
 		mainCardLayout.show(mainPane, CARD_PLAYERS);
+		currentlyVisible = CARD_PLAYERS;
 	}
 
 	private void onViewGamesClicked()
 	{
-		mainCardLayout.show(mainPane, CARD_GAMES);
+		mainCardLayout.show(mainPane, CARD_PLAYS);
+		currentlyVisible = CARD_PLAYS;
 	}
 }

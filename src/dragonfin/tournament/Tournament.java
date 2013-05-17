@@ -218,6 +218,52 @@ public class Tournament
 			dbConn.commit();
 		}
 
+		if (schemaVersion < 3)
+		{
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"CREATE TABLE play ("
+			+" id IDENTITY,"
+			+" game VARCHAR(200),"
+			+" board VARCHAR(200),"
+			+" status VARCHAR(200),"
+			+" started TIMESTAMP,"
+			+" finished TIMESTAMP"
+			+" )"
+			);
+			stmt.execute(
+			"CREATE TABLE playparticipant ("
+			+" play INTEGER NOT NULL,"
+			+" seat VARCHAR(200),"
+			+" player INTEGER,"
+			+" turn_order INTEGER,"
+			+" score VARCHAR(200),"
+			+" rank INTEGER,"
+			+" PRIMARY KEY (play, seat),"
+			+" FOREIGN KEY (play) REFERENCES play (id),"
+			+" FOREIGN KEY (player) REFERENCES player (id)"
+			+" )"
+			);
+			stmt.execute(
+			"ALTER TABLE master ALTER COLUMN eventName RENAME TO event_name"
+			);
+			stmt.execute(
+			"ALTER TABLE master ALTER COLUMN eventLocation RENAME TO event_location"
+			);
+			stmt.execute(
+			"ALTER TABLE master ALTER COLUMN eventStartTime RENAME TO event_start_time"
+			);
+			stmt.execute(
+			"ALTER TABLE player ALTER COLUMN memberNumber RENAME TO member_number"
+			);
+			stmt.execute(
+			"ALTER TABLE player ALTER COLUMN homeLocation RENAME TO home_location"
+			);
+			stmt.execute(
+			"UPDATE master SET version=3"
+			);
+			dbConn.commit();
+		}
 
 		}
 		catch (SQLException e) {
@@ -241,12 +287,37 @@ public class Tournament
 		}
 	}
 
+	public ResultSetModel getPlaysModel()
+	{
+		try {
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"SELECT * FROM play"
+			);
+			ResultSetModel m = new ResultSetModel(stmt.getResultSet());
+			m.updateHandler = new MyPlayUpdater();
+			return m;
+		}
+		catch (SQLException e) {
+			throw new RuntimeException("SQL exception: "+e, e);
+		}
+	}
+
 	public void addPlayer()
 		throws SQLException
 	{
 		Statement stmt = dbConn.createStatement();
 		stmt.execute(
 			"INSERT INTO player (name) VALUES (NULL)"
+			);
+	}
+
+	public void addPlay()
+		throws SQLException
+	{
+		Statement stmt = dbConn.createStatement();
+		stmt.execute(
+			"INSERT INTO play (game) VALUES (NULL)"
 			);
 	}
 
@@ -257,6 +328,22 @@ public class Tournament
 		{
 			PreparedStatement stmt = dbConn.prepareStatement(
 				"UPDATE player SET "
+				+quoteSchemaName(attrName)+"=?"
+				+" WHERE id=?"
+				);
+			stmt.setObject(1, newValue);
+			stmt.setObject(2, key);
+			stmt.executeUpdate();
+		}
+	}
+
+	class MyPlayUpdater implements ResultSetModel.UpdateHandler
+	{
+		public void update(Object key, String attrName, Object newValue)
+			throws SQLException
+		{
+			PreparedStatement stmt = dbConn.prepareStatement(
+				"UPDATE play SET "
 				+quoteSchemaName(attrName)+"=?"
 				+" WHERE id=?"
 				);
