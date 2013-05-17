@@ -201,9 +201,41 @@ public class Tournament
 			dbConn.commit();
 		}
 
+		if (schemaVersion < 2)
+		{
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"CREATE TABLE player ("
+			+" id IDENTITY,"
+			+" name VARCHAR(200),"
+			+" memberNumber VARCHAR(200),"
+			+" homeLocation VARCHAR(200)"
+			+" )"
+			);
+			stmt.execute(
+			"UPDATE master SET version=2"
+			);
+			dbConn.commit();
+		}
+
+
 		}
 		catch (SQLException e) {
 			System.err.println(e);
+		}
+	}
+
+	public ResultSetModel getPlayersModel()
+	{
+		try {
+			Statement stmt = dbConn.createStatement();
+			stmt.execute(
+			"SELECT * FROM player"
+			);
+			return new ResultSetModel(stmt.getResultSet());
+		}
+		catch (SQLException e) {
+			throw new RuntimeException("SQL exception: "+e, e);
 		}
 	}
 }

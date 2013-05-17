@@ -18,7 +18,7 @@ public class MainWindow extends JFrame
 	Tournament tournament;
 	File currentFile;
 
-	RosterModel rosterModel;
+	ResultSetModel rosterModel;
 	JTable rosterTable;
 	JScrollPane rosterScrollPane;
 
@@ -247,7 +247,7 @@ public class MainWindow extends JFrame
 		this.currentFile = file;
 		this.tournament = newTournament;
 
-		rosterModel = new RosterModel(newTournament);
+		rosterModel = newTournament.getPlayersModel();
 		rosterTable.setModel(rosterModel);
 
 		refresh();
