@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.text.MessageFormat;
+import java.sql.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -43,6 +44,22 @@ public class MainWindow extends JFrame
 			});
 
 		setTournament(null, new Tournament());
+		connectDatabase();
+	}
+
+	void connectDatabase()
+	{
+		try {
+
+		String fileName = "db/tournamentdb";
+
+		Class cl = Class.forName("org.hsqldb.jdbc.JDBCDriver");
+		Connection c = DriverManager.getConnection("jdbc:hsqldb:file:"+fileName, "SA", "");
+
+		}
+		catch (Exception e) {
+			throw new RuntimeException("cannot load database:"+e, e);
+		}
 	}
 
 	void makeMenu()
