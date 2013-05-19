@@ -11,7 +11,7 @@ public class ResultSetModel extends AbstractTableModel
 	String [] columnNames;
 	Object [][] data;
 	boolean showInsertRow;
-	boolean showIdColumn = true;
+	boolean [] hiddenColumn;
 
 	public ResultSetModel(ResultSet rs)
 		throws SQLException
@@ -22,6 +22,7 @@ public class ResultSetModel extends AbstractTableModel
 		this.columnCount = rsmd.getColumnCount();
 
 		this.columnNames = new String[columnCount];
+		this.hiddenColumn = new boolean[columnCount];
 		for (int i = 0; i < columnCount; i++) {
 			this.columnNames[i] = rsmd.getColumnName(i+1);
 		}
@@ -38,12 +39,39 @@ public class ResultSetModel extends AbstractTableModel
 		this.data = rows.toArray(new Object[0][]);
 	}
 
+	// example: col.0 is hidden
+	// then   0 => 1
+	//        1 => 2
+	//	 etc.
+	//
+	// example: col.1 is hidden
+	// then   0 => 0
+	//        1 => 2
+	//        2 => 3
+	//       etc.
+	//
+	// example: col.0 and col.2 are hidden
+	// then   0 => 1
+	//        1 => 3
+	//        2 => 4
+	//       etc.
+	//
+	int adjustForHiddenColumns(int col)
+	{
+		for (int i = 0; i <= col; i++) {
+			if (hiddenColumn[i]) {
+				col++;
+			}
+		}
+
+		assert col >= 0 && col < columnCount;
+		return col;
+	}
+
 	@Override
 	public String getColumnName(int col)
 	{
-		if (!showIdColumn) {
-			col++;
-		}
+		col = adjustForHiddenColumns(col);
 		assert col >= 0 && col < columnCount;
 
 		return columnNames[col];
@@ -59,27 +87,28 @@ public class ResultSetModel extends AbstractTableModel
 	@Override
 	public int getColumnCount()
 	{
-		return columnCount
-			+ (showIdColumn ? 0 : -1);
+		int rv = columnCount;
+		for (int i = 0; i < columnCount; i++) {
+			if (hiddenColumn[i]) {
+				rv--;
+			}
+		}
+		return rv;
 	}
 
 	@Override
 	public boolean isCellEditable(int row, int col)
 	{
-		if (!showIdColumn) {
-			col++;
-		}
-
+		col = adjustForHiddenColumns(col);
 		assert col >= 0 && col < columnCount;
+
 		return col != 0 && updateHandler != null;
 	}
 
 	@Override
 	public Object getValueAt(int row, int col)
 	{
-		if (!showIdColumn) {
-			col++;
-		}
+		col = adjustForHiddenColumns(col);
 
 		if (row < data.length) {
 			return data[row][col];
@@ -92,9 +121,7 @@ public class ResultSetModel extends AbstractTableModel
 	@Override
 	public void setValueAt(Object value, int row, int col)
 	{
-		if (!showIdColumn) {
-			col++;
-		}
+		col = adjustForHiddenColumns(col);
 
 		if (row < data.length) {
 			data[row][col] = value;

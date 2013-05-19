@@ -34,9 +34,10 @@ public class Play
 			stmt.setInt(1, playId);
 			ResultSet rs = stmt.executeQuery();
 			ResultSetModel m = new ResultSetModel(rs);
-			m.showIdColumn = false;
 			m.updateHandler = new MyParticipantUpdater();
 			m.appendHandler = new MyParticipantAppender();
+			m.hiddenColumn[0] = true;
+			m.hiddenColumn[1] = true;
 			return m;
 		}
 		catch (SQLException e) {
