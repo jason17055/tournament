@@ -34,6 +34,7 @@ public class Play
 			stmt.setInt(1, playId);
 			ResultSet rs = stmt.executeQuery();
 			ResultSetModel m = new ResultSetModel(rs);
+			m.showIdColumn = false;
 			m.updateHandler = new MyParticipantUpdater();
 			return m;
 		}
