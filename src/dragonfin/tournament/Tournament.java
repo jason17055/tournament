@@ -457,6 +457,21 @@ public class Tournament
 			);
 	}
 
+	public int addPlayer(String playerName)
+		throws SQLException
+	{
+		PreparedStatement stmt = dbConn.prepareStatement(
+			"INSERT INTO player (name) VALUES (?)",
+			Statement.RETURN_GENERATED_KEYS
+			);
+		stmt.setString(1, playerName);
+		stmt.executeUpdate();
+
+		ResultSet genKeys = stmt.getGeneratedKeys();
+		genKeys.next();
+		return genKeys.getInt(1);
+	}
+
 	public void addPlay()
 		throws SQLException
 	{

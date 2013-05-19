@@ -51,6 +51,7 @@ public class SmartTable extends JTable
 	{
 		ResultSetModel.Lookup lookup;
 		JComboBox<LookupItem> comboBox;
+		Object unlistedValue;
 
 		MyLookupCellEditor(ResultSetModel m, int col, ResultSetModel.Lookup lookup)
 		{
@@ -98,7 +99,13 @@ public class SmartTable extends JTable
 		@Override
 		public Object getCellEditorValue()
 		{
-			return ((LookupItem)comboBox.getSelectedItem()).returnValue;
+			LookupItem item = (LookupItem)comboBox.getSelectedItem();
+			if (item == LookupItem.UNLISTED) {
+				return unlistedValue;
+			}
+			else {
+				return item.returnValue;
+			}
 		}
 
 		private void onItemStateChanged(ItemEvent evt)
@@ -106,7 +113,7 @@ public class SmartTable extends JTable
 			if (evt.getStateChange() == ItemEvent.SELECTED &&
 				evt.getItem() == LookupItem.UNLISTED)
 			{
-				lookup.doUnlistedOption(comboBox);
+				unlistedValue = lookup.doUnlistedOption(comboBox);
 			}
 		}
 	}

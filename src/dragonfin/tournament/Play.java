@@ -55,6 +55,10 @@ public class Play
 		public void update(Object key, String attrName, Object newValue)
 			throws SQLException
 		{
+			if (attrName.equalsIgnoreCase("PLAYER_NAME")) {
+				attrName = "PLAYER";
+			}
+
 			PreparedStatement stmt = db().prepareStatement(
 				"UPDATE playparticipant SET "
 				+quoteSchemaName(attrName)+"=?"
@@ -116,11 +120,24 @@ public class Play
 		}
 
 		//implements Lookup
-		public void doUnlistedOption(Component ownerComponent)
+		public Object doUnlistedOption(Component ownerComponent)
 		{
-			JOptionPane.showMessageDialog(ownerComponent,
-				"Foo", "Bar",
-				JOptionPane.PLAIN_MESSAGE);
+			String playerName = JOptionPane.showInputDialog(
+				ownerComponent,
+				"Enter name of the player"
+				);
+			if (playerName != null) {
+				try {
+
+				int playerId = master.addPlayer(playerName);
+System.out.println("the new player id is "+playerId);
+				return new Integer(playerId);
+
+				} catch (SQLException e) {
+					UnexpectedExceptionDialog.showException(ownerComponent, e);
+				}
+			}
+			return null;
 		}
 	}
 }

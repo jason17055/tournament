@@ -172,6 +172,6 @@ public class ResultSetModel extends AbstractTableModel
 	{
 		List<LookupItem> getLookupList();
 		boolean showUnlistedOption();
-		void doUnlistedOption(Component ownerComponent);
+		Object doUnlistedOption(Component ownerComponent);
 	}
 }
