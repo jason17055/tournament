@@ -13,6 +13,10 @@ public class ResultSetModel extends AbstractTableModel
 	boolean showInsertRow;
 	boolean [] hiddenColumn;
 
+	UpdateHandler updateHandler;
+	Appender appendHandler;
+	Lookup [] lookupColumn;
+
 	public ResultSetModel(ResultSet rs)
 		throws SQLException
 	{
@@ -23,6 +27,7 @@ public class ResultSetModel extends AbstractTableModel
 
 		this.columnNames = new String[columnCount];
 		this.hiddenColumn = new boolean[columnCount];
+		this.lookupColumn = new Lookup[columnCount];
 		for (int i = 0; i < columnCount; i++) {
 			this.columnNames[i] = rsmd.getColumnName(i+1);
 		}
@@ -105,6 +110,18 @@ public class ResultSetModel extends AbstractTableModel
 		return col != 0 && updateHandler != null;
 	}
 
+	public boolean isLookupColumn(int col)
+	{
+		col = adjustForHiddenColumns(col);
+		return lookupColumn[col] != null;
+	}
+
+	public Lookup getLookupColumn(int col)
+	{
+		col = adjustForHiddenColumns(col);
+		return lookupColumn[col];
+	}
+
 	@Override
 	public Object getValueAt(int row, int col)
 	{
@@ -143,12 +160,16 @@ public class ResultSetModel extends AbstractTableModel
 		void update(Object key, String attrName, Object newValue)
 			throws SQLException;
 	}
-	UpdateHandler updateHandler;
 
 	public interface Appender
 	{
 		void newRow()
 			throws SQLException;
 	}
-	Appender appendHandler;
+
+	public interface Lookup
+	{
+		List<LookupItem> getLookupList();
+		boolean showUnlistedOption();
+	}
 }
