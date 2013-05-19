@@ -388,6 +388,18 @@ public class Tournament
 		seatNames = tmp.split(",");
 	}
 
+	void saveMasterData()
+		throws SQLException
+	{
+		PreparedStatement stmt = dbConn.prepareStatement(
+			"UPDATE master"
+			+" SET event_name=?,"
+			+"     event_location=?");
+		stmt.setString(1, eventName);
+		stmt.setString(2, eventLocation);
+		stmt.executeUpdate();
+	}
+
 	public String getColumnTypeData(String columnName)
 		throws SQLException
 	{

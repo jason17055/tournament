@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
+import static dragonfin.tournament.UnexpectedExceptionDialog.showException;
 
 public class TournamentPropertiesDialog extends JDialog
 {
@@ -16,11 +17,10 @@ public class TournamentPropertiesDialog extends JDialog
 	JTextField beginTimeEntry;
 	JTextField endDateEntry;
 	JTextField endTimeEntry;
-	JTextArea playerFieldsEntry;
 
 	public TournamentPropertiesDialog(Window owner, Tournament tournament)
 	{
-		super(owner);
+		super(owner, Dialog.ModalityType.DOCUMENT_MODAL);
 		this.tournament = tournament;
 		setTitle("Tournament Properties");
 
@@ -57,18 +57,14 @@ public class TournamentPropertiesDialog extends JDialog
 		tournament.setEventBeginTime(beginTimeEntry.getText());
 		tournament.setEventEndDate(endDateEntry.getText());
 		tournament.setEventEndTime(endTimeEntry.getText());
-
-		String [] parts = playerFieldsEntry.getText().split("\n");
-		ArrayList<String> tmp = new ArrayList<String>();
-		for (String s : parts) {
-			s = s.trim();
-System.out.println("-->"+s+"<--");
-			if (s.length() != 0) {
-				tmp.add(s);
-			}
-		}
-		tournament.playerCustomFields = tmp.toArray(new String[0]);
 		tournament.dirty = true;
+
+		try {
+		tournament.saveMasterData();
+		}
+		catch (Exception e) {
+			showException(this, e);
+		}
 
 		dispose();
 	}
@@ -124,16 +120,6 @@ System.out.println("-->"+s+"<--");
 		mainPane.add(new JLabel(strings.getString("properties.event_end_time")), c0);
 		endTimeEntry = new JTextField(tournament.getEventEndTime());
 		mainPane.add(endTimeEntry, c1);
-
-		c0.gridy = (++c1.gridy);
-
-		mainPane.add(new JLabel(strings.getString("properties.player_fields")), c0);
-		StringBuilder sb = new StringBuilder();
-		for (String s : tournament.playerCustomFields) {
-			sb.append(s + "\n");
-		}
-		playerFieldsEntry = new JTextArea(sb.toString());
-		mainPane.add(playerFieldsEntry, c1);
 
 		return mainPane;
 	}
