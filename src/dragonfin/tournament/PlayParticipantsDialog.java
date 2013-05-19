@@ -16,7 +16,9 @@ public class PlayParticipantsDialog extends JDialog
 
 	public PlayParticipantsDialog(Window owner, Play play)
 	{
-		super(owner, "Edit Participants", Dialog.ModalityType.DOCUMENT_MODAL);
+		super(owner,
+			strings.getString("edit_participants.caption"),
+			Dialog.ModalityType.DOCUMENT_MODAL);
 		this.play = play;
 
 		makeToolbar();
@@ -30,14 +32,14 @@ public class PlayParticipantsDialog extends JDialog
 		JPanel buttonPane = new JPanel();
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 
-		JButton btn1 = new JButton("OK");
+		JButton btn1 = new JButton(strings.getString("ok_btn_caption"));
 		btn1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				onOkClicked();
 			}});
 		buttonPane.add(btn1);
 
-		JButton btn2 = new JButton("Cancel");
+		JButton btn2 = new JButton(strings.getString("cancel_btn_caption"));
 		btn2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				dispose();
