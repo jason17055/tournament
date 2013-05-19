@@ -135,6 +135,13 @@ public class MainWindow extends JFrame
 //			}});
 //		fileMenu.add(menuItem);
 //
+		menuItem = new JMenuItem(strings.getString("menu.file.properties"));
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				onFilePropertiesClicked();
+			}});
+		fileMenu.add(menuItem);
+
 		menuItem = new JMenuItem(strings.getString("menu.file.exit"));
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
@@ -393,6 +400,12 @@ public class MainWindow extends JFrame
 				JOptionPane.ERROR_MESSAGE);
 		}
 		return false;
+	}
+
+	void onFilePropertiesClicked()
+	{
+		TournamentPropertiesDialog dlg = new TournamentPropertiesDialog(this, tournament);
+		dlg.setVisible(true);
 	}
 
 	void refresh()

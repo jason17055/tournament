@@ -20,9 +20,75 @@ public class Tournament
 	transient boolean dirty;
 	transient Connection dbConn;
 
+	public String getEventName()
+	{
+		return eventName;
+	}
+
+	public String getEventLocation()
+	{
+		return eventLocation;
+	}
+
+	public String getEventBeginDate()
+	{
+		return eventBeginDate;
+	}
+
+	public String getEventBeginTime()
+	{
+		return eventBeginTime;
+	}
+
+	public String getEventEndDate()
+	{
+		return eventEndDate;
+	}
+
+	public String getEventEndTime()
+	{
+		return eventEndTime;
+	}
+
 	public boolean isDirty()
 	{
 		return dirty;
+	}
+
+	public void setEventName(String eventName)
+	{
+		this.eventName = eventName;
+		this.dirty = true;
+	}
+
+	public void setEventLocation(String eventLocation)
+	{
+		this.eventLocation = eventLocation;
+		this.dirty = true;
+	}
+
+	public void setEventBeginDate(String beginDate)
+	{
+		this.eventBeginDate = beginDate;
+		this.dirty = true;
+	}
+
+	public void setEventBeginTime(String beginTime)
+	{
+		this.eventBeginTime = beginTime;
+		this.dirty = true;
+	}
+
+	public void setEventEndDate(String beginDate)
+	{
+		this.eventEndDate = beginDate;
+		this.dirty = true;
+	}
+
+	public void setEventEndTime(String endTime)
+	{
+		this.eventEndTime = endTime;
+		this.dirty = true;
 	}
 
 	public void loadFile(File file)
