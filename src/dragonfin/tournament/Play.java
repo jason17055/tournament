@@ -36,6 +36,7 @@ public class Play
 			ResultSetModel m = new ResultSetModel(rs);
 			m.showIdColumn = false;
 			m.updateHandler = new MyParticipantUpdater();
+			m.appendHandler = new MyParticipantAppender();
 			return m;
 		}
 		catch (SQLException e) {
@@ -55,6 +56,19 @@ public class Play
 				);
 			stmt.setObject(1, newValue);
 			stmt.setObject(2, key);
+			stmt.executeUpdate();
+		}
+	}
+
+	class MyParticipantAppender implements ResultSetModel.Appender
+	{
+		public void newRow()
+			throws SQLException
+		{
+			PreparedStatement stmt = db().prepareStatement(
+				"INSERT INTO playparticipant (play) VALUES (?)"
+				);
+			stmt.setInt(1, playId);
 			stmt.executeUpdate();
 		}
 	}

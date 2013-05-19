@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
+import static dragonfin.tournament.UnexpectedExceptionDialog.showException;
 
 public class PlayParticipantsDialog extends JDialog
 {
@@ -83,11 +84,18 @@ public class PlayParticipantsDialog extends JDialog
 
 	private void onAddClicked()
 	{
-		//TODO
+		try {
+			participantsModel.appendHandler.newRow();
+		}
+		catch (Exception e) {
+			showException(this, e);
+		}
 	}
 
 	private void onRefreshClicked()
 	{
+		participantsModel = play.getParticipantsModel();
+		participantsTable.setModel(participantsModel);
 		//TODO
 	}
 

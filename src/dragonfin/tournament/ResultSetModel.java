@@ -117,4 +117,11 @@ public class ResultSetModel extends AbstractTableModel
 			throws SQLException;
 	}
 	UpdateHandler updateHandler;
+
+	public interface Appender
+	{
+		void newRow()
+			throws SQLException;
+	}
+	Appender appendHandler;
 }
