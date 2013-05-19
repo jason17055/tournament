@@ -1,5 +1,8 @@
 package dragonfin.tournament;
 
+import java.awt.Component;
+import javax.swing.*;
+
 import java.sql.*;
 import java.util.*;
 import static dragonfin.tournament.Tournament.quoteSchemaName;
@@ -110,6 +113,14 @@ public class Play
 		public boolean showUnlistedOption()
 		{
 			return true;
+		}
+
+		//implements Lookup
+		public void doUnlistedOption(Component ownerComponent)
+		{
+			JOptionPane.showMessageDialog(ownerComponent,
+				"Foo", "Bar",
+				JOptionPane.PLAIN_MESSAGE);
 		}
 	}
 }

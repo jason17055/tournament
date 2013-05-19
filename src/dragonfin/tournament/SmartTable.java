@@ -1,6 +1,7 @@
 package dragonfin.tournament;
 
 import java.awt.Component;
+import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -60,6 +61,12 @@ public class SmartTable extends JTable
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
 		{
 			this.comboBox = new JComboBox<LookupItem>();
+			this.comboBox.addItemListener(
+				new ItemListener() {
+					public void itemStateChanged(ItemEvent evt) {
+						onItemStateChanged(evt);
+					}
+				});
 
 			List<LookupItem> items = lookup.getLookupList();
 			int found = -1;
@@ -92,6 +99,15 @@ public class SmartTable extends JTable
 		public Object getCellEditorValue()
 		{
 			return ((LookupItem)comboBox.getSelectedItem()).returnValue;
+		}
+
+		private void onItemStateChanged(ItemEvent evt)
+		{
+			if (evt.getStateChange() == ItemEvent.SELECTED &&
+				evt.getItem() == LookupItem.UNLISTED)
+			{
+				lookup.doUnlistedOption(comboBox);
+			}
 		}
 	}
 }

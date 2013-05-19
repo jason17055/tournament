@@ -1,5 +1,6 @@
 package dragonfin.tournament;
 
+import java.awt.Component;
 import java.sql.*;
 import java.util.*;
 import javax.swing.table.*;
@@ -171,5 +172,6 @@ public class ResultSetModel extends AbstractTableModel
 	{
 		List<LookupItem> getLookupList();
 		boolean showUnlistedOption();
+		void doUnlistedOption(Component ownerComponent);
 	}
 }
