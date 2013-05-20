@@ -30,7 +30,7 @@ public class ResultSetModel extends AbstractTableModel
 		this.hiddenColumn = new boolean[columnCount];
 		this.lookupColumn = new Lookup[columnCount];
 		for (int i = 0; i < columnCount; i++) {
-			this.columnNames[i] = rsmd.getColumnName(i+1);
+			this.columnNames[i] = rsmd.getColumnLabel(i+1);
 		}
 
 		ArrayList< Object[] > rows = new ArrayList< Object[] >();
