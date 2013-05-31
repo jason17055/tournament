@@ -54,3 +54,28 @@ INSERT INTO column_type (name, type_data) VALUES (
 	'PLAY.STATUS', 'enum:proposed,assigned,started,suspended,aborted,completed'
 	);
 
+CREATE TABLE rating_batch (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT
+	);
+
+CREATE TABLE rating_identity (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	batch INTEGER NOT NULL,
+	player INTEGER NOT NULL,
+	rating_cycle INTEGER NOT NULL,
+	rating FLOAT NOT NULL,
+	FOREIGN KEY (batch) REFERENCES rating_batch (id),
+	FOREIGN KEY (player) REFERENCES player (id)
+	);
+
+CREATE TABLE rating_data (
+	batch INTEGER NOT NULL,
+	player_a INTEGER NOT NULL,
+	player_b INTEGER NOT NULL,
+	actual_performance FLOAT NOT NULL,
+	expected_performance FLOAT NOT NULL,
+	weight FLOAT NOT NULL,
+	FOREIGN KEY (batch) REFERENCES rating_batch (id),
+	FOREIGN KEY (player_a) REFERENCES rating_identity (id),
+	FOREIGN KEY (player_b) REFERENCES rating_identity (id)
+	);

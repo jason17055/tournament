@@ -114,4 +114,11 @@ $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
 </p>
 
 <?php
+$run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
+?>
+<p>
+<a href="<?php h($run_ratings_url)?>">Run Ratings</a>
+</p>
+
+<?php
 end_page();
