@@ -6,7 +6,7 @@ $database = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 function db_quote($str)
 {
 	global $database;
-	if (is_null($str)) {
+	if (is_null($str) || $str === '') {
 		return "NULL";
 	}
 	else {

@@ -21,6 +21,8 @@ begin_page($page_title);
 <caption>Players</caption>
 <tr>
 <th>Player Name</th>
+<th>Number</th>
+<th>Home City</th>
 </tr>
 <?php
 $sql = "SELECT id,name,member_number,home_location FROM player
