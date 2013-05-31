@@ -18,6 +18,43 @@ begin_page($page_title);
 
 ?>
 <table border="1">
+<caption>Players</caption>
+<tr>
+<th>Player Name</th>
+</tr>
+<?php
+$sql = "SELECT id,name,member_number,home_location FROM player
+	WHERE tournament=".db_quote($tournament_id)."
+	ORDER BY name";
+$query = mysqli_query($database, $sql);
+while ($row = mysqli_fetch_row($query)) {
+
+	$player_id = $row[0];
+	$name = $row[1];
+	$member_number = $row[2];
+	$home_location = $row[3];
+
+	$url = "player.php?id=".urlencode($player_id);
+
+	?><tr>
+<td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
+<td class="member_number_col"><?php h($member_number)?></td>
+<td class="home_location_col"><?php h($home_location)?></td>
+</tr>
+<?php
+} //end foreach player
+?>
+</table>
+
+<?php
+$new_player_url = "player.php?tournament=".urlencode($tournament_id);
+?>
+<p>
+<a href="<?php h($new_player_url)?>">New Player</a>
+</p>
+
+<table border="1">
+<caption>Contests</caption>
 <tr>
 <th>ID</th>
 <th>Round</th>
@@ -40,7 +77,7 @@ while ($row = mysqli_fetch_row($query)) {
 	$board = $row[2];
 	$game = $row[3];
 
-	$url = "#";
+	$url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
 <td class="id_col"><a href="<?php h($url)?>"><?php h($contest_id)?></a></td>

@@ -13,9 +13,11 @@ CREATE TABLE tournament (
 
 CREATE TABLE player (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	tournament INTEGER NOT NULL,
 	name VARCHAR(200),
 	member_number VARCHAR(200),
-	home_location VARCHAR(200)
+	home_location VARCHAR(200),
+	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
 CREATE TABLE contest (
