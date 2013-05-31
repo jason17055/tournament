@@ -52,8 +52,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			or die(db_error($database));
 		$contest_id = mysqli_insert_id($database);
 
-		$url = "contest_participant.php?contest=".urlencode($contest_id)."&next_url=".urlencode($next_url);
+		$self_url = "contest.php?id=".urlencode($contest_id);
+		if (isset($_REQUEST['next_url'])) {
+			$self_url .= '&next_url='.urlencode($_REQUEST['next_url']);
+		}
+		$url = "contest_participant.php?contest=".urlencode($contest_id)."&next_url=".urlencode($self_url);
 		header("Location: $url");
+		exit();
+	}
+
+	else if (isset($_REQUEST['action:update_contest'])) {
+		$sql = "UPDATE contest
+		SET game=".db_quote($_REQUEST['game']).",
+		board=".db_quote($_REQUEST['board']).",
+		status=".db_quote($_REQUEST['status']).",
+		round=".db_quote($_REQUEST['round'])."
+		WHERE id=".db_quote($_GET['id']);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		header("Location: $next_url");
 		exit();
 	}
 

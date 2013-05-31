@@ -6,15 +6,19 @@ require_once('includes/skin.php');
 
 if (isset($_GET['contest'])) {
 	$contest_id = $_GET['contest'];
-	$sql = "SELECT tournament FROM contest WHERE id=".db_quote($contest_id);
+	$sql = "SELECT tournament,
+		CONCAT(c.round, '-', c.board) AS contest_name
+		FROM contest c WHERE id=".db_quote($contest_id);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Not Found");
 	$tournament_id = $row[0];
+	$contest_name = $row[1];
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT cp.contest AS contest,
 		c.tournament AS tournament,
+		CONCAT(c.round, '-', c.board) AS contest_name,
 		player,seat,turn_order,score,placement
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
@@ -24,13 +28,14 @@ else if (isset($_GET['id'])) {
 		or die("Not Found");
 	$contest_id = $row[0];
 	$tournament_id = $row[1];
+	$contest_name = $row[2];
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-		$_REQUEST['player'] = $row[2];
-		$_REQUEST['seat'] = $row[3];
-		$_REQUEST['turn_order'] = $row[4];
-		$_REQUEST['score'] = $row[5];
-		$_REQUEST['placement'] = $row[6];
+		$_REQUEST['player'] = $row[3];
+		$_REQUEST['seat'] = $row[4];
+		$_REQUEST['turn_order'] = $row[5];
+		$_REQUEST['score'] = $row[6];
+		$_REQUEST['placement'] = $row[7];
 	}
 }
 else {
@@ -77,7 +82,7 @@ begin_page($_GET['id'] ? "Edit Contest Participant" : "New Contest Participant")
 <table>
 <tr>
 <td>Contest:</td>
-<td><?php h($contest_id)?></td>
+<td><?php h($contest_name)?></td>
 </tr>
 <tr>
 <td><label for="player_cb">Player:</label></td>
