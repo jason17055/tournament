@@ -24,3 +24,23 @@ function end_page()
 </html>
 <?php
 }
+
+function select_widget($args)
+{
+	?><select name="<?php h($args['name'])?>">
+<?php
+	foreach ($args['options'] as $k => $v) {
+		select_option($k, $v, $k == $args['value']);
+	}
+?>
+</select><?php
+}
+
+function select_option($value, $name, $is_selected)
+{
+	?><option value="<?php h($value)?>"<?php
+		echo($is_selected?' selected="selected"':'')
+		?>><?php h($name)?></option>
+
+<?php
+}

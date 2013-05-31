@@ -2,6 +2,8 @@ prefix = /srv/www/htdocs/webtd
 
 php_scripts = \
 	config.php \
+	contest.php \
+	contest_participant.php \
 	index.php \
 	player.php \
 	tournament_dashboard.php \
