@@ -3,7 +3,8 @@ prefix = /srv/www/htdocs/webtd
 php_scripts = \
 	config.php \
 	index.php \
-	includes/db.php
+	includes/db.php \
+	includes/skin.php
 
 all:
 
