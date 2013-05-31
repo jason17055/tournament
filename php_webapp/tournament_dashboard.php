@@ -63,11 +63,23 @@ $new_player_url = "player.php?tournament=".urlencode($tournament_id);
 <th>Board</th>
 <th>Game</th>
 <th>Participants</th>
-<th>Results</th>
+<th>Winner</th>
 </tr>
 <?php
-$sql = "SELECT id,round,board,game
-	FROM contest
+$sql = "SELECT id,round,board,game,
+	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
+		FROM player p
+		WHERE p.id IN (
+			SELECT player FROM contest_participant cp
+			WHERE cp.contest=c.id)) AS participants,
+	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
+		FROM player p
+		WHERE p.id IN (
+			SELECT player FROM contest_participant cp
+			WHERE cp.contest=c.id
+			AND cp.placement=1
+			)) AS winner
+	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY id";
 $query = mysqli_query($database, $sql);
@@ -78,6 +90,8 @@ while ($row = mysqli_fetch_row($query)) {
 	$round = $row[1];
 	$board = $row[2];
 	$game = $row[3];
+	$participants = $row[4];
+	$winner = $row[5];
 
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
@@ -86,11 +100,11 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="round_col"><?php h($round)?></td>
 <td class="board_col"><?php h($board)?></td>
 <td class="game_col"><?php h($game)?></td>
-<td class="participants_col"><?php h("")?></td>
-<td class="results_col"><?php h("")?></td>
+<td class="participants_col"><?php h($participants)?></td>
+<td class="winner_col"><?php h($winner)?></td>
 </tr>
 <?php
-}
+} //end foreach contest
 
 ?>
 </table>
