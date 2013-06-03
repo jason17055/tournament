@@ -10,10 +10,10 @@ if (isset($_GET['tournament'])) {
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
 		name,member_number,home_location,mail
-		FROM player WHERE id=".db_quote($_GET['id']);
+		FROM person WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
-		or die("Invalid player id");
+		or die("Invalid person id");
 	$tournament_id = $row[0];
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	else if (isset($_REQUEST['action:create_player'])) {
+	else if (isset($_REQUEST['action:create_person'])) {
 
-		$sql = "INSERT INTO player (tournament,name,member_number,home_location,mail)
+		$sql = "INSERT INTO person (tournament,name,member_number,home_location,mail)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
@@ -53,9 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	else if (isset($_REQUEST['action:update_player'])) {
+	else if (isset($_REQUEST['action:update_person'])) {
 
-		$sql = "UPDATE player
+		$sql = "UPDATE person
 			SET name=".db_quote($_REQUEST['name']).",
 			member_number=".db_quote($_REQUEST['member_number']).",
 			home_location=".db_quote($_REQUEST['home_location']).",
@@ -98,14 +98,21 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 
 <div class="form_buttons_bar">
 <?php if ($_GET['id']) { ?>
-<button type="submit" name="action:update_player">Update Player</button>
-<button type="submit" name="action:delete_player">Delete Player</button>
+<button type="submit" name="action:update_person">Update Player</button>
+<button type="submit" name="action:delete_person">Delete Player</button>
 <?php } else { ?>
-<button type="submit" name="action:create_player">Create Player</button>
+<button type="submit" name="action:create_person">Create Player</button>
 <?php } ?>
 <button type="submit" name="action:cancel">Cancel</button>
 </div>
 </form>
+
+<?php
+$scorecard_url = "player_scorecard.php?id=".urlencode($_REQUEST['id']);
+?>
+<p>
+<a href="<?php h($scorecard_url)?>">Scorecard</a>
+</p>
 
 <?php
 end_page();

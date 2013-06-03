@@ -11,7 +11,7 @@ CREATE TABLE tournament (
 	start_time DATETIME
 	);
 
-CREATE TABLE player (
+CREATE TABLE person (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,
 	name VARCHAR(200),
@@ -20,6 +20,11 @@ CREATE TABLE player (
 	mail VARCHAR(200),
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
+
+--CREATE TABLE account (
+--	id INTEGER NOT NULL PRIMARY KEY,
+--	FOREIGN KEY (account) REFERENCES person (id)
+--	);
 
 CREATE TABLE contest (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -43,7 +48,7 @@ CREATE TABLE contest_participant (
 	score VARCHAR(200),
 	placement INTEGER,
 	FOREIGN KEY (contest) REFERENCES contest (id),
-	FOREIGN KEY (player) REFERENCES player (id)
+	FOREIGN KEY (player) REFERENCES person (id)
 	);
 
 CREATE TABLE column_type (
@@ -66,7 +71,7 @@ CREATE TABLE rating_identity (
 	rating_cycle INTEGER NOT NULL,
 	rating FLOAT NOT NULL,
 	FOREIGN KEY (batch) REFERENCES rating_batch (id),
-	FOREIGN KEY (player) REFERENCES player (id)
+	FOREIGN KEY (player) REFERENCES person (id)
 	);
 
 CREATE TABLE rating_data (

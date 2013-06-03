@@ -5,7 +5,8 @@ php_scripts = \
 	contest.php \
 	contest_participant.php \
 	index.php \
-	player.php \
+	person.php \
+	player_scorecard.php \
 	run_ratings.php \
 	tournament_dashboard.php \
 	includes/db.php \

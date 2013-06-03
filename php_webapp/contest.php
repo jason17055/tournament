@@ -129,7 +129,7 @@ begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
 		p.name AS player_name,
 		score,placement
 		FROM contest_participant cp
-		JOIN player p ON p.id=cp.player
+		JOIN person p ON p.id=cp.player
 		WHERE contest=".db_quote($_GET['id'])."
 		ORDER BY turn_order,player_name,cp.id";
 	$query = mysqli_query($database, $sql);

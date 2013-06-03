@@ -91,7 +91,7 @@ begin_page($_GET['id'] ? "Edit Contest Participant" : "New Contest Participant")
 	select_option("", "--select--", !$_REQUEST['player']);
 
 	$sql = "SELECT id,name
-		FROM player
+		FROM person
 		WHERE tournament=".db_quote($tournament_id)."
 		AND (id=".db_quote($_REQUEST['player'])."
 			OR id NOT IN (SELECT player FROM contest_participant WHERE contest=".db_quote($contest_id).")

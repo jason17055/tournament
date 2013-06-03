@@ -25,18 +25,18 @@ begin_page($page_title);
 <th>Home City</th>
 </tr>
 <?php
-$sql = "SELECT id,name,mail,home_location FROM player
+$sql = "SELECT id,name,mail,home_location FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY name";
 $query = mysqli_query($database, $sql);
 while ($row = mysqli_fetch_row($query)) {
 
-	$player_id = $row[0];
+	$person_id = $row[0];
 	$name = $row[1];
 	$mail = $row[2];
 	$home_location = $row[3];
 
-	$url = "player.php?id=".urlencode($player_id);
+	$url = "person.php?id=".urlencode($person_id);
 
 	?><tr>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
@@ -44,15 +44,15 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="home_location_col"><?php h($home_location)?></td>
 </tr>
 <?php
-} //end foreach player
+} //end foreach person
 ?>
 </table>
 
 <?php
-$new_player_url = "player.php?tournament=".urlencode($tournament_id);
+$new_person_url = "person.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
-<a href="<?php h($new_player_url)?>">New Player</a>
+<a href="<?php h($new_person_url)?>">New Player</a>
 </p>
 
 <table border="1">
@@ -68,12 +68,12 @@ $sql = "SELECT id,
 	CONCAT(round,'-',board) AS contest_name,
 	game,
 	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
-		FROM player p
+		FROM person p
 		WHERE p.id IN (
 			SELECT player FROM contest_participant cp
 			WHERE cp.contest=c.id)) AS participants,
 	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
-		FROM player p
+		FROM person p
 		WHERE p.id IN (
 			SELECT player FROM contest_participant cp
 			WHERE cp.contest=c.id
