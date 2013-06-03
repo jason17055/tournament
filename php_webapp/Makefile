@@ -11,6 +11,7 @@ php_scripts = \
 	player_scorecard.php \
 	run_ratings.php \
 	tournament_dashboard.php \
+	includes/auth.php \
 	includes/db.php \
 	includes/ratings_functions.php \
 	includes/skin.php
