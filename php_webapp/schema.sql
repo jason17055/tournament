@@ -21,10 +21,11 @@ CREATE TABLE person (
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
---CREATE TABLE account (
---	id INTEGER NOT NULL PRIMARY KEY,
---	FOREIGN KEY (account) REFERENCES person (id)
---	);
+CREATE TABLE account (
+	id INTEGER NOT NULL PRIMARY KEY,
+	amazon_user_id VARCHAR(200),
+	FOREIGN KEY (id) REFERENCES person (id)
+	);
 
 CREATE TABLE contest (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
