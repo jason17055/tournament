@@ -9,7 +9,7 @@ if (isset($_GET['tournament'])) {
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
-		name,member_number,home_location
+		name,member_number,home_location,mail
 		FROM player WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -20,6 +20,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['name'] = $row[1];
 		$_REQUEST['member_number'] = $row[2];
 		$_REQUEST['home_location'] = $row[3];
+		$_REQUEST['mail'] = $row[4];
 	}
 }
 else {
@@ -37,15 +38,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	else if (isset($_REQUEST['action:create_player'])) {
 
-		$sql = "INSERT INTO player (tournament,name,member_number,home_location)
+		$sql = "INSERT INTO player (tournament,name,member_number,home_location,mail)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['member_number']).",
-			".db_quote($_REQUEST['home_location'])."
+			".db_quote($_REQUEST['home_location']).",
+			".db_quote($_REQUEST['mail'])."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
+
+		header("Location: $next_url");
+		exit();
+	}
+
+	else if (isset($_REQUEST['action:update_player'])) {
+
+		$sql = "UPDATE player
+			SET name=".db_quote($_REQUEST['name']).",
+			member_number=".db_quote($_REQUEST['member_number']).",
+			home_location=".db_quote($_REQUEST['home_location']).",
+			mail=".db_quote($_REQUEST['mail'])."
+			WHERE id=".db_quote($_REQUEST['id']);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
 
 		header("Location: $next_url");
 		exit();
@@ -72,6 +89,10 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 <tr>
 <td><label for="home_location_entry">Home Location:</label></td>
 <td><input type="text" id="home_location_entry" name="home_location" value="<?php h($_REQUEST['home_location'])?>"></td>
+</tr>
+<tr>
+<td><label for="mail_entry">Email Address:</label></td>
+<td><input type="text" id="mail_entry" name="mail" value="<?php h($_REQUEST['mail'])?>"></td>
 </tr>
 </table>
 

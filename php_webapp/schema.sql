@@ -17,6 +17,7 @@ CREATE TABLE player (
 	name VARCHAR(200),
 	member_number VARCHAR(200),
 	home_location VARCHAR(200),
+	mail VARCHAR(200),
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 

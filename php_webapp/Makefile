@@ -1,7 +1,6 @@
 prefix = /srv/www/htdocs/webtd
 
 php_scripts = \
-	as_dominion_results.php \
 	config.php \
 	contest.php \
 	contest_participant.php \
