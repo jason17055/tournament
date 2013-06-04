@@ -19,7 +19,7 @@ function do_ratings($tournament_id)
 			p.id,
 			0,
 			0
-			FROM player p
+			FROM person p
 			WHERE tournament=".db_quote($tournament_id);
 	mysqli_query($database, $sql)
 		or die("SQL error 402: ".db_error($database));
@@ -29,7 +29,7 @@ function do_ratings($tournament_id)
 			p.id,
 			1,
 			0
-			FROM player p
+			FROM person p
 			WHERE tournament=".db_quote($tournament_id);
 	mysqli_query($database, $sql)
 		or die("SQL error 403: ".db_error($database));
@@ -39,7 +39,7 @@ function do_ratings($tournament_id)
 	$sql = "SELECT p.id,
 		a.id,
 		b.id
-		FROM player p
+		FROM person p
 		JOIN rating_identity a
 			ON a.player=p.id
 			AND a.rating_cycle=0
@@ -237,7 +237,7 @@ function do_ratings_pass($batch_num)
 
 	$sql = "SELECT r.id,p.name,r.rating_cycle,r.rating
 		FROM rating_identity r
-		JOIN player p
+		JOIN person p
 			ON p.id=r.player
 		WHERE batch=".db_quote($batch_num)."
 		ORDER BY r.rating_cycle DESC, r.rating DESC, p.name";
