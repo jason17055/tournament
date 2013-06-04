@@ -3,6 +3,7 @@
 require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
+require_once('includes/auth.php');
 
 if (isset($_GET['contest'])) {
 	$contest_id = $_GET['contest'];
@@ -51,7 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	else if (isset($_REQUEST['action:create_contest_participant'])) {
+	if (!is_director($tournament_id)) {
+		die("Not authorized.");
+	}
+
+	if (isset($_REQUEST['action:create_contest_participant'])) {
 
 		$sql = "INSERT INTO contest_participant (contest,player,seat,turn_order,score,placement)
 			VALUES (
