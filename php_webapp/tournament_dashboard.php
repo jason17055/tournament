@@ -121,9 +121,11 @@ $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
 
 
 if (is_director($tournament_id)) {
+$edit_tourney_url = "tournament.php?id=".urlencode($tournament_id);
 $run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
+<a href="<?php h($edit_tourney_url)?>">Tournament Settings</a> |
 <a href="<?php h($run_ratings_url)?>">Run Ratings</a>
 </p>
 

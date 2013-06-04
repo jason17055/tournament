@@ -9,6 +9,7 @@ php_scripts = \
 	person.php \
 	player_scorecard.php \
 	run_ratings.php \
+	tournament.php \
 	tournament_dashboard.php \
 	includes/auth.php \
 	includes/db.php \
