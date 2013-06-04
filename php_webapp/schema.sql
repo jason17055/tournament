@@ -16,7 +16,8 @@ CREATE TABLE tournament (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	name VARCHAR(200) NOT NULL,
 	location VARCHAR(200),
-	start_time DATETIME
+	start_time DATETIME,
+	multi_game CHAR(1) NOT NULL DEFAULT 'N'
 	);
 
 CREATE TABLE tournament_role (

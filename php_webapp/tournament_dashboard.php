@@ -121,7 +121,7 @@ $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
 
 
 if (is_director($tournament_id)) {
-$edit_tourney_url = "tournament.php?id=".urlencode($tournament_id);
+$edit_tourney_url = "tournament.php?id=".urlencode($tournament_id).'&next_url='.urlencode($_SERVER['REQUEST_URI']);
 $run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>

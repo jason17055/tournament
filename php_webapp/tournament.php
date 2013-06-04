@@ -6,19 +6,21 @@ require_once('includes/skin.php');
 require_once('includes/auth.php');
 
 if (isset($_GET['id'])) {
+	$tournament_id = $_GET['id'];
+
 	$sql = "SELECT
-		name,location,start_time
+		name,location,start_time,multi_game
 		FROM tournament
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Not Found");
-	$tournament_id = $row[0];
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['name'] = $row[0];
 		$_REQUEST['location'] = $row[1];
 		$_REQUEST['start_time'] = $row[2];
+		$_REQUEST['multi_game'] = ($row[3]=='Y')?'1':null;
 	}
 }
 else {
@@ -43,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		SET name=".db_quote($_REQUEST['name']).",
 		location=".db_quote($_REQUEST['location']).",
 		start_time=".db_quote($_REQUEST['start_time']).",
+		multi_game=".db_quote($_REQUEST['multi_game']?'Y':'N')."
 		WHERE id=".db_quote($tournament_id);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -72,6 +75,12 @@ begin_page("Edit Tournament");
 <tr>
 <td><label for="start_time_entry">Start Time:</label></td>
 <td><input type="text" id="start_time_entry" name="start_time" value="<?php h($_REQUEST['start_time'])?>"></td>
+</tr>
+<tr>
+<td valign="top">Options:</td>
+<td>
+<div><label><input type="checkbox" name="multi_game"<?php echo($_REQUEST['multi_game']?' checked="checked"':'')?>>Multi Game Tournament</label></div>
+</td>
 </tr>
 </table>
 
