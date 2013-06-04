@@ -76,7 +76,8 @@ INSERT INTO column_type (name, type_data) VALUES (
 	);
 
 CREATE TABLE rating_batch (
-	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	created DATETIME NOT NULL
 	);
 
 CREATE TABLE rating_identity (
