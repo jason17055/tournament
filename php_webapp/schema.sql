@@ -4,11 +4,28 @@ CREATE TABLE master (
 
 INSERT INTO master (version) VALUES (1);
 
+CREATE TABLE account (
+	username VARCHAR(20) NOT NULL PRIMARY KEY,
+	enabled CHAR(1) NOT NULL DEFAULT 'Y',
+	is_sysadmin CHAR(1) NOT NULL DEFAULT 'N',
+	created DATETIME NOT NULL,
+	last_login DATETIME
+	);
+
 CREATE TABLE tournament (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	name VARCHAR(200) NOT NULL,
 	location VARCHAR(200),
 	start_time DATETIME
+	);
+
+CREATE TABLE tournament_role (
+	account VARCHAR(20) NOT NULL,
+	tournament INTEGER NOT NULL,
+	is_director CHAR(1) NOT NULL DEFAULT 'N',
+	PRIMARY KEY (account, tournament),
+	FOREIGN KEY (tournament) REFERENCES tournament (id),
+	FOREIGN KEY (account) REFERENCES account (username)
 	);
 
 CREATE TABLE person (
@@ -19,12 +36,6 @@ CREATE TABLE person (
 	home_location VARCHAR(200),
 	mail VARCHAR(200),
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
-	);
-
-CREATE TABLE account (
-	id INTEGER NOT NULL PRIMARY KEY,
-	amazon_user_id VARCHAR(200),
-	FOREIGN KEY (id) REFERENCES person (id)
 	);
 
 CREATE TABLE contest (
