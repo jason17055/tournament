@@ -7,23 +7,36 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
+	$sql = "SELECT multi_game FROM tournament
+		WHERE id=".db_quote($tournament_id);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query)
+		or die("Not Found");
+	$tournament_info = array(
+		multi_game => $row[0]
+		);
 }
 else if (isset($_GET['id'])) {
-	$sql = "SELECT tournament,
+	$sql = "SELECT tournament,multi_game,
 		game,board,status,started,finished,round
-		FROM contest WHERE id=".db_quote($_GET['id']);
+		FROM contest c
+		JOIN tournament t ON t.id=c.tournament
+		WHERE c.id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Invalid contest id");
 	$tournament_id = $row[0];
+	$tournament_info = array(
+		multi_game => $row[1]
+		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-		$_REQUEST['game'] = $row[1];
-		$_REQUEST['board'] = $row[2];
-		$_REQUEST['status'] = $row[3];
-		$_REQUEST['started'] = $row[4];
-		$_REQUEST['finished'] = $row[5];
-		$_REQUEST['round'] = $row[6];
+		$_REQUEST['game'] = $row[2];
+		$_REQUEST['board'] = $row[3];
+		$_REQUEST['status'] = $row[4];
+		$_REQUEST['started'] = $row[5];
+		$_REQUEST['finished'] = $row[6];
+		$_REQUEST['round'] = $row[7];
 	}
 }
 else {
@@ -67,11 +80,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 
 	else if (isset($_REQUEST['action:update_contest'])) {
+
+		$updates = array();
+		if ($tournament_info['multi_game']=='Y') {
+		$updates[] = "game=".db_quote($_REQUEST['game']);
+		}
+		$updates[] = "board=".db_quote($_REQUEST['board']);
+		$updates[] = "status=".db_quote($_REQUEST['status']);
+		$updates[] = "round=".db_quote($_REQUEST['round']);
+
 		$sql = "UPDATE contest
-		SET game=".db_quote($_REQUEST['game']).",
-		board=".db_quote($_REQUEST['board']).",
-		status=".db_quote($_REQUEST['status']).",
-		round=".db_quote($_REQUEST['round'])."
+		SET ".implode(',',$updates)."
 		WHERE id=".db_quote($_GET['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -98,10 +117,12 @@ begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
 <td><label for="board_entry">Board/Table No.:</label></td>
 <td><input type="text" id="board_entry" name="board" value="<?php h($_REQUEST['board'])?>"></td>
 </tr>
+<?php if ($tournament_info['multi_game']=='Y'){?>
 <tr>
 <td><label for="game_entry">Game:</label></td>
 <td><input type="text" id="game_entry" name="game" value="<?php h($_REQUEST['game'])?>"></td>
 </tr>
+<?php }//endif multi_game tournament?>
 <tr>
 <td><label for="status_cb">Status:</label></td>
 <td><?php select_widget(array(

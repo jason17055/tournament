@@ -5,12 +5,13 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT name FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,multi_game FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
 	id => $tournament_id,
-	name => $row[0]
+	name => $row[0],
+	multi_game => $row[1]
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";
@@ -61,7 +62,9 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <caption>Contests</caption>
 <tr>
 <th>Round-Board</th>
+<?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
+<?php } ?>
 <th>Participants</th>
 <th>Winner</th>
 </tr>
@@ -98,7 +101,9 @@ while ($row = mysqli_fetch_row($query)) {
 	?>
 <tr>
 <td class="id_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
+<?php } ?>
 <td class="participants_col"><?php h($participants)?></td>
 <td class="winner_col"><?php h($winner)?></td>
 </tr>
