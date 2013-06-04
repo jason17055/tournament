@@ -115,12 +115,12 @@ begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <table>
 <tr>
-<td><label for="round_entry">Round:</label></td>
-<td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
-</tr>
-<tr>
 <td><label for="rating_cycle_entry">Rating Cycle:</label></td>
 <td><input type="text" id="rating_cycle_entry" name="rating_cycle" value="<?php h($_REQUEST['rating_cycle'])?>"></td>
+</tr>
+<tr>
+<td><label for="round_entry">Round:</label></td>
+<td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
 </tr>
 <tr>
 <td><label for="board_entry">Board/Table No.:</label></td>
