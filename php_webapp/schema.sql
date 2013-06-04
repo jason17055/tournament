@@ -50,6 +50,7 @@ CREATE TABLE contest (
 	finished DATETIME,
 	round VARCHAR(200),
 	rating_cycle INTEGER,
+	notes TEXT,
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
