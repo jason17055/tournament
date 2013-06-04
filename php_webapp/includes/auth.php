@@ -63,5 +63,7 @@ function is_director($tournament_id)
 		WHERE a.username=".db_quote($_SESSION['username']);
 	$query = mysqli_query($database, $sql)
 		or die("SQL error: ".db_error($database));
-	return ($row[0]=='Y' || $row[1] == 'Y');
+	$row = mysqli_fetch_row($query);
+
+	return $row && ($row[0]=='Y' || $row[1] == 'Y');
 }
