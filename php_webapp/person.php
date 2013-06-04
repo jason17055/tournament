@@ -10,7 +10,7 @@ if (isset($_GET['tournament'])) {
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
-		name,member_number,home_location,mail
+		name,member_number,home_location,mail,status
 		FROM person WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -22,6 +22,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['member_number'] = $row[2];
 		$_REQUEST['home_location'] = $row[3];
 		$_REQUEST['mail'] = $row[4];
+		$_REQUEST['status'] = $row[5];
 	}
 }
 else {
@@ -43,13 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_person'])) {
 
-		$sql = "INSERT INTO person (tournament,name,member_number,home_location,mail)
+		$sql = "INSERT INTO person (tournament,name,member_number,home_location,mail,status)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['member_number']).",
 			".db_quote($_REQUEST['home_location']).",
-			".db_quote($_REQUEST['mail'])."
+			".db_quote($_REQUEST['mail']).",
+			".db_quote($_REQUEST['status'])."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
@@ -64,7 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			SET name=".db_quote($_REQUEST['name']).",
 			member_number=".db_quote($_REQUEST['member_number']).",
 			home_location=".db_quote($_REQUEST['home_location']).",
-			mail=".db_quote($_REQUEST['mail'])."
+			mail=".db_quote($_REQUEST['mail']).",
+			status=".db_quote($_REQUEST['status'])."
 			WHERE id=".db_quote($_REQUEST['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -98,6 +101,18 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 <tr>
 <td><label for="mail_entry">Email Address:</label></td>
 <td><input type="text" id="mail_entry" name="mail" value="<?php h($_REQUEST['mail'])?>"></td>
+</tr>
+<tr>
+<td><label for="status_cb">Status:</label></td>
+<td><?php select_widget(array(
+	name => 'status',
+	value => $_REQUEST['status'],
+	options => array(""=>"--select--",
+		"ready"=>"Ready",
+		"not_ready"=>"Not Ready",
+		"absent" => "Absent"
+		)
+	))?></td>
 </tr>
 </table>
 

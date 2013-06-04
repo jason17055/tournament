@@ -23,10 +23,10 @@ begin_page($page_title);
 <tr>
 <th>Player Name</th>
 <th>Email Address</th>
-<th>Home City</th>
+<th>Status</th>
 </tr>
 <?php
-$sql = "SELECT id,name,mail,home_location FROM person
+$sql = "SELECT id,name,mail,status FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY name";
 $query = mysqli_query($database, $sql);
@@ -35,14 +35,14 @@ while ($row = mysqli_fetch_row($query)) {
 	$person_id = $row[0];
 	$name = $row[1];
 	$mail = $row[2];
-	$home_location = $row[3];
+	$status = $row[3];
 
 	$url = "person.php?id=".urlencode($person_id);
 
 	?><tr>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
 <td class="mail_col"><?php h($mail)?></td>
-<td class="home_location_col"><?php h($home_location)?></td>
+<td class="status_col"><?php h($status)?></td>
 </tr>
 <?php
 } //end foreach person
