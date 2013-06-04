@@ -62,6 +62,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <caption>Contests</caption>
 <tr>
 <th>Round-Board</th>
+<th>Rating Cycle</th>
 <?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
 <?php } ?>
@@ -71,6 +72,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <?php
 $sql = "SELECT id,
 	CONCAT(round,'-',board) AS contest_name,
+	rating_cycle,
 	game,
 	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
 		FROM person p
@@ -93,14 +95,16 @@ while ($row = mysqli_fetch_row($query)) {
 
 	$contest_id = $row[0];
 	$contest_name = $row[1];
-	$game = $row[2];
-	$participants = $row[3];
-	$winner = $row[4];
+	$rating_cycle = $row[2];
+	$game = $row[3];
+	$participants = $row[4];
+	$winner = $row[5];
 
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
 <td class="id_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<td class="rating_cycle_col"><?php h($rating_cycle)?></td>
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>

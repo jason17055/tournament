@@ -17,7 +17,8 @@ CREATE TABLE tournament (
 	name VARCHAR(200) NOT NULL,
 	location VARCHAR(200),
 	start_time DATETIME,
-	multi_game CHAR(1) NOT NULL DEFAULT 'N'
+	multi_game CHAR(1) NOT NULL DEFAULT 'N',
+	current_rating_cycle INTEGER
 	);
 
 CREATE TABLE tournament_role (
@@ -48,6 +49,7 @@ CREATE TABLE contest (
 	started DATETIME,
 	finished DATETIME,
 	round VARCHAR(200),
+	rating_cycle INTEGER,
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 

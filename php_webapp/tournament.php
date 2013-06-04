@@ -9,7 +9,7 @@ if (isset($_GET['id'])) {
 	$tournament_id = $_GET['id'];
 
 	$sql = "SELECT
-		name,location,start_time,multi_game
+		name,location,start_time,multi_game,current_rating_cycle
 		FROM tournament
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
@@ -21,6 +21,7 @@ if (isset($_GET['id'])) {
 		$_REQUEST['location'] = $row[1];
 		$_REQUEST['start_time'] = $row[2];
 		$_REQUEST['multi_game'] = ($row[3]=='Y')?'1':null;
+		$_REQUEST['current_rating_cycle'] = $row[4];
 	}
 }
 else {
@@ -45,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		SET name=".db_quote($_REQUEST['name']).",
 		location=".db_quote($_REQUEST['location']).",
 		start_time=".db_quote($_REQUEST['start_time']).",
-		multi_game=".db_quote($_REQUEST['multi_game']?'Y':'N')."
+		multi_game=".db_quote($_REQUEST['multi_game']?'Y':'N').",
+		current_rating_cycle=".db_quote($_REQUEST['current_rating_cycle'])."
 		WHERE id=".db_quote($tournament_id);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -81,6 +83,10 @@ begin_page("Edit Tournament");
 <td>
 <div><label><input type="checkbox" name="multi_game"<?php echo($_REQUEST['multi_game']?' checked="checked"':'')?>>Multi Game Tournament</label></div>
 </td>
+</tr>
+<tr>
+<td valign="top"><label for="current_rating_cycle_entry">Current Rating Cycle:</label></td>
+<td><input type="text" id="current_rating_cycle_entry" name="current_rating_cycle" value="<?php h($_REQUEST['current_rating_cycle'])?>"></td>
 </tr>
 </table>
 

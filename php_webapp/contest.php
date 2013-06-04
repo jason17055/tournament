@@ -7,18 +7,20 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
-	$sql = "SELECT multi_game FROM tournament
+	$sql = "SELECT multi_game,current_rating_cycle FROM tournament
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Not Found");
 	$tournament_info = array(
-		multi_game => $row[0]
+		multi_game => $row[0],
+		current_rating_cycle => $row[1]
 		);
+	$_REQUEST['rating_cycle'] = $tournament_info['current_rating_cycle'];
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,multi_game,
-		game,board,status,started,finished,round
+		game,board,status,started,finished,round,rating_cycle
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
@@ -37,6 +39,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['started'] = $row[5];
 		$_REQUEST['finished'] = $row[6];
 		$_REQUEST['round'] = $row[7];
+		$_REQUEST['rating_cycle'] = $row[8];
 	}
 }
 else {
@@ -58,13 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_contest'])) {
 
-		$sql = "INSERT INTO contest (tournament,game,board,status,round)
+		$sql = "INSERT INTO contest (tournament,game,board,status,round,rating_cycle)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['game']).",
 			".db_quote($_REQUEST['board']).",
 			".db_quote($_REQUEST['status']).",
-			".db_quote($_REQUEST['round'])."
+			".db_quote($_REQUEST['round']).",
+			".db_quote($_REQUEST['rating_cycle'])."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
@@ -88,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		$updates[] = "round=".db_quote($_REQUEST['round']);
+		$updates[] = "rating_cycle=".db_quote($_REQUEST['rating_cycle']);
 
 		$sql = "UPDATE contest
 		SET ".implode(',',$updates)."
@@ -112,6 +117,10 @@ begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
 <tr>
 <td><label for="round_entry">Round:</label></td>
 <td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
+</tr>
+<tr>
+<td><label for="rating_cycle_entry">Rating Cycle:</label></td>
+<td><input type="text" id="rating_cycle_entry" name="rating_cycle" value="<?php h($_REQUEST['rating_cycle'])?>"></td>
 </tr>
 <tr>
 <td><label for="board_entry">Board/Table No.:</label></td>
