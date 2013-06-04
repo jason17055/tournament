@@ -155,10 +155,12 @@ begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
 	?>
 </table>
 <?php
+	if (is_director($tournament_id)) {
 	$add_participant_url = "contest_participant.php?contest=".urlencode($_GET['id'])
 		."&next_url=".urlencode($_SERVER['REQUEST_URI']);
 	?>
 <div><a href="<?php h($add_participant_url)?>">Add Participant</a></div>
+	<?php } //endif is_director ?>
 </td>
 <?php
 	} // endif contest id known
