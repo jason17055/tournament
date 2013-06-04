@@ -13,6 +13,7 @@ function begin_page($page_title)
 <html>
 <head>
 <title><?php h($page_title)?></title>
+<link type="text/css" rel="stylesheet" href="webtd.css">
 </head>
 <body>
 <h1><?php h($page_title)?></h1>

@@ -1,5 +1,8 @@
 prefix = /srv/www/htdocs/webtd
 
+data_files = \
+	webtd.css
+
 php_scripts = \
 	config.php \
 	contest.php \
@@ -20,6 +23,6 @@ all:
 
 install:
 	mkdir -p "$(prefix)/includes"
-	for f in $(php_scripts); do \
+	for f in $(php_scripts) $(data_files); do \
 		cp "$$f" "$(prefix)/$$f"; \
 	done

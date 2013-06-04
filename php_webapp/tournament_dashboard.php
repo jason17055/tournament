@@ -103,7 +103,7 @@ while ($row = mysqli_fetch_row($query)) {
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
-<td class="id_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <td class="rating_cycle_col"><?php h($rating_cycle)?></td>
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
