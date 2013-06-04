@@ -20,7 +20,9 @@ function begin_page($page_title)
 if ($_SESSION['username']) { ?>
 <p>You are logged in as <b><?php h($_SESSION['username'])?></b>.
 </p>
-<?php }
+<?php } else { ?>
+<p><a href="<?php h('login.php?next_url='.urlencode($_SERVER['REQUEST_URI']))?>">Login</a></p>
+<?php } //end if not logged in
 }
 
 function end_page()

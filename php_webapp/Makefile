@@ -4,7 +4,6 @@ php_scripts = \
 	config.php \
 	contest.php \
 	contest_participant.php \
-	handle_login.php \
 	index.php \
 	login.php \
 	person.php \
