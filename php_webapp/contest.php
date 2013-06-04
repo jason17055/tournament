@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
-begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
+begin_page($_GET['id'] ? "Edit Game" : "New Game");
 
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
@@ -206,10 +206,10 @@ begin_page($_GET['id'] ? "Edit Contest" : "New Contest");
 
 <div class="form_buttons_bar">
 <?php if ($_GET['id']) { ?>
-<button type="submit" name="action:update_contest">Update Contest</button>
-<button type="submit" name="action:delete_contest">Delete Contest</button>
+<button type="submit" name="action:update_contest">Update Game</button>
+<button type="submit" name="action:delete_contest">Delete Game</button>
 <?php } else { ?>
-<button type="submit" name="action:create_contest">Create Contest</button>
+<button type="submit" name="action:create_contest">Create Game</button>
 <?php } ?>
 <button type="submit" name="action:cancel">Cancel</button>
 </div>

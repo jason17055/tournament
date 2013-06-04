@@ -59,7 +59,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <?php } ?>
 
 <table border="1">
-<caption>Contests</caption>
+<caption>Games</caption>
 <tr>
 <th>Rating Cycle</th>
 <th>Round-Board</th>
@@ -122,7 +122,7 @@ if (is_director($tournament_id)) {
 $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
-<a href="<?php h($new_contest_url)?>">New Contest</a>
+<a href="<?php h($new_contest_url)?>">New Game</a>
 </p>
 
 <?php
