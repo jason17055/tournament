@@ -76,4 +76,12 @@ while ($row = mysqli_fetch_row($query)) {
 ?>
 </table>
 <?php
+
+$go_back_url = 'person.php?id='.urlencode($_GET['id']);
+?>
+<p>
+<a href="<?php h($go_back_url)?>">Go Back</a>
+</p>
+
+<?php
 end_page();
