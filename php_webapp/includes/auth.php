@@ -50,3 +50,18 @@ function add_login_attributes()
 			or die("SQL error: ".db_error($database));
 	}
 }
+
+function is_director($tournament_id)
+{
+	global $database;
+
+	$sql = "SELECT is_director,is_sysadmin
+		FROM account a
+		LEFT JOIN tournament_role r
+			ON r.account=a.username
+			AND r.tournament=".db_quote($tournament_id)."
+		WHERE a.username=".db_quote($_SESSION['username']);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	return ($row[0]=='Y' || $row[1] == 'Y');
+}

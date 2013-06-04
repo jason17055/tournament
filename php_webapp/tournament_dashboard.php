@@ -49,11 +49,13 @@ while ($row = mysqli_fetch_row($query)) {
 </table>
 
 <?php
+if (is_director($tournament_id)) {
 $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($new_person_url)?>">New Player</a>
 </p>
+<?php } ?>
 
 <table border="1">
 <caption>Contests</caption>
@@ -107,6 +109,7 @@ while ($row = mysqli_fetch_row($query)) {
 </table>
 
 <?php
+if (is_director($tournament_id)) {
 $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
@@ -114,6 +117,10 @@ $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
 </p>
 
 <?php
+}//endif director
+
+
+if (is_director($tournament_id)) {
 $run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
@@ -121,4 +128,5 @@ $run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
 </p>
 
 <?php
+}//endif director
 end_page();
