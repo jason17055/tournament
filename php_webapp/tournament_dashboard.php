@@ -61,8 +61,8 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <table border="1">
 <caption>Contests</caption>
 <tr>
-<th>Round-Board</th>
 <th>Rating Cycle</th>
+<th>Round-Board</th>
 <?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
 <?php } ?>
@@ -88,7 +88,7 @@ $sql = "SELECT id,
 			)) AS winner
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
-	ORDER BY id";
+	ORDER BY rating_cycle,id";
 $query = mysqli_query($database, $sql);
 
 while ($row = mysqli_fetch_row($query)) {
@@ -103,8 +103,8 @@ while ($row = mysqli_fetch_row($query)) {
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
-<td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <td class="rating_cycle_col"><?php h($rating_cycle)?></td>
+<td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
