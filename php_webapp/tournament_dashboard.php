@@ -42,7 +42,13 @@ while ($row = mysqli_fetch_row($query)) {
 	?><tr>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
 <td class="mail_col"><?php h($mail)?></td>
-<td class="status_col"><?php h($status)?></td>
+<td class="status_col"><?php
+	if ($status == 'ready') {
+		?><img src="images/plus.png" width="14" height="14" alt=""><?php
+	} else if ($status == 'absent') {
+		?><img src="images/minus.png" width="14" height="14" alt=""><?php
+	}
+	h($status)?></td>
 </tr>
 <?php
 } //end foreach person

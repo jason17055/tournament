@@ -1,7 +1,9 @@
 prefix = /srv/www/htdocs/webtd
 
 data_files = \
-	webtd.css
+	webtd.css \
+	images/plus.png \
+	images/minus.png
 
 php_scripts = \
 	config.php \
@@ -22,6 +24,7 @@ php_scripts = \
 all:
 
 install:
+	mkdir -p "$(prefix)/images"
 	mkdir -p "$(prefix)/includes"
 	for f in $(php_scripts) $(data_files); do \
 		cp "$$f" "$(prefix)/$$f"; \
