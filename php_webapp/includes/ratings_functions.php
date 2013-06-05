@@ -10,48 +10,62 @@ function do_ratings($tournament_id)
 		or die("SQL error 401: ".db_error($database));
 	$batch_num = mysqli_insert_id($database);
 
-	// each player has n+1 ratings...
-	//   (n is number of ratings cycles)
-	// 0th rating is the pre-tournament rating (fixed at 0)
-	// ith rating is rating after cycle #i (determined by this algorithm)
-
-	for ($i = 0; $i <= 2; $i++)
-	{
+	// each player has a "prior" rating (rating_cycle=0),
+	// fixed at 0
 	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
 		SELECT ".db_quote($batch_num).",
 			p.id,
-			".db_quote($i).",
+			0,
 			0
 			FROM person p
 			WHERE tournament=".db_quote($tournament_id);
 	mysqli_query($database, $sql)
 		or die("SQL error 402: ".db_error($database));
-	}
+
+	// and each player has a "post" rating for EACH session
+	// that they participated in...
+	// the "post" ratings are determined by this algorithm
+
+	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
+		SELECT DISTINCT ".db_quote($batch_num).",
+			p.id,
+			c.session_num,
+			0
+			FROM person p
+			CROSS JOIN contest c ON c.tournament=p.tournament
+			AND c.id IN (
+				SELECT contest FROM contest_participant
+				WHERE player=p.id
+				)
+			WHERE p.tournament=".db_quote($tournament_id);
+	mysqli_query($database, $sql)
+		or die("SQL error 402: ".db_error($database));
 
 	// generate dummy games to connect each player's rating identity
-	// to the previous cycle's rating identity of that player
+	// to that player's rating identity of the previous session
 
-	$sql = "SELECT p.id,
-		a.id,
-		b.id
+	$sql = "SELECT p.id AS person_id,
+		a.id AS post_rating_id,
+		(SELECT b.id FROM rating_identity b
+			WHERE b.player=p.id
+			AND b.rating_cycle<a.rating_cycle
+			AND b.batch=a.batch
+			ORDER BY b.rating_cycle DESC LIMIT 1) AS pre_rating_id
 		FROM person p
 		JOIN rating_identity a
 			ON a.player=p.id
 			AND a.batch=".db_quote($batch_num)."
-		JOIN rating_identity b
-			ON b.player=p.id
-			AND b.rating_cycle=a.rating_cycle+1
-			AND b.batch=".db_quote($batch_num)."
-		WHERE p.tournament=".db_quote($tournament_id);
+		WHERE p.tournament=".db_quote($tournament_id)."
+		AND a.rating_cycle<>0";
 
 	$query = mysqli_query($database, $sql);
 	while ($row = mysqli_fetch_row($query)) {
 		
-		$pre_tourn_id = $row[1];
-		$post_tourn_id = $row[2];
+		$post_tourn_id = $row[1];
+		$pre_tourn_id = $row[2];
 
-		$weight = 9; // equivalent to nine one-vs-one games
-		$perf = 5.0/9.0; //winning 5 of them.
+		$weight = 19; // equivalent to nineteen one-vs-one games
+		$perf = 0.51; //and winning a 51% rate.
 
 		$sql = "INSERT INTO rating_data (batch,player_a,player_b,actual_performance,weight)
 			VALUES (
@@ -218,6 +232,7 @@ function do_ratings_pass($batch_num)
 <body>
 <p>Batch number: <?php h($batch_num)?></p>
 <p>Current error: <?php h($sum_errors)?></p>
+<p>Current k value: <?php h($k)?></p>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <input type="hidden" name="batch" value="<?php h($batch_num)?>">
 <button type="submit" name="action:run_ratings">Another Pass</button>
