@@ -10,31 +10,26 @@ function do_ratings($tournament_id)
 		or die("SQL error 401: ".db_error($database));
 	$batch_num = mysqli_insert_id($database);
 
-	// each player has two ratings...
-	// a pre-tournament rating (fixed at 0)
-	// and a post-tournament rating (which this algorithm will determine)
+	// each player has n+1 ratings...
+	//   (n is number of ratings cycles)
+	// 0th rating is the pre-tournament rating (fixed at 0)
+	// ith rating is rating after cycle #i (determined by this algorithm)
 
+	for ($i = 0; $i <= 2; $i++)
+	{
 	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
 		SELECT ".db_quote($batch_num).",
 			p.id,
-			0,
+			".db_quote($i).",
 			0
 			FROM person p
 			WHERE tournament=".db_quote($tournament_id);
 	mysqli_query($database, $sql)
 		or die("SQL error 402: ".db_error($database));
+	}
 
-	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
-		SELECT ".db_quote($batch_num).",
-			p.id,
-			1,
-			0
-			FROM person p
-			WHERE tournament=".db_quote($tournament_id);
-	mysqli_query($database, $sql)
-		or die("SQL error 403: ".db_error($database));
-
-	// generate dummy games to connect each player's two identities
+	// generate dummy games to connect each player's rating identity
+	// to the previous cycle's rating identity of that player
 
 	$sql = "SELECT p.id,
 		a.id,
@@ -42,11 +37,10 @@ function do_ratings($tournament_id)
 		FROM person p
 		JOIN rating_identity a
 			ON a.player=p.id
-			AND a.rating_cycle=0
 			AND a.batch=".db_quote($batch_num)."
 		JOIN rating_identity b
 			ON b.player=p.id
-			AND b.rating_cycle=1
+			AND b.rating_cycle=a.rating_cycle+1
 			AND b.batch=".db_quote($batch_num)."
 		WHERE p.tournament=".db_quote($tournament_id);
 
@@ -84,14 +78,17 @@ function do_ratings($tournament_id)
 
 	// now record the actual game data
 
-	$sql = "SELECT id FROM contest
+	$sql = "SELECT id,rating_cycle FROM contest
 		WHERE tournament=".db_quote($tournament_id)."
-		AND status='completed'";
+		AND status='completed'
+		AND rating_cycle IS NOT NULL
+		AND rating_cycle >= 1";
 	$c_query = mysqli_query($database, $sql)
 		or die("SQL error 406: ".db_error($database));
 
 	while ($c_row = mysqli_fetch_row($c_query)) {
 		$contest_id = $c_row[0];
+		$rating_cycle = $c_row[1];
 
 		$sql = "SELECT AVG(score),COUNT(*)
 			FROM contest_participant
@@ -133,11 +130,11 @@ function do_ratings($tournament_id)
 				(SELECT id FROM rating_identity
 					WHERE batch=".db_quote($batch_num)."
 					AND player=".db_quote($a_pid)."
-					AND rating_cycle=1),
+					AND rating_cycle=".db_quote($rating_cycle)."),
 				(SELECT id FROM rating_identity
 					WHERE batch=".db_quote($batch_num)."
 					AND player=".db_quote($b_pid)."
-					AND rating_cycle=1),
+					AND rating_cycle=".db_quote($rating_cycle)."),
 				".db_quote($perf).",
 				".db_quote($weight)."
 				FROM dual";
