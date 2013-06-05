@@ -18,6 +18,7 @@ CREATE TABLE tournament (
 	location VARCHAR(200),
 	start_time DATETIME,
 	multi_game CHAR(1) NOT NULL DEFAULT 'N',
+	multi_session CHAR(1) NOT NULL DEFAULT 'N',
 	current_rating_cycle INTEGER
 	);
 
