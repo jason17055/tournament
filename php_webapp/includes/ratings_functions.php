@@ -226,7 +226,7 @@ function do_ratings_pass($batch_num)
 
 <table border="1">
 <tr>
-<th>Week</th>
+<th>Session</th>
 <th>Player</th>
 <th>Rating</th>
 </tr>
@@ -237,6 +237,7 @@ function do_ratings_pass($batch_num)
 		JOIN person p
 			ON p.id=r.player
 		WHERE batch=".db_quote($batch_num)."
+		AND rating_cycle<>0
 		ORDER BY r.rating_cycle DESC, r.rating DESC, p.name";
 	$query = mysqli_query($database, $sql);
 	while ($row = mysqli_fetch_row($query))
