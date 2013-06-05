@@ -78,9 +78,20 @@ INSERT INTO column_type (name, type_data) VALUES (
 	'PLAY.STATUS', 'enum:proposed,assigned,started,suspended,aborted,completed'
 	);
 
+CREATE TABLE player_rating (
+	id INTEGER NOT NULL,
+	session_num INTEGER NOT NULL,
+	prior_rating FLOAT NOT NULL,
+	post_rating FLOAT NOT NULL,
+	PRIMARY KEY (id, session_num),
+	FOREIGN KEY (id) REFERENCES person (id)
+	);
+
 CREATE TABLE rating_batch (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	created DATETIME NOT NULL
+	tournament INTEGER NOT NULL,
+	created DATETIME NOT NULL,
+	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
 CREATE TABLE rating_identity (

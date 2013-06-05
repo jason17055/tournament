@@ -5,7 +5,9 @@ function do_ratings($tournament_id)
 	global $database;
 
 	// get a ratings batch number
-	$sql = "INSERT INTO rating_batch (created) VALUES (NOW())";
+	$sql = "INSERT INTO rating_batch (tournament,created) VALUES (
+		".db_quote($tournament_id).",
+		NOW())";
 	mysqli_query($database, $sql)
 		or die("SQL error 401: ".db_error($database));
 	$batch_num = mysqli_insert_id($database);
@@ -236,6 +238,7 @@ function do_ratings_pass($batch_num)
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <input type="hidden" name="batch" value="<?php h($batch_num)?>">
 <button type="submit" name="action:run_ratings">Another Pass</button>
+<button type="submit" name="action:commit_ratings">Save Ratings</button>
 <button type="submit" name="action:cancel">Cancel</button>
 </form>
 
@@ -269,4 +272,43 @@ function do_ratings_pass($batch_num)
 </body>
 </html>
 <?php
+}
+
+function do_ratings_commit($batch_num)
+{
+	global $database;
+
+	$sql = "SELECT tournament FROM rating_batch
+		WHERE id=".db_quote($batch_num);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query)
+		or die("Invalid batch number");
+	$tournament_id = $row[0];
+
+	$sql = "DELETE FROM player_rating
+		WHERE id IN (
+		SELECT id FROM person WHERE tournament=".db_quote($tournament_id)."
+		)";
+	mysqli_query($database, $sql)
+		or die("SQL error 43: ".db_error($database));
+
+	$sql = "INSERT INTO player_rating (id,session_num,post_rating,prior_rating)
+		SELECT r.player,r.rating_cycle,
+			r.rating AS post_rating,
+			(SELECT b.rating FROM rating_identity b
+				WHERE b.batch=r.batch
+				AND b.player=r.player
+				AND b.rating_cycle<r.rating_cycle
+				ORDER BY b.rating_cycle DESC
+				LIMIT 1
+				) AS prior_rating
+		FROM rating_identity r
+			WHERE r.batch=".db_quote($batch_num)."
+			AND r.rating_cycle>0";
+	mysqli_query($database, $sql)
+		or die("SQL error 44: ".db_error($database));
+
+	$url = "tournament_dashboard.php?tournament=".urlencode($tournament_id);
+	header("Location: $url");
+	exit();
 }
