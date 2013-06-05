@@ -1,0 +1,2 @@
+tournament:
+ when unchecking 'multi_session', set all session_num values to NULL
