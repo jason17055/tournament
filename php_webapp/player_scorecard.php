@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 begin_page("$person_info[name] - Scorecard");
 
 $sql = "SELECT c.id,
+	rating_cycle,
 	CONCAT(c.round,'-',c.board) AS contest_name,
 	(SELECT GROUP_CONCAT(p.name ORDER BY p.name SEPARATOR ', ')
 		FROM contest_participant cp
@@ -36,7 +37,7 @@ $sql = "SELECT c.id,
 	FROM contest_participant cp1
 		JOIN contest c ON c.id=cp1.contest
 	WHERE cp1.player=".db_quote($person_id)."
-	ORDER BY c.round,c.board,c.id
+	ORDER BY c.rating_cycle,c.round,c.board,c.id
 	";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
@@ -44,6 +45,7 @@ $query = mysqli_query($database, $sql)
 ?>
 <table border="1">
 <tr>
+<th>Session</th>
 <th>Round-Board</th>
 <th>Against</th>
 <th>Placement</th>
@@ -52,9 +54,10 @@ $query = mysqli_query($database, $sql)
 
 while ($row = mysqli_fetch_row($query)) {
 	$url = "contest.php?id=".urlencode($row[0]);
-	$contest_name = $row[1];
-	$opponents = $row[2];
-	$placement = $row[3];
+	$rating_cycle = $row[1];
+	$contest_name = $row[2];
+	$opponents = $row[3];
+	$placement = $row[4];
 	if ($placement == 1) {
 		$placement = "1st";
 	}else if ($placement == 2) {
@@ -66,6 +69,7 @@ while ($row = mysqli_fetch_row($query)) {
 	}
 ?>
 <tr>
+<td class="rating_cycle_col"><?php h($rating_cycle)?></td>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>
