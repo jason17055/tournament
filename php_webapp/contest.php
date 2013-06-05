@@ -17,11 +17,11 @@ if (isset($_GET['tournament'])) {
 		multi_session => $row[1],
 		current_session => $row[2]
 		);
-	$_REQUEST['rating_cycle'] = $tournament_info['current_session'];
+	$_REQUEST['session_num'] = $tournament_info['current_session'];
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,multi_game,multi_session,
-		game,board,status,started,finished,round,rating_cycle,notes
+		game,board,status,started,finished,round,session_num,notes
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
@@ -41,7 +41,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['started'] = $row[6];
 		$_REQUEST['finished'] = $row[7];
 		$_REQUEST['round'] = $row[8];
-		$_REQUEST['rating_cycle'] = $row[9];
+		$_REQUEST['session_num'] = $row[9];
 		$_REQUEST['notes'] = $row[10];
 	}
 }
@@ -64,14 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_contest'])) {
 
-		$sql = "INSERT INTO contest (tournament,game,board,status,round,rating_cycle,notes)
+		$sql = "INSERT INTO contest (tournament,game,board,status,round,session_num,notes)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['game']).",
 			".db_quote($_REQUEST['board']).",
 			".db_quote($_REQUEST['status']).",
 			".db_quote($_REQUEST['round']).",
-			".db_quote($_REQUEST['rating_cycle']).",
+			".db_quote($_REQUEST['session_num']).",
 			".db_quote($_REQUEST['notes'])."
 			)";
 		mysqli_query($database, $sql)
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		$updates[] = "round=".db_quote($_REQUEST['round']);
-		$updates[] = "rating_cycle=".db_quote($_REQUEST['rating_cycle']);
+		$updates[] = "session_num=".db_quote($_REQUEST['session_num']);
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
 
 		$sql = "UPDATE contest
@@ -120,8 +120,8 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <table>
 <tr>
-<td><label for="rating_cycle_entry">Rating Cycle:</label></td>
-<td><input type="text" id="rating_cycle_entry" name="rating_cycle" value="<?php h($_REQUEST['rating_cycle'])?>"></td>
+<td><label for="session_num_entry">Session:</label></td>
+<td><input type="text" id="session_num_entry" name="session_num" value="<?php h($_REQUEST['session_num'])?>"></td>
 </tr>
 <tr>
 <td><label for="round_entry">Round:</label></td>

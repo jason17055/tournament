@@ -40,36 +40,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 $page_title = "$tournament_info[name] - Run Ratings";
 begin_page($page_title);
 
-$sql = "SELECT rating_cycle,
-	(SELECT COUNT(*) FROM contest WHERE rating_cycle=t.rating_cycle AND tournament=t.tournament) AS contest_count,
+$sql = "SELECT session_num,
+	(SELECT COUNT(*) FROM contest WHERE session_num=t.session_num AND tournament=t.tournament) AS contest_count,
 	(SELECT COUNT(DISTINCT player) FROM contest_participant cp
 			JOIN contest c ON c.id=cp.contest
 			WHERE c.tournament=t.tournament) AS player_count
 	FROM (
-		SELECT DISTINCT tournament,rating_cycle
+		SELECT DISTINCT tournament,session_num
 		FROM contest
 		WHERE tournament=".db_quote($tournament_id)."
-		AND rating_cycle IS NOT NULL
+		AND session_num IS NOT NULL
 		) t
-	ORDER BY rating_cycle";
+	ORDER BY session_num";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
 ?>
 <table border="1">
 <tr>
-<th>Rating Cycle</th>
+<th>Session</th>
 <th>Game Count</th>
 <th>Player Count</th>
 </tr>
 <?php
 while ($row = mysqli_fetch_row($query)) {
-	$rating_cycle = $row[0];
+	$session_num = $row[0];
 	$contest_count = $row[1];
 	$player_count = $row[2];
 	?>
 <tr>
-<td class="rating_cycle_col"><?php h($rating_cycle)?></td>
+<td class="session_num_col"><?php h($session_num)?></td>
 <td class="contest_count_col"><?php h($contest_count)?></td>
 <td class="player_count_col"><?php h($player_count)?></td>
 </tr>

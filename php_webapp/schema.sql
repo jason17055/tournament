@@ -45,13 +45,13 @@ CREATE TABLE person (
 CREATE TABLE contest (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,
-	game VARCHAR(200),
+	session_num INTEGER,
+	round VARCHAR(200),
 	board VARCHAR(200),
+	game VARCHAR(200),
 	status VARCHAR(200),
 	started DATETIME,
 	finished DATETIME,
-	round VARCHAR(200),
-	rating_cycle INTEGER,
 	notes TEXT,
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);

@@ -78,17 +78,17 @@ function do_ratings($tournament_id)
 
 	// now record the actual game data
 
-	$sql = "SELECT id,rating_cycle FROM contest
+	$sql = "SELECT id,session_num FROM contest
 		WHERE tournament=".db_quote($tournament_id)."
 		AND status='completed'
-		AND rating_cycle IS NOT NULL
-		AND rating_cycle >= 1";
+		AND session_num IS NOT NULL
+		AND session_num >= 1";
 	$c_query = mysqli_query($database, $sql)
 		or die("SQL error 406: ".db_error($database));
 
 	while ($c_row = mysqli_fetch_row($c_query)) {
 		$contest_id = $c_row[0];
-		$rating_cycle = $c_row[1];
+		$session_num = $c_row[1];
 
 		$sql = "SELECT AVG(score),COUNT(*)
 			FROM contest_participant
@@ -130,11 +130,11 @@ function do_ratings($tournament_id)
 				(SELECT id FROM rating_identity
 					WHERE batch=".db_quote($batch_num)."
 					AND player=".db_quote($a_pid)."
-					AND rating_cycle=".db_quote($rating_cycle)."),
+					AND rating_cycle=".db_quote($session_num)."),
 				(SELECT id FROM rating_identity
 					WHERE batch=".db_quote($batch_num)."
 					AND player=".db_quote($b_pid)."
-					AND rating_cycle=".db_quote($rating_cycle)."),
+					AND rating_cycle=".db_quote($session_num)."),
 				".db_quote($perf).",
 				".db_quote($weight)."
 				FROM dual";
