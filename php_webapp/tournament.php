@@ -9,7 +9,7 @@ if (isset($_GET['id'])) {
 	$tournament_id = $_GET['id'];
 
 	$sql = "SELECT
-		name,location,start_time,multi_game,multi_session,current_rating_cycle
+		name,location,start_time,multi_game,multi_session,current_session
 		FROM tournament
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
@@ -22,7 +22,7 @@ if (isset($_GET['id'])) {
 		$_REQUEST['start_time'] = $row[2];
 		$_REQUEST['multi_game'] = ($row[3]=='Y')?'1':null;
 		$_REQUEST['multi_session'] = ($row[4]=='Y')?'1':null;
-		$_REQUEST['current_rating_cycle'] = $row[5];
+		$_REQUEST['current_session'] = $row[5];
 	}
 }
 else {
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		start_time=".db_quote($_REQUEST['start_time']).",
 		multi_game=".db_quote($_REQUEST['multi_game']?'Y':'N').",
 		multi_session=".db_quote($_REQUEST['multi_session']?'Y':'N').",
-		current_rating_cycle=".db_quote($_REQUEST['current_rating_cycle'])."
+		current_session=".db_quote($_REQUEST['current_session'])."
 		WHERE id=".db_quote($tournament_id);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -88,8 +88,8 @@ begin_page("Edit Tournament");
 </td>
 </tr>
 <tr>
-<td valign="top"><label for="current_rating_cycle_entry">Current Rating Cycle:</label></td>
-<td><input type="text" id="current_rating_cycle_entry" name="current_rating_cycle" value="<?php h($_REQUEST['current_rating_cycle'])?>"></td>
+<td valign="top"><label for="current_session_entry">Current Rating Cycle:</label></td>
+<td><input type="text" id="current_session_entry" name="current_session" value="<?php h($_REQUEST['current_session'])?>"></td>
 </tr>
 </table>
 

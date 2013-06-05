@@ -19,7 +19,7 @@ CREATE TABLE tournament (
 	start_time DATETIME,
 	multi_game CHAR(1) NOT NULL DEFAULT 'N',
 	multi_session CHAR(1) NOT NULL DEFAULT 'N',
-	current_rating_cycle INTEGER
+	current_session INTEGER
 	);
 
 CREATE TABLE tournament_role (

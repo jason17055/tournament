@@ -7,19 +7,20 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
-	$sql = "SELECT multi_game,current_rating_cycle FROM tournament
+	$sql = "SELECT multi_game,multi_session,current_session FROM tournament
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Not Found");
 	$tournament_info = array(
 		multi_game => $row[0],
-		current_rating_cycle => $row[1]
+		multi_session => $row[1],
+		current_session => $row[2]
 		);
-	$_REQUEST['rating_cycle'] = $tournament_info['current_rating_cycle'];
+	$_REQUEST['rating_cycle'] = $tournament_info['current_session'];
 }
 else if (isset($_GET['id'])) {
-	$sql = "SELECT tournament,multi_game,
+	$sql = "SELECT tournament,multi_game,multi_session,
 		game,board,status,started,finished,round,rating_cycle,notes
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
@@ -29,18 +30,19 @@ else if (isset($_GET['id'])) {
 		or die("Invalid contest id");
 	$tournament_id = $row[0];
 	$tournament_info = array(
-		multi_game => $row[1]
+		multi_game => $row[1],
+		multi_session => $row[2]
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-		$_REQUEST['game'] = $row[2];
-		$_REQUEST['board'] = $row[3];
-		$_REQUEST['status'] = $row[4];
-		$_REQUEST['started'] = $row[5];
-		$_REQUEST['finished'] = $row[6];
-		$_REQUEST['round'] = $row[7];
-		$_REQUEST['rating_cycle'] = $row[8];
-		$_REQUEST['notes'] = $row[9];
+		$_REQUEST['game'] = $row[3];
+		$_REQUEST['board'] = $row[4];
+		$_REQUEST['status'] = $row[5];
+		$_REQUEST['started'] = $row[6];
+		$_REQUEST['finished'] = $row[7];
+		$_REQUEST['round'] = $row[8];
+		$_REQUEST['rating_cycle'] = $row[9];
+		$_REQUEST['notes'] = $row[10];
 	}
 }
 else {
