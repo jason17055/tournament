@@ -5,13 +5,14 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT name,multi_game FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,multi_game,multi_session FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
 	id => $tournament_id,
 	name => $row[0],
-	multi_game => $row[1]
+	multi_game => $row[1],
+	multi_session => $row[2]
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";
@@ -67,7 +68,9 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <table border="1">
 <caption>Games</caption>
 <tr>
+<?php if ($tournament_info['multi_session']=='Y') { ?>
 <th>Session</th>
+<?php } ?>
 <th>Round-Board</th>
 <?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
@@ -109,7 +112,9 @@ while ($row = mysqli_fetch_row($query)) {
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
+<?php if ($tournament_info['multi_session']=='Y') { ?>
 <td class="session_num_col"><?php h($session_num)?></td>
+<?php } ?>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>

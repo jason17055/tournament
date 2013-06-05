@@ -4,17 +4,23 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 
-$sql = "SELECT tournament, name
-	FROM person WHERE id=".db_quote($_GET['id']);
+$sql = "SELECT t.id, t.multi_game, t.multi_session, p.name
+	FROM person p
+	JOIN tournament t ON t.id=p.tournament
+	WHERE p.id=".db_quote($_GET['id']);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query)
 	or die("Not Found");
 $tournament_id = $row[0];
+$tournament_info = array(
+	id => $tournament_id,
+	multi_game => $row[1],
+	multi_session => $row[2]
+	);
 $person_id = $_GET['id'];
 $person_info = array(
 	id => $person_id,
-	tournament => $tournament_id,
-	name => $row[1]
+	name => $row[3]
 	);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
@@ -45,7 +51,9 @@ $query = mysqli_query($database, $sql)
 ?>
 <table border="1">
 <tr>
+<?php if ($tournament_info['multi_session']=='Y'){?>
 <th>Session</th>
+<?php }?>
 <th>Round-Board</th>
 <th>Against</th>
 <th>Placement</th>
@@ -69,7 +77,9 @@ while ($row = mysqli_fetch_row($query)) {
 	}
 ?>
 <tr>
+<?php if ($tournament_info['multi_session']=='Y'){?>
 <td class="session_num_col"><?php h($session_num)?></td>
+<?php }?>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>

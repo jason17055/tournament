@@ -90,13 +90,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	else if (isset($_REQUEST['action:update_contest'])) {
 
 		$updates = array();
+		if ($tournament_info['multi_session']=='Y') {
+		$updates[] = "session_num=".db_quote($_REQUEST['session_num']);
+		}
 		if ($tournament_info['multi_game']=='Y') {
 		$updates[] = "game=".db_quote($_REQUEST['game']);
 		}
 		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		$updates[] = "round=".db_quote($_REQUEST['round']);
-		$updates[] = "session_num=".db_quote($_REQUEST['session_num']);
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
 
 		$sql = "UPDATE contest
@@ -119,10 +121,12 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <table>
+<?php if ($tournament_info['multi_session']=='Y') {?>
 <tr>
 <td><label for="session_num_entry">Session:</label></td>
 <td><input type="text" id="session_num_entry" name="session_num" value="<?php h($_REQUEST['session_num'])?>"></td>
 </tr>
+<?php }//endif multi_session tournament?>
 <tr>
 <td><label for="round_entry">Round:</label></td>
 <td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
