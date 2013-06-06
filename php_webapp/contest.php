@@ -169,15 +169,20 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <table border="1">
 <tr>
 <th>Player</th>
+<th>Rating</th>
 <th>Score</th>
 <th>Placement</th>
 </tr>
 <?php
 	$sql = "SELECT cp.id AS id,
 		p.name AS player_name,
+		r.prior_rating AS prior_rating,
 		score,placement
 		FROM contest_participant cp
+		JOIN contest c ON c.id=cp.contest
 		JOIN person p ON p.id=cp.player
+		LEFT JOIN player_rating r ON r.id=p.id
+			AND r.session_num=c.session_num
 		WHERE contest=".db_quote($_GET['id'])."
 		ORDER BY turn_order,player_name,cp.id";
 	$query = mysqli_query($database, $sql);
@@ -185,11 +190,13 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 		$cpid = $row[0];
 		$url = "contest_participant.php?id=".urlencode($cpid)."&next_url=".urlencode($_SERVER['REQUEST_URI']);
 		$player_name = $row[1];
-		$score = $row[2];
-		$placement = $row[3];
+		$prior_rating = $row[2];
+		$score = $row[3];
+		$placement = $row[4];
 		?>
 <tr>
 <td class="player_col"><a href="<?php h($url)?>"><?php h($player_name)?></a></td>
+<td class="rating_col"><?php h(sprintf('%.0f',$prior_rating))?></td>
 <td class="score_col"><?php h($score)?></td>
 <td class="placement_col"><?php h($placement)?></td>
 </tr>

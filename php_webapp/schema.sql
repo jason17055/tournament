@@ -65,6 +65,8 @@ CREATE TABLE contest_participant (
 	turn_order INTEGER,
 	score VARCHAR(200),
 	placement INTEGER,
+	performance FLOAT,
+	expected_performance FLOAT,
 	FOREIGN KEY (contest) REFERENCES contest (id),
 	FOREIGN KEY (player) REFERENCES person (id)
 	);

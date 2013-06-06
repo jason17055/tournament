@@ -10,3 +10,6 @@
 .player_count_col {
 	text-align: center;
 }
+.rating_col, .score_col, .placement_col {
+	text-align: right;
+}
