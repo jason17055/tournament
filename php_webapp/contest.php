@@ -64,14 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_contest'])) {
 
-		$sql = "INSERT INTO contest (tournament,game,board,status,round,session_num,notes)
+		$sql = "INSERT INTO contest (tournament,session_num,round,game,board,status,started,finished,notes)
 			VALUES (
 			".db_quote($tournament_id).",
+			".db_quote($_REQUEST['session_num']).",
+			".db_quote($_REQUEST['round']).",
 			".db_quote($_REQUEST['game']).",
 			".db_quote($_REQUEST['board']).",
 			".db_quote($_REQUEST['status']).",
-			".db_quote($_REQUEST['round']).",
-			".db_quote($_REQUEST['session_num']).",
+			".db_quote($_REQUEST['started']).",
+			".db_quote($_REQUEST['finished']).",
 			".db_quote($_REQUEST['notes'])."
 			)";
 		mysqli_query($database, $sql)
@@ -100,6 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		$updates[] = "round=".db_quote($_REQUEST['round']);
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
+		$updates[] = "started=".db_quote($_REQUEST['started']);
+		$updates[] = "finished=".db_quote($_REQUEST['finished']);
 
 		$sql = "UPDATE contest
 		SET ".implode(',',$updates)."
@@ -134,6 +138,14 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <tr>
 <td><label for="board_entry">Board/Table No.:</label></td>
 <td><input type="text" id="board_entry" name="board" value="<?php h($_REQUEST['board'])?>"></td>
+</tr>
+<tr>
+<td><label for="started_entry">Start Date/Time:</label></td>
+<td><input type="datetime-local" id="started_entry" name="started" value="<?php h($_REQUEST['started'])?>"></td>
+</tr>
+<tr>
+<td><label for="finished_entry">Finish Date/Time:</label></td>
+<td><input type="datetime-local" id="finished_entry" name="finished" value="<?php h($_REQUEST['finished'])?>"></td>
 </tr>
 <?php if ($tournament_info['multi_game']=='Y'){?>
 <tr>

@@ -50,8 +50,8 @@ CREATE TABLE contest (
 	board VARCHAR(200),
 	game VARCHAR(200),
 	status VARCHAR(200),
-	started DATETIME,
-	finished DATETIME,
+	started VARCHAR(20),
+	finished VARCHAR(20),
 	notes TEXT,
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
