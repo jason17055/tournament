@@ -84,18 +84,23 @@ $sql = "SELECT id,
 	session_num,
 	IFNULL(CONCAT(round,'-',board),started) AS contest_name,
 	game,scenario,
-	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
-		FROM person p
-		WHERE p.id IN (
-			SELECT player FROM contest_participant cp
-			WHERE cp.contest=c.id)) AS participants,
-	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
-		FROM person p
-		WHERE p.id IN (
-			SELECT player FROM contest_participant cp
-			WHERE cp.contest=c.id
-			AND cp.placement=1
-			)) AS winner
+	(SELECT GROUP_CONCAT(
+		p.name ORDER BY name SEPARATOR ', '
+		)
+		FROM contest_participant cp
+			JOIN person p ON p.id=cp.player
+		WHERE cp.contest=c.id
+	) AS participants,
+	(SELECT GROUP_CONCAT(
+		CONCAT(p.name, IF(cp.score IS NOT NULL,
+				CONCAT(' (',cp.score,')'),
+				'')) ORDER BY name SEPARATOR ', '
+		)
+		FROM contest_participant cp
+			JOIN person p ON p.id=cp.player
+		WHERE cp.contest=c.id
+		AND cp.placement=1
+	) AS winner
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY session_num,round,board,id";
