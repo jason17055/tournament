@@ -81,7 +81,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <?php
 $sql = "SELECT id,
 	session_num,
-	CONCAT(round,'-',board) AS contest_name,
+	IFNULL(CONCAT(round,'-',board),started) AS contest_name,
 	game,
 	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
 		FROM person p

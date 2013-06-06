@@ -62,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		die("Not authorized.");
 	}
 
+	$_REQUEST['started'] = parse_date_time($_REQUEST['started_date'],$_REQUEST['started_time']);
+	$_REQUEST['finished'] = parse_date_time($_REQUEST['finished_date'],$_REQUEST['finished_time']);
+
 	if (isset($_REQUEST['action:create_contest'])) {
 
 		$sql = "INSERT INTO contest (tournament,session_num,round,game,board,status,started,finished,notes)
@@ -120,6 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
+split_datetime($_REQUEST['started'], $_REQUEST['started_date'], $_REQUEST['started_time']);
+split_datetime($_REQUEST['finished'], $_REQUEST['finished_date'], $_REQUEST['finished_time']);
+
 begin_page($_GET['id'] ? "Edit Game" : "New Game");
 
 ?>
@@ -140,12 +146,18 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <td><input type="text" id="board_entry" name="board" value="<?php h($_REQUEST['board'])?>"></td>
 </tr>
 <tr>
-<td><label for="started_entry">Start Date/Time:</label></td>
-<td><input type="datetime-local" id="started_entry" name="started" value="<?php h($_REQUEST['started'])?>"></td>
+<td><label for="started_date_entry">Start Date/Time:</label></td>
+<td>
+<label>Date: <input type="date" id="started_date_entry" name="started_date" value="<?php h($_REQUEST['started_date'])?>"></label>
+<label>Time: <input type="time" name="started_time" value="<?php h($_REQUEST['started_time'])?>"></label>
+</td>
 </tr>
 <tr>
-<td><label for="finished_entry">Finish Date/Time:</label></td>
-<td><input type="datetime-local" id="finished_entry" name="finished" value="<?php h($_REQUEST['finished'])?>"></td>
+<td><label for="finished_date_entry">Finish Date/Time:</label></td>
+<td>
+<label>Date: <input type="date" id="finished_date_entry" name="finished_date" value="<?php h($_REQUEST['finished_date'])?>"></label>
+<label>Time: <input type="time" name="started_time" value="<?php h($_REQUEST['started_time'])?>"></label>
+</td>
 </tr>
 <?php if ($tournament_info['multi_game']=='Y'){?>
 <tr>

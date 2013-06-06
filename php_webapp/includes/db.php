@@ -20,3 +20,20 @@ function db_error($obj)
 
 	return mysqli_error($database);
 }
+
+function parse_date_time($date_str, $time_str)
+{
+	if (strlen($time_str) == 0) {
+		return $date_str;
+	}
+	else {
+		return $date_str . 'T' . $time_str;
+	}
+}
+
+function split_datetime($datetime_str, &$date_str, &$time_str)
+{
+	$parts = explode('T', $datetime_str);
+	$date_str = $parts[0];
+	$time_str = $parts[1];
+}
