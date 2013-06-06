@@ -68,8 +68,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['placement'])."
 			)";
 		mysqli_query($database, $sql)
-			or die(db_error($database));
+			or die("SQL error: ".db_error($database));
 		$contest_participant_id = mysqli_insert_id($database);
+
+		header("Location: $next_url");
+		exit();
+	}
+
+	else if (isset($_REQUEST['action:update_contest_participant'])) {
+
+		$sql = "UPDATE contest_participant
+			SET player=".db_quote($_REQUEST['player']).",
+			seat=".db_quote($_REQUEST['seat']).",
+			turn_order=".db_quote($_REQUEST['turn_order']).",
+			score=".db_quote($_REQUEST['score']).",
+			placement=".db_quote($_REQUEST['placement'])."
+			WHERE id=".db_quote($_GET['id']);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
 
 		header("Location: $next_url");
 		exit();
