@@ -75,6 +75,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
 <?php } ?>
+<th>Scenario</th>
 <th>Participants</th>
 <th>Winner</th>
 </tr>
@@ -82,7 +83,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 $sql = "SELECT id,
 	session_num,
 	IFNULL(CONCAT(round,'-',board),started) AS contest_name,
-	game,
+	game,scenario,
 	(SELECT GROUP_CONCAT(name ORDER BY name SEPARATOR ', ')
 		FROM person p
 		WHERE p.id IN (
@@ -106,8 +107,9 @@ while ($row = mysqli_fetch_row($query)) {
 	$session_num = $row[1];
 	$contest_name = $row[2];
 	$game = $row[3];
-	$participants = $row[4];
-	$winner = $row[5];
+	$scenario = $row[4];
+	$participants = $row[5];
+	$winner = $row[6];
 
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
@@ -119,6 +121,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
+<td class="scenario_col"><?php h($scenario)?></td>
 <td class="participants_col"><?php h($participants)?></td>
 <td class="winner_col"><?php h($winner)?></td>
 </tr>

@@ -49,6 +49,7 @@ CREATE TABLE contest (
 	round VARCHAR(200),
 	board VARCHAR(200),
 	game VARCHAR(200),
+	scenario VARCHAR(4000),
 	status VARCHAR(200),
 	started VARCHAR(20),
 	finished VARCHAR(20),

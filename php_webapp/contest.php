@@ -21,7 +21,9 @@ if (isset($_GET['tournament'])) {
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,multi_game,multi_session,
-		game,board,status,started,finished,round,session_num,notes
+		session_num,round,board,
+		game,scenario,status,
+		started,finished,notes
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
@@ -35,14 +37,15 @@ else if (isset($_GET['id'])) {
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-		$_REQUEST['game'] = $row[3];
-		$_REQUEST['board'] = $row[4];
-		$_REQUEST['status'] = $row[5];
-		$_REQUEST['started'] = $row[6];
-		$_REQUEST['finished'] = $row[7];
-		$_REQUEST['round'] = $row[8];
-		$_REQUEST['session_num'] = $row[9];
-		$_REQUEST['notes'] = $row[10];
+		$_REQUEST['session_num'] = $row[3];
+		$_REQUEST['round'] = $row[4];
+		$_REQUEST['board'] = $row[5];
+		$_REQUEST['game'] = $row[6];
+		$_REQUEST['scenario'] = $row[7];
+		$_REQUEST['status'] = $row[8];
+		$_REQUEST['started'] = $row[9];
+		$_REQUEST['finished'] = $row[10];
+		$_REQUEST['notes'] = $row[11];
 	}
 }
 else {
@@ -67,13 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_contest'])) {
 
-		$sql = "INSERT INTO contest (tournament,session_num,round,game,board,status,started,finished,notes)
+		$sql = "INSERT INTO contest (tournament,session_num,round,board,game,scenario,status,started,finished,notes)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['session_num']).",
 			".db_quote($_REQUEST['round']).",
-			".db_quote($_REQUEST['game']).",
 			".db_quote($_REQUEST['board']).",
+			".db_quote($_REQUEST['game']).",
+			".db_quote($_REQUEST['scenario']).",
 			".db_quote($_REQUEST['status']).",
 			".db_quote($_REQUEST['started']).",
 			".db_quote($_REQUEST['finished']).",
@@ -104,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		$updates[] = "round=".db_quote($_REQUEST['round']);
+		$updates[] = "scenario=".db_quote($_REQUEST['scenario']);
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
 		$updates[] = "started=".db_quote($_REQUEST['started']);
 		$updates[] = "finished=".db_quote($_REQUEST['finished']);
@@ -165,6 +170,10 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <td><input type="text" id="game_entry" name="game" value="<?php h($_REQUEST['game'])?>"></td>
 </tr>
 <?php }//endif multi_game tournament?>
+<tr>
+<td><label for="scenario_entry">Scenario:</label></td>
+<td><input type="text" id="scenario_entry" name="scenario" value="<?php h($_REQUEST['scenario'])?>"></td>
+</tr>
 <tr>
 <td><label for="status_cb">Status:</label></td>
 <td><?php select_widget(array(
