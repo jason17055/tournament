@@ -24,13 +24,16 @@ if (isset($_GET['id'])) {
 		$_REQUEST['multi_session'] = ($row[4]=='Y')?'1':null;
 		$_REQUEST['current_session'] = $row[5];
 	}
+
+	is_director($tournament_id)
+		or die("Not authorized");
 }
 else {
-	die("Invalid query string");
+	$tournament_id = NULL;
+	is_sysadmin()
+		or die("Not authorized");
 }
 
-is_director($tournament_id)
-	or die("Not authorized");
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
@@ -42,7 +45,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	if (isset($_REQUEST['action:update_tournament'])) {
+	if (isset($_REQUEST['action:create_tournament'])) {
+		$sql = "INSERT INTO tournament (name,location,start_time,
+			multi_game,multi_session,current_session)
+			VALUES (
+			".db_quote($_REQUEST['name']).",
+			".db_quote($_REQUEST['location']).",
+			".db_quote($_REQUEST['start_time']).",
+			".db_quote($_REQUEST['multi_game']?'Y':'N').",
+			".db_quote($_REQUEST['multi_session']?'Y':'N').",
+			".db_quote($_REQUEST['current_session'])."
+			)";
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		$tournament_id = mysqli_insert_id($database);
+		$url = "tournament_dashboard.php?tournament=".urlencode($tournament_id);
+		header("Location: $url");
+		exit();
+	}
+
+	else if (isset($_REQUEST['action:update_tournament'])) {
 		$sql = "UPDATE tournament
 		SET name=".db_quote($_REQUEST['name']).",
 		location=".db_quote($_REQUEST['location']).",
@@ -63,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
-begin_page("Edit Tournament");
+begin_page($_GET['id'] ? "Edit Tournament" : "New Tournament");
 
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">

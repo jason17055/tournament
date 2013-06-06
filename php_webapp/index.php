@@ -4,13 +4,8 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 
-?><!DOCTYPE HTML>
-<html>
-<head>
-<title>Tournament Director</title>
-</head>
-<body>
-<h1>Tournament Director</h1>
+begin_page('Tournament Director');
+?>
 <p>
 Welcome to Tournament Director.
 Please select a tournament.
@@ -45,5 +40,15 @@ while ($row = mysqli_fetch_row($query)) {
 
 ?>
 </table>
-</body>
-</html>
+<?php
+
+if (is_sysadmin()) {
+$new_tournament_url = 'tournament.php';
+?>
+<p>
+<a href="<?php h($new_tournament_url)?>">New Tournament</a>
+</p>
+<?php
+} //endif is_sysadmin
+
+end_page();

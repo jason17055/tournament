@@ -51,6 +51,11 @@ function add_login_attributes()
 	}
 }
 
+function is_sysadmin()
+{
+	return !!$_SESSION['sysadmin'];
+}
+
 function is_director($tournament_id)
 {
 	global $database;
