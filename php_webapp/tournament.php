@@ -118,7 +118,7 @@ begin_page($_GET['id'] ? "Edit Tournament" : "New Tournament");
 </td>
 </tr>
 <tr>
-<td valign="top"><label for="current_session_entry">Current Rating Cycle:</label></td>
+<td valign="top"><label for="current_session_entry">Current Session:</label></td>
 <td><input type="text" id="current_session_entry" name="current_session" value="<?php h($_REQUEST['current_session'])?>"></td>
 </tr>
 </table>
