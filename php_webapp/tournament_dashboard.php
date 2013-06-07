@@ -130,7 +130,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
-<td class="scenario_col"><?php h($scenario)?></td>
+<td class="scenario_col"><?php format_scenario($scenario)?></td>
 <td class="participants_col"><?php h($participants)?></td>
 <td class="winner_col"><?php h($winner)?></td>
 </tr>

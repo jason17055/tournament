@@ -87,3 +87,15 @@ function select_option($value, $name, $is_selected)
 
 <?php
 }
+
+function format_scenario($raw_text)
+{
+	if (substr($raw_text,0,1)=='{') {
+		$url = DOMINION_ROLLER_URL . '?display/'.urlencode($raw_text);
+		?><a href="<?php h($url)?>">View Card Set</a>
+		<?php
+	}
+	else {
+		h($raw_text);
+	}
+}
