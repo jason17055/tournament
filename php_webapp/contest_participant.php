@@ -20,9 +20,11 @@ else if (isset($_GET['id'])) {
 	$sql = "SELECT cp.contest AS contest,
 		c.tournament AS tournament,
 		CONCAT(c.round, '-', c.board) AS contest_name,
-		player,seat,turn_order,score,placement
+		player,seat,turn_order,score,placement,
+		p.name AS player_name
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
+		LEFT JOIN person p ON p.id=cp.player
 		WHERE cp.id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -37,6 +39,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['turn_order'] = $row[5];
 		$_REQUEST['score'] = $row[6];
 		$_REQUEST['placement'] = $row[7];
+		$_REQUEST['player_name'] = $row[8];
 	}
 }
 else {
@@ -107,24 +110,30 @@ begin_page($_GET['id'] ? "Edit Contest Participant" : "New Contest Participant")
 </tr>
 <tr>
 <td><label for="player_cb">Player:</label></td>
-<td><select name="player" id="player_cb">
-<?php
-	select_option("", "--select--", !$_REQUEST['player']);
-
+<td><input id="player_cb" name="player" value="<?php h($_REQUEST['player_name'])?>" data-player_id="<?php h($_REQUEST['player'])?>" class="player_sel">
+<script type="text/javascript"><!--
+players_src = [
+  <?php
 	$sql = "SELECT id,name
 		FROM person
 		WHERE tournament=".db_quote($tournament_id)."
 		AND (id=".db_quote($_REQUEST['player'])."
-			OR id NOT IN (SELECT player FROM contest_participant WHERE contest=".db_quote($contest_id).")
+			OR id NOT IN (SELECT player FROM contest_participant WHERE contest=".db_quote($contest_id)." AND player IS NOT NULL)
 		    )
 		ORDER BY name";
-	$query = mysqli_query($database, $sql);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	$count = 0;
 	while ($row = mysqli_fetch_row($query)) {
-		select_option($row[0], $row[1], $_REQUEST['player'] == $row[0]);
+		if ($count++) { echo ','; }
+		?>
+	{ "value": <?php echo json_encode($row[0])?>,
+	"label": <?php echo json_encode($row[1])?>}
+<?php
 	}
-
-	select_option("*unlisted*", "(Unlisted)", FALSE);
-	?></select></td>
+	?> ];
+//-->
+</script>
 </tr>
 </tr>
 <tr>
