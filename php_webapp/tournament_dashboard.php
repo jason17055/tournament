@@ -71,6 +71,7 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <?php if ($tournament_info['multi_session']=='Y') { ?>
 <th>Session</th>
 <?php } ?>
+<th>Started</th>
 <th>Round-Board</th>
 <?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
@@ -82,7 +83,8 @@ $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 <?php
 $sql = "SELECT id,
 	session_num,
-	IFNULL(CONCAT(round,'-',board),started) AS contest_name,
+	IFNULL(started,'(unknown)') AS started,
+	CONCAT(round,'-',board) AS contest_name,
 	game,scenario,
 	(SELECT GROUP_CONCAT(
 		p.name ORDER BY name SEPARATOR ', '
@@ -103,18 +105,19 @@ $sql = "SELECT id,
 	) AS winner
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
-	ORDER BY session_num,round,board,id";
+	ORDER BY session_num,round,started,board,id";
 $query = mysqli_query($database, $sql);
 
 while ($row = mysqli_fetch_row($query)) {
 
 	$contest_id = $row[0];
 	$session_num = $row[1];
-	$contest_name = $row[2];
-	$game = $row[3];
-	$scenario = $row[4];
-	$participants = $row[5];
-	$winner = $row[6];
+	$started_date = $row[2];
+	$contest_name = $row[3];
+	$game = $row[4];
+	$scenario = $row[5];
+	$participants = $row[6];
+	$winner = $row[7];
 
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
@@ -122,6 +125,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php if ($tournament_info['multi_session']=='Y') { ?>
 <td class="session_num_col"><?php h($session_num)?></td>
 <?php } ?>
+<td class="started_date_col"><a href="<?php h($url)?>"><?php h($started_date)?></a></td>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <?php if ($tournament_info['multi_game'] == 'Y') { ?>
 <td class="game_col"><?php h($game)?></td>
