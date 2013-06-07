@@ -34,6 +34,7 @@ $sql = "SELECT c.id,
 	session_num,
 	started,
 	CONCAT(c.round,'-',c.board) AS contest_name,
+	scenario,
 	(SELECT GROUP_CONCAT(p.name ORDER BY p.name SEPARATOR ', ')
 		FROM contest_participant cp
 			JOIN person p ON p.id=cp.player
@@ -57,6 +58,7 @@ $query = mysqli_query($database, $sql)
 <?php }?>
 <th>Date</th>
 <th>Round-Board</th>
+<th>Scenario</th>
 <th>Against</th>
 <th>Placement</th>
 </tr>
@@ -67,8 +69,9 @@ while ($row = mysqli_fetch_row($query)) {
 	$session_num = $row[1];
 	$started_date = $row[2];
 	$contest_name = $row[3];
-	$opponents = $row[4];
-	$placement = $row[5];
+	$scenario = $row[4];
+	$opponents = $row[5];
+	$placement = $row[6];
 	if ($placement == 1) {
 		$placement = "1st";
 	}else if ($placement == 2) {
@@ -85,6 +88,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php }?>
 <td class="started_date_col"><?php h($started_date)?></td>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<td class="scenario_col"><?php format_scenario($scenario)?></td>
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>
 </tr>
