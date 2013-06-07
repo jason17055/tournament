@@ -92,7 +92,8 @@ function format_scenario($raw_text)
 {
 	if (substr($raw_text,0,1)=='{') {
 		$url = DOMINION_ROLLER_URL . '?display/'.urlencode($raw_text);
-		?><a href="<?php h($url)?>">View Card Set</a>
+		$icon_url = DOMINION_ROLLER_URL . 'images/20px-Dominion_icon.png';
+		?><a href="<?php h($url)?>"><img src="<?php h($icon_url)?>" class="dominion_link" alt="View Card Set"></a>
 		<?php
 	}
 	else {
