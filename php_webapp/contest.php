@@ -7,7 +7,8 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
-	$sql = "SELECT multi_game,multi_session,current_session FROM tournament
+	$sql = "SELECT multi_game,multi_session,multi_round,current_session
+		FROM tournament
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -15,12 +16,13 @@ if (isset($_GET['tournament'])) {
 	$tournament_info = array(
 		multi_game => $row[0],
 		multi_session => $row[1],
-		current_session => $row[2]
+		multi_round => $row[2],
+		current_session => $row[3]
 		);
 	$_REQUEST['session_num'] = $tournament_info['current_session'];
 }
 else if (isset($_GET['id'])) {
-	$sql = "SELECT tournament,multi_game,multi_session,
+	$sql = "SELECT tournament,multi_game,multi_session,multi_round,
 		session_num,round,board,
 		game,scenario,status,
 		started,finished,notes
@@ -33,19 +35,20 @@ else if (isset($_GET['id'])) {
 	$tournament_id = $row[0];
 	$tournament_info = array(
 		multi_game => $row[1],
-		multi_session => $row[2]
+		multi_session => $row[2],
+		multi_round => $row[3]
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-		$_REQUEST['session_num'] = $row[3];
-		$_REQUEST['round'] = $row[4];
-		$_REQUEST['board'] = $row[5];
-		$_REQUEST['game'] = $row[6];
-		$_REQUEST['scenario'] = $row[7];
-		$_REQUEST['status'] = $row[8];
-		$_REQUEST['started'] = $row[9];
-		$_REQUEST['finished'] = $row[10];
-		$_REQUEST['notes'] = $row[11];
+		$_REQUEST['session_num'] = $row[4];
+		$_REQUEST['round'] = $row[5];
+		$_REQUEST['board'] = $row[6];
+		$_REQUEST['game'] = $row[7];
+		$_REQUEST['scenario'] = $row[8];
+		$_REQUEST['status'] = $row[9];
+		$_REQUEST['started'] = $row[10];
+		$_REQUEST['finished'] = $row[11];
+		$_REQUEST['notes'] = $row[12];
 	}
 }
 else {
@@ -107,7 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		}
 		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
+		if ($tournament_info['multi_round']=='Y') {
 		$updates[] = "round=".db_quote($_REQUEST['round']);
+		}
 		$updates[] = "scenario=".db_quote($_REQUEST['scenario']);
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
 		$updates[] = "started=".db_quote($_REQUEST['started']);
@@ -142,10 +147,12 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <td><input type="text" id="session_num_entry" name="session_num" value="<?php h($_REQUEST['session_num'])?>"></td>
 </tr>
 <?php }//endif multi_session tournament?>
+<?php if ($tournament_info['multi_round']=='Y') {?>
 <tr>
 <td><label for="round_entry">Round:</label></td>
 <td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
 </tr>
+<?php }//endif multi_round tournament?>
 <tr>
 <td><label for="board_entry">Board/Table No.:</label></td>
 <td><input type="text" id="board_entry" name="board" value="<?php h($_REQUEST['board'])?>"></td>
