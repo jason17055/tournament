@@ -65,7 +65,8 @@ $query = mysqli_query($database, $sql)
 <?php
 
 while ($row = mysqli_fetch_row($query)) {
-	$url = "contest.php?id=".urlencode($row[0]);
+	$url = "contest.php?id=".urlencode($row[0])
+		.'&next_url='.urlencode($_SERVER['REQUEST_URI']);
 	$session_num = $row[1];
 	$started_date = $row[2];
 	$contest_name = $row[3];
