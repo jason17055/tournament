@@ -2,6 +2,7 @@ prefix = /srv/www/htdocs/webtd
 
 data_files = \
 	webtd.css \
+	webtd.js \
 	images/plus.png \
 	images/minus.png
 
