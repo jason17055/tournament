@@ -10,7 +10,7 @@
 .player_count_col {
 	text-align: center;
 }
-.rating_col, .score_col, .placement_col {
+td.rating_col, td.score_col, td.placement_col {
 	text-align: right;
 }
 .scenario_col {
@@ -27,4 +27,10 @@
 }
 .placement_col {
 	text-align: center;
+}
+.turn_order_col {
+	text-align: center;
+}
+.tabular_form th.player_col {
+	text-align: left;
 }

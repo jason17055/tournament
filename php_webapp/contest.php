@@ -235,13 +235,13 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <tr>
 <td valign="top"><label>Participants:</label></td>
 <td>
-<table border="1">
+<table class="tabular_form">
 <tr>
-<th>Player</th>
-<th>Seat</th>
-<th>Turn Order</th>
-<th>Score</th>
-<th>Placement</th>
+<th class="player_col">Player</th>
+<th class="seat_col">Seat</th>
+<th class="turn_order_col">Turn Order</th>
+<th class="score_col">Score</th>
+<th class="placement_col">Placement</th>
 </tr>
 <?php
 	$sql = "SELECT cp.id AS id,
