@@ -209,7 +209,8 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <table border="1">
 <tr>
 <th>Player</th>
-<th>Rating</th>
+<th>Seat</th>
+<th>Turn Order</th>
 <th>Score</th>
 <th>Placement</th>
 </tr>
@@ -233,12 +234,14 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 		$prior_rating = $row[2];
 		$score = $row[3];
 		$placement = $row[4];
+		$pre = 'participant_'.$cpid;
 		?>
 <tr>
-<td class="player_col"><a href="<?php h($url)?>"><?php h($player_name)?></a></td>
-<td class="rating_col"><?php h(sprintf('%.0f',$prior_rating))?></td>
-<td class="score_col"><?php h($score)?></td>
-<td class="placement_col"><?php h($placement)?></td>
+<td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>"></td>
+<td class="seat_col"><input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"></td>
+<td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($turn_order)?>"></td>
+<td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($score)?>"></td>
+<td class="placement_col"><input type="text" size="4" name="<?php h($pre.'_placement')?>" value="<?php h($placement)?>"></td>
 </tr>
 <?php
 	} // end foreach participant
