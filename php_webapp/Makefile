@@ -11,6 +11,7 @@ php_scripts = \
 	contest.php \
 	contest_participant.php \
 	index.php \
+	list_roster.inc.php \
 	login.php \
 	person.php \
 	player_scorecard.php \

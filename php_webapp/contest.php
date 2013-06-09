@@ -124,6 +124,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
+		$p_updates = array();
+		foreach ($_POST as $k => $v) {
+			if (preg_match('/^participant_(\d+)_(.*)$/', $k, $m)) {
+				$cpid = $m[1];
+				$field = $m[2];
+				if (!isset($p_updates[$cpid])) {
+					$p_updates[$cpid] = array();
+				}
+				$p_updates[$cpid][$field] = $v;
+			}
+		}
+		foreach ($p_updates as $cpid => $cp_post) {
+			$updates = array();
+			foreach ($cp_post as $k => $v) {
+				if ($k == 'player' || $k == 'seat' ||
+				$k == 'turn_order' || $k == 'score' ||
+				$k == 'placement')
+				{
+					$updates[] = "$k=".db_quote($v);
+				}
+			}
+			if (count($updates)) {
+				$sql = "UPDATE contest_participant
+					SET ".implode(',',$updates)."
+					WHERE id=".db_quote($cpid);
+				mysqli_query($database, $sql);
+			}
+		}
+
 		header("Location: $next_url");
 		exit();
 	}
@@ -216,9 +245,10 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 </tr>
 <?php
 	$sql = "SELECT cp.id AS id,
+		p.id AS player_id,
 		p.name AS player_name,
 		r.prior_rating AS prior_rating,
-		score,placement
+		seat,turn_order,score,placement
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
 		JOIN person p ON p.id=cp.player
@@ -230,14 +260,17 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 	while ($row = mysqli_fetch_row($query)) {
 		$cpid = $row[0];
 		$url = "contest_participant.php?id=".urlencode($cpid)."&next_url=".urlencode($_SERVER['REQUEST_URI']);
-		$player_name = $row[1];
-		$prior_rating = $row[2];
-		$score = $row[3];
-		$placement = $row[4];
+		$player_id = $row[1];
+		$player_name = $row[2];
+		$prior_rating = $row[3];
+		$seat = $row[4];
+		$turn_order = $row[5];
+		$score = $row[6];
+		$placement = $row[7];
 		$pre = 'participant_'.$cpid;
 		?>
 <tr>
-<td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>"></td>
+<td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>" data-player_id="<?php h($player_id)?>" class="player_sel"></td>
 <td class="seat_col"><input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"></td>
 <td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($turn_order)?>"></td>
 <td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($score)?>"></td>
@@ -259,6 +292,9 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 	} // endif contest id known
 	?>
 </table>
+<?php
+	include('list_roster.inc.php');
+	?>
 
 <div class="form_buttons_bar">
 <?php if ($_GET['id']) { ?>
