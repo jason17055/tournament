@@ -151,26 +151,22 @@ $weights = array();
 <table border="1">
 <tr>
 <th>Pairing</th>
-<th>Played (Prior Sessions)</th>
-<th>Played (This Session)</th>
-<th>Fitness</th>
+<th>Played Before</th>
+<th>Same Home Town?</th>
+<th>Same Family?</th>
 </tr>
 <?php
 
 $sql = "SELECT p.id, q.id,
 	p.name, q.name,
+	p.home_location, q.home_location,
 	(SELECT COUNT(*) FROM contest c
 		WHERE c.tournament=p.tournament
 		AND c.session_num<".db_quote($tournament_info['current_session'])."
+		AND c.status='completed'
 		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
 		AND q.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
-		) AS common_plays_total,
-	(SELECT COUNT(*) FROM contest c
-		WHERE c.tournament=p.tournament
-		AND c.session_num=".db_quote($tournament_info['current_session'])."
-		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
-		AND q.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
-		) AS common_plays_this_session
+		) AS nplays
 	FROM person p
 	CROSS JOIN person q ON q.tournament = p.tournament
 		AND q.id>p.id
@@ -182,18 +178,23 @@ while ($row = mysqli_fetch_row($query)) {
 	$key = "$row[0],$row[1]";
 	$p_name = $row[2];
 	$q_name = $row[3];
-	$nplays = $row[4]+5*$row[5];
-	$common_last_name = check_common_surname($p_name,$q_name);
+	$p_home = $row[4];
+	$q_home = $row[5];
+	$nplays = $row[6];
 
-	$fitness = 1.0/($nplays+1)
-		* ($common_last_name ? 0.3 : 1);
-	$weights["$row[0],$row[1]"] = $fitness;
-	$weights["$row[1],$row[0]"] = $fitness;
+	$same_home = $row[4] == $row[5];
+	$same_family = $same_home && check_common_surname($p_name, $q_name);
+
+	$weights[$key] = array(
+		nplays => $nplays,
+		same_home => $same_home,
+		same_family => $same_family
+		);
 
 	?><tr><td><?php h("$p_name vs $q_name")?></td>
-<td><?php h($row[4])?></td>
-<td><?php h($row[5])?></td>
-<td><?php h(sprintf('%.4f', $fitness))?></td>
+<td align="center"><?php h($nplays)?></td>
+<td align="center"><?php h($same_home ? 'YES' : 'NO')?></td>
+<td align="center"><?php h($same_family ? 'YES' : 'NO')?></td>
 </tr>
 <?php
 }
@@ -205,74 +206,89 @@ while ($row = mysqli_fetch_row($query)) {
 
 function generate_matching($vertices, $weights)
 {
-	$vertices_a = array();
+	$players_list = array();
 	foreach ($vertices as $k=>$v) {
-		$vertices_a[] = $k;
+		$players_list[] = $k;
 	}
 
-	$n = count($vertices_a);
+	$nplayers = count($players_list);
+	$ntables = ceil($nplayers/4.0);
 
-	if ($n <= 4) {
-		// single table of four
-		return array(
-			$vertices_a[0] => 1,
-			$vertices_a[1] => 1,
-			$vertices_a[2] => 1,
-			$vertices_a[3] => 1
-			);
-	}
-
-	shuffle($vertices_a);
-
-	$ntables = ceil($n/4.0);
 	$assignments = array();
-	for ($i = 0; $i < $n; $i++) {
-		$assignments[$vertices_a[$i]] = ($i % $ntables) + 1;
+	for ($round = $_REQUEST['first_round']; $round <= $_REQUEST['last_round']; $round++) {
+
+		$tables = array();
+		for ($i = 0; $i < $ntables; $i++) {
+			$tables[] = array(
+				'board' => ($i+1),
+				'round' => $round,
+				'players' => array()
+				);
+		}
+
+		shuffle($players_list);
+		for ($i = 0; $i < $nplayers; $i++) {
+			$tableno = ($i % $ntables);
+			$tables[$tableno]['players'][] = $players_list[$i];
+		}
+
+		foreach ($tables as $tab) {
+			$assignments[] = $tab;
+		}
 	}
-	return $assignments;
+
+	return array(
+		'players' => $vertices,
+		'history' => $weights,
+		'assignments' => $assignments
+		);
 }
 
-function assignments_fitness($assignments, $weights)
+function sum_fitness($matching)
 {
+	$history = $matching['history'];
+
 	$total_fitness = 0;
-	foreach ($assignments as $pid => $table_number) {
+	foreach ($matching['assignments'] as $game) {
+
 		$sum_fitness = 0;
 		$count = 0;
-		foreach ($assignments as $opp => $opp_table) {
-			if ($opp != $pid && $opp_table == $table_number) {
+
+	foreach ($game['players'] as $pid) {
+		foreach ($game['players'] as $opp) {
+			if ($pid < $opp) {
 				$count++;
-				$f = $weights["$pid,$opp"];
+				$k = "$pid,$opp";
+				$h = $history[$k];
+				$f = 1/(1+$h['nplays']) * (
+					$h['same_family'] ? 0.5 :
+					($h['same_home'] ? 0.85 : 1));
 				$sum_fitness += $f;
 			}
 		}
+	}
 		$avg_fitness = $count ? $sum_fitness / $count : 0;
 		$total_fitness += $avg_fitness;
 	}
+
 	return $total_fitness;
 }
 
-$assignments = generate_matching($players, $weights);
-$tables = array();
-foreach ($assignments as $pid => $table) {
-	if (!isset($tables[$table])) {
-		$tables[$table] = array();
-	}
-	$tables[$table][] = $pid;
-}
+$matching = generate_matching($players, $weights);
 
 ?>
 <table border="1">
-<caption>Fitness : <?php h(sprintf('%.4f',assignments_fitness($assignments, $weights)))?></caption>
+<caption>Fitness : <?php h(sprintf('%.4f',sum_fitness($matching)))?></caption>
 <tr>
 <th>Table</th>
 <th>Players</th>
 </tr>
 <?php
-foreach ($tables as $table_name => $table_assign) {
+foreach ($matching['assignments'] as $game) {
 	?><tr>
-<td><?php h("Table $table_name")?></td>
+<td><?php h("Table $game[round]-$game[board]")?></td>
 <td><ul class="player_inline_list"><?php
-	foreach ($table_assign as $pid) {
+	foreach ($game['players'] as $pid) {
 		$p = $players[$pid];
 		?><li><span class="player_name" data-player-id="<?php h($pid)?>"><?php h($p['name'])?></span></li>
 <?php

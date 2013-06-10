@@ -61,3 +61,6 @@ td.rating_col, td.score_col, td.placement_col {
 	padding: 3px 10px;
 	font-size: 12pt;
 }
+.driller_content {
+	display: none
+}
