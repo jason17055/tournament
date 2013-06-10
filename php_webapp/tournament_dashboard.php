@@ -80,9 +80,12 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 if (is_director($tournament_id)) {
 $new_person_url = "person.php?tournament=".urlencode($tournament_id);
+$pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($new_person_url)?>">New Player</a>
+|
+<a href="<?php h($pairings_url)?>">Generate Pairings</a>
 </p>
 <?php } ?>
 

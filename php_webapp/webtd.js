@@ -92,3 +92,10 @@ $(function() {
 	$('#add_participant_link').click(on_add_participant_clicked);
 	$('.delete_row_btn').click(on_delete_participant_clicked);
 });
+
+$(function() {
+	$('.driller_content').hide();
+	$('.driller_heading').click(function() {
+		$(this).next('.driller_content').slideToggle(500);
+		});
+});

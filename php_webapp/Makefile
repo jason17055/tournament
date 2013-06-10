@@ -14,6 +14,7 @@ php_scripts = \
 	index.php \
 	list_roster.inc.php \
 	login.php \
+	pairings.php \
 	person.php \
 	player_scorecard.php \
 	run_ratings.php \

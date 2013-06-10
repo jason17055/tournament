@@ -40,3 +40,24 @@ td.rating_col, td.score_col, td.placement_col {
 .game_count_col {
 	text-align: center;
 }
+.player_inline_list {
+	list-style-type: none;
+	padding: 0;
+}
+.player_inline_list li {
+	display: inline;
+	padding: 0px 3px;
+}
+
+.driller_container {
+	margin-bottom: 1em;
+}
+.driller_heading {
+	margin: 0;
+	color: black;
+	background-color: #f73;
+	border: 1px solid #c30;
+	cursor: pointer;
+	padding: 3px 10px;
+	font-size: 12pt;
+}
