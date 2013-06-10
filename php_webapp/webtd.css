@@ -37,3 +37,6 @@ td.rating_col, td.score_col, td.placement_col {
 .template {
 	display: none;
 }
+.game_count_col {
+	text-align: center;
+}

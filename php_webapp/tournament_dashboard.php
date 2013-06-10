@@ -5,14 +5,15 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT name,multi_game,multi_session FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,multi_game,multi_session,current_session FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
 	id => $tournament_id,
 	name => $row[0],
 	multi_game => $row[1],
-	multi_session => $row[2]
+	multi_session => $row[2],
+	current_session => $row[3]
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";
@@ -25,9 +26,23 @@ begin_page($page_title);
 <th>Player Name</th>
 <th>Email Address</th>
 <th>Status</th>
+<th>Games Played</th>
+<th>Wins</th>
+<th>Wins This Session</th>
 </tr>
 <?php
-$sql = "SELECT id,name,mail,status FROM person
+$sql = "SELECT id,name,mail,status,
+	(SELECT COUNT(DISTINCT contest) FROM contest_participant
+			WHERE player=p.id) AS games_played,
+	(SELECT COUNT(DISTINCT contest) FROM contest_participant
+			WHERE player=p.id
+			AND placement=1) AS games_won,
+	(SELECT COUNT(DISTINCT cp.contest) FROM contest_participant cp
+			JOIN contest c ON c.id=cp.contest
+			WHERE cp.player=p.id
+			AND cp.placement=1
+			AND c.session_num=".db_quote($tournament_info['current_session']).") AS games_won_this_session
+	FROM person p
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY name";
 $query = mysqli_query($database, $sql);
@@ -37,6 +52,9 @@ while ($row = mysqli_fetch_row($query)) {
 	$name = $row[1];
 	$mail = $row[2];
 	$status = $row[3];
+	$games_played = $row[4];
+	$games_won = $row[5];
+	$games_won_this_session = $row[6];
 
 	$url = "person.php?id=".urlencode($person_id);
 
@@ -50,6 +68,9 @@ while ($row = mysqli_fetch_row($query)) {
 		?><img src="images/minus.png" width="14" height="14" alt=""><?php
 	}
 	h($status)?></td>
+<td class="game_count_col"><?php h($games_played)?></td>
+<td class="game_count_col"><?php h($games_won)?></td>
+<td class="game_count_col"><?php h($games_won_this_session)?></td>
 </tr>
 <?php
 } //end foreach person
