@@ -58,9 +58,37 @@ function on_add_participant_clicked(evt)
 		);
 
 	$('#participants_table').append($r);
+
+	$('.delete_row_btn', $r).click(function(evt) {
+		$r.remove();
+		});
+
 	return false;
+}
+
+function on_delete_participant_clicked(evt)
+{
+	var el = this;
+	var row_el = null;
+	var rowid = null;
+
+	while (el && !rowid) {
+		rowid = el.getAttribute('data-rowid');
+		row_el = el;
+		el = el.parentNode;
+	}
+
+	if (!rowid) { return; }
+
+	var $x = $('<input type="hidden">');
+	$x.attr('name', 'participant_'+rowid+'_delete');
+	$x.attr('value', '1');
+	$('#participants_table').after($x);
+
+	$(row_el).remove();
 }
 
 $(function() {
 	$('#add_participant_link').click(on_add_participant_clicked);
+	$('.delete_row_btn').click(on_delete_participant_clicked);
 });

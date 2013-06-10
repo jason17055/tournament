@@ -136,15 +136,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			}
 		}
 		foreach ($p_updates as $cpid => $cp_post) {
+
+			if (isset($cp_post['delete'])) {
+				$sql = "DELETE FROM contest_participant
+					WHERE id=".db_quote($cpid);
+				mysqli_query($database, $sql)
+					or die("SQL error: ".db_error($database));
+				continue;
+			}
+
 			$updates = array();
+			$count_nonempty = 0;
 			foreach ($cp_post as $k => $v) {
 				if ($k == 'player' || $k == 'seat' ||
 				$k == 'turn_order' || $k == 'score' ||
 				$k == 'placement')
 				{
 					$updates[] = "$k=".db_quote($v);
+					if (strlen($v)) { $count_nonempty++; }
+				}
+				else {
+					die("unrecognized participant field : $k");
 				}
 			}
+
 			if (count($updates) == 0) {
 				continue;
 			}
@@ -156,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					AND contest=".db_quote($_GET['id']);
 				mysqli_query($database, $sql);
 			}
-			else {
+			else if ($count_nonempty) {
 				array_unshift($updates, "contest=".db_quote($_GET['id']));
 				$sql = "INSERT INTO contest_participant
 					SET ".implode(',',$updates);
@@ -281,12 +296,13 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 		$placement = $row[7];
 		$pre = 'participant_'.$cpid;
 		?>
-<tr>
+<tr data-rowid="<?php h($cpid)?>">
 <td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>" data-player_id="<?php h($player_id)?>" class="player_sel"></td>
 <td class="seat_col"><input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"></td>
 <td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($turn_order)?>"></td>
 <td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($score)?>"></td>
 <td class="placement_col"><input type="text" size="4" name="<?php h($pre.'_placement')?>" value="<?php h($placement)?>"></td>
+<td class="actions_col"><button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button></td>
 </tr>
 <?php
 	} // end foreach participant
@@ -297,6 +313,7 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <td class="turn_order_col"><input type="text" size="4" name="_turn_order"></td>
 <td class="score_col"><input type="text" size="4" name="_score"></td>
 <td class="placement_col"><input type="text" size="4" name="_placement"></td>
+<td class="actions_col"><button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button></td>
 </tr>
 </table>
 <?php
