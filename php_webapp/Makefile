@@ -4,7 +4,8 @@ data_files = \
 	webtd.css \
 	webtd.js \
 	images/plus.png \
-	images/minus.png
+	images/minus.png \
+	images/red_cross.png
 
 php_scripts = \
 	config.php \
