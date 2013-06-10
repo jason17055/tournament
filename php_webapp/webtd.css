@@ -34,3 +34,6 @@ td.rating_col, td.score_col, td.placement_col {
 .tabular_form th.player_col {
 	text-align: left;
 }
+.template {
+	display: none;
+}

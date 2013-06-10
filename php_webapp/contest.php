@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		$p_updates = array();
 		foreach ($_POST as $k => $v) {
-			if (preg_match('/^participant_(\d+)_(.*)$/', $k, $m)) {
+			if (preg_match('/^participant_(_?\d+)_(.*)$/', $k, $m)) {
 				$cpid = $m[1];
 				$field = $m[2];
 				if (!isset($p_updates[$cpid])) {
@@ -145,11 +145,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 					$updates[] = "$k=".db_quote($v);
 				}
 			}
-			if (count($updates)) {
+			if (count($updates) == 0) {
+				continue;
+			}
+
+			if (preg_match('/^(\d+)$/', $cpid, $m)) {
 				$sql = "UPDATE contest_participant
 					SET ".implode(',',$updates)."
-					WHERE id=".db_quote($cpid);
+					WHERE id=".db_quote($cpid)."
+					AND contest=".db_quote($_GET['id']);
 				mysqli_query($database, $sql);
+			}
+			else {
+				array_unshift($updates, "contest=".db_quote($_GET['id']));
+				$sql = "INSERT INTO contest_participant
+					SET ".implode(',',$updates);
+				mysqli_query($database, $sql)
+					or die("SQL error: ".db_error($database));
 			}
 		}
 
@@ -235,7 +247,7 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <tr>
 <td valign="top"><label>Participants:</label></td>
 <td>
-<table class="tabular_form">
+<table id="participants_table" class="tabular_form">
 <tr>
 <th class="player_col">Player</th>
 <th class="seat_col">Seat</th>
@@ -279,13 +291,20 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <?php
 	} // end foreach participant
 	?>
+<tr id="new_participant_row" class="template">
+<td class="player_col"><input type="text" name="_player" class="player_sel"></td>
+<td class="seat_col"><input type="text" size="4" name="_seat"></td>
+<td class="turn_order_col"><input type="text" size="4" name="_turn_order"></td>
+<td class="score_col"><input type="text" size="4" name="_score"></td>
+<td class="placement_col"><input type="text" size="4" name="_placement"></td>
+</tr>
 </table>
 <?php
 	if (is_director($tournament_id)) {
 	$add_participant_url = "contest_participant.php?contest=".urlencode($_GET['id'])
 		."&next_url=".urlencode($_SERVER['REQUEST_URI']);
 	?>
-<div><a href="<?php h($add_participant_url)?>">Add Participant</a></div>
+<div><a href="#<?php h($add_participant_url)?>" id="add_participant_link">Add Participant</a></div>
 	<?php } //endif is_director ?>
 </td>
 <?php
