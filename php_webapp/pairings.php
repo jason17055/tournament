@@ -117,11 +117,11 @@ while ($row = mysqli_fetch_row($query))
 {
 	$pid = $row[0];
 	$p = array(
-		name => $row[1],
-		count2p => $row[2],
-		count3p => $row[3],
-		count4p => $row[4],
-		count5p => $row[5]
+		'name' => $row[1],
+		'count2p' => $row[2],
+		'count3p' => $row[3],
+		'count4p' => $row[4],
+		'count5p' => $row[5]
 		);
 	$players[$pid] = $p;
 
@@ -244,12 +244,14 @@ function generate_matching($vertices, $weights)
 		);
 }
 
-function sum_fitness($matching)
+function sum_fitness(&$matching)
 {
 	$history = $matching['history'];
 
+	$encounters = array();
+
 	$total_fitness = 0;
-	foreach ($matching['assignments'] as $game) {
+	foreach ($matching['assignments'] as &$game) {
 
 		$sum_fitness = 0;
 		$count = 0;
@@ -260,14 +262,19 @@ function sum_fitness($matching)
 				$count++;
 				$k = "$pid,$opp";
 				$h = $history[$k];
-				$f = 1/(1+$h['nplays']) * (
-					$h['same_family'] ? 0.5 :
-					($h['same_home'] ? 0.85 : 1));
+				$encounters[$k] = ($encounters[$k] ?: 0) + 1;
+				$f = 1/($encounters[$k]+$h['nplays']/5);
+				if ($h['same_family']) {
+					$f *= 0.6;
+				} else if ($h['same_home']) {
+					$f *= 0.9;
+				}
 				$sum_fitness += $f;
 			}
 		}
 	}
 		$avg_fitness = $count ? $sum_fitness / $count : 0;
+		$game['this_fitness'] = $avg_fitness;
 		$total_fitness += $avg_fitness;
 	}
 
@@ -275,6 +282,44 @@ function sum_fitness($matching)
 }
 
 $matching = generate_matching($players, $weights);
+$sql = "SELECT id,round,board,
+		(SELECT GROUP_CONCAT(
+			player ORDER BY player SEPARATOR ','
+			)
+		FROM contest_participant
+		WHERE contest=c.id
+		) AS players
+	FROM contest c
+	WHERE tournament=".db_quote($tournament_id)."
+	AND session_num=".db_quote($tournament_info['current_session']);
+$query = mysqli_query($database, $sql);
+while ($row = mysqli_fetch_row($query))
+{
+	$round = $row[1];
+	$board = $row[2];
+	$m_players = explode(',',$row[3]);
+	$game = array(
+		'round' => $round,
+		'board' => $board,
+		'players' => $m_players
+		);
+	$matching['assignments'][] = $game;
+}
+
+function order_by_round_and_board($a, $b)
+{
+	if ($a['round'] != $b['round']) {
+		return $a['round'] > $b['round'] ? 1 : -1;
+	}
+	else if ($a['board'] != $b['board']) {
+		return $a['board'] > $b['board'] ? 1 : -1;
+	}
+	else {
+		return 0;
+	}
+}
+
+usort($matching['assignments'], 'order_by_round_and_board');
 
 ?>
 <table border="1">
@@ -282,6 +327,7 @@ $matching = generate_matching($players, $weights);
 <tr>
 <th>Table</th>
 <th>Players</th>
+<th>Fitness</th>
 </tr>
 <?php
 foreach ($matching['assignments'] as $game) {
@@ -294,6 +340,7 @@ foreach ($matching['assignments'] as $game) {
 <?php
 	}
 	?></ul></td>
+<td><?php h($game['this_fitness'])?></td>
 </tr>
 <?php
 }//end foreach table
