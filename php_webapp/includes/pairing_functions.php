@@ -108,6 +108,7 @@ function mutate_matching(&$parent_matching)
 
 	$rmtable_idx = roulette($R);
 	$table = $assignments[$rmtable_idx];
+	$rmtable_round = $table['round'];
 
 	$player_idx = rand(1, count($table['players'])) - 1;
 	$new_players = $table['players'];
@@ -120,7 +121,11 @@ function mutate_matching(&$parent_matching)
 	// find a place to insert this player
 	$R = array();
 	for ($i = 0; $i < count($assignments); $i++) {
+		// don't re-insert in same table
 		if ($i == $rmtable_idx) { continue; }
+		// don't insert to table in a different round
+		if ($assignments[$i]['round'] != $rmtable_round) { continue; }
+
 		$table_size = count($assignments[$i]['players']);
 		$f = 1.0/pow($table_size,2);
 		$R[] = array(
