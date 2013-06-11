@@ -22,6 +22,7 @@ php_scripts = \
 	tournament_dashboard.php \
 	includes/auth.php \
 	includes/db.php \
+	includes/pairing_functions.php \
 	includes/ratings_functions.php \
 	includes/skin.php
 

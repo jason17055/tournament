@@ -3,17 +3,7 @@
 require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
-
-function check_common_surname($a_name, $b_name)
-{
-	$a_names = explode(' ', $a_name);
-	$a_surname = array_pop($a_names);
-
-	$b_names = explode(' ', $b_name);
-	$b_surname = array_pop($b_names);
-
-	return strtolower($a_surname) == strtolower($b_surname);
-}
+require_once('includes/pairing_functions.php');
 
 $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,current_session,
@@ -204,84 +194,7 @@ while ($row = mysqli_fetch_row($query)) {
 </div><!--/.driller_container-->
 <?php
 
-function generate_matching($vertices, $weights)
-{
-	$players_list = array();
-	foreach ($vertices as $k=>$v) {
-		$players_list[] = $k;
-	}
-
-	$nplayers = count($players_list);
-	$ntables = ceil($nplayers/4.0);
-
-	$assignments = array();
-	for ($round = $_REQUEST['first_round']; $round <= $_REQUEST['last_round']; $round++) {
-
-		$tables = array();
-		for ($i = 0; $i < $ntables; $i++) {
-			$tables[] = array(
-				'board' => ($i+1),
-				'round' => $round,
-				'players' => array()
-				);
-		}
-
-		shuffle($players_list);
-		for ($i = 0; $i < $nplayers; $i++) {
-			$tableno = ($i % $ntables);
-			$tables[$tableno]['players'][] = $players_list[$i];
-		}
-
-		foreach ($tables as $tab) {
-			$assignments[] = $tab;
-		}
-	}
-
-	return array(
-		'players' => $vertices,
-		'history' => $weights,
-		'assignments' => $assignments
-		);
-}
-
-function sum_fitness(&$matching)
-{
-	$history = $matching['history'];
-
-	$encounters = array();
-
-	$total_fitness = 0;
-	foreach ($matching['assignments'] as &$game) {
-
-		$sum_fitness = 0;
-		$count = 0;
-
-	foreach ($game['players'] as $pid) {
-		foreach ($game['players'] as $opp) {
-			if ($pid < $opp) {
-				$count++;
-				$k = "$pid,$opp";
-				$h = $history[$k];
-				$encounters[$k] = ($encounters[$k] ?: 0) + 1;
-				$f = 1/($encounters[$k]+$h['nplays']/5);
-				if ($h['same_family']) {
-					$f *= 0.6;
-				} else if ($h['same_home']) {
-					$f *= 0.9;
-				}
-				$sum_fitness += $f;
-			}
-		}
-	}
-		$avg_fitness = $count ? $sum_fitness / $count : 0;
-		$game['this_fitness'] = $avg_fitness;
-		$total_fitness += $avg_fitness;
-	}
-
-	return $total_fitness;
-}
-
-$matching = generate_matching($players, $weights);
+$games = array();
 $sql = "SELECT id,round,board,
 		(SELECT GROUP_CONCAT(
 			player ORDER BY player SEPARATOR ','
@@ -291,7 +204,8 @@ $sql = "SELECT id,round,board,
 		) AS players
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
-	AND session_num=".db_quote($tournament_info['current_session']);
+	AND session_num=".db_quote($tournament_info['current_session'])."
+	AND status<>'proposed'";
 $query = mysqli_query($database, $sql);
 while ($row = mysqli_fetch_row($query))
 {
@@ -303,7 +217,7 @@ while ($row = mysqli_fetch_row($query))
 		'board' => $board,
 		'players' => $m_players
 		);
-	$matching['assignments'][] = $game;
+	$games[] = $game;
 }
 
 function order_by_round_and_board($a, $b)
@@ -319,11 +233,15 @@ function order_by_round_and_board($a, $b)
 	}
 }
 
-usort($matching['assignments'], 'order_by_round_and_board');
 
+function show_matching(&$matching)
+{
+$players = &$matching['players'];
+
+usort($matching['assignments'], 'order_by_round_and_board');
 ?>
 <table border="1">
-<caption>Fitness : <?php h(sprintf('%.4f',sum_fitness($matching)))?></caption>
+<caption>Fitness : <?php h(sprintf('%.4f',$matching['fitness']))?></caption>
 <tr>
 <th>Table</th>
 <th>Players</th>
@@ -347,6 +265,11 @@ foreach ($matching['assignments'] as $game) {
 ?>
 </table>
 <?php
+} //end show_matching()
+
 } //endif action:generate_pairings
+
+$matching = generate_optimal_matching($games, $players, $weights);
+show_matching($matching);
 
 end_page();
