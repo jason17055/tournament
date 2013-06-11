@@ -220,32 +220,17 @@ while ($row = mysqli_fetch_row($query))
 	$games[] = $game;
 }
 
-function order_by_round_and_board($a, $b)
-{
-	if ($a['round'] != $b['round']) {
-		return $a['round'] > $b['round'] ? 1 : -1;
-	}
-	else if ($a['board'] != $b['board']) {
-		return $a['board'] > $b['board'] ? 1 : -1;
-	}
-	else {
-		return 0;
-	}
-}
-
-
 function show_matching(&$matching)
 {
 $players = &$matching['players'];
 
 usort($matching['assignments'], 'order_by_round_and_board');
 ?>
-<table border="1">
+<table border="1" style="float:left; margin-right: 2em">
 <caption>Fitness : <?php h(sprintf('%.4f',$matching['fitness']))?></caption>
 <tr>
 <th>Table</th>
 <th>Players</th>
-<th>Fitness</th>
 </tr>
 <?php
 foreach ($matching['assignments'] as $game) {
@@ -258,12 +243,25 @@ foreach ($matching['assignments'] as $game) {
 <?php
 	}
 	?></ul></td>
-<td><?php h($game['this_fitness'])?></td>
 </tr>
 <?php
 }//end foreach table
 ?>
 </table>
+<table border="1">
+<tr><th>Penalty</th><th>Points</th></tr>
+<?php
+	foreach ($matching['penalties'] as $pen_key => $pen_val) {
+	?><tr>
+	<td><?php h($pen_key)?></td>
+	<td align="right"><?php h($pen_val)?></td>
+	</tr>
+	<?php
+	}
+	?>
+</table>
+<div style="clear:both"></div>
+
 <?php
 } //end show_matching()
 
@@ -271,5 +269,8 @@ foreach ($matching['assignments'] as $game) {
 
 $matching = generate_optimal_matching($games, $players, $weights);
 show_matching($matching);
+
+//$m = mutate_matching($matching);
+//show_matching($m);
 
 end_page();

@@ -58,37 +58,100 @@ function sum_fitness(&$matching)
 {
 	$history = $matching['history'];
 
+	$penalties = array(
+		'consecutives' => 0,
+		'repeats' => 0
+		);
+
+	// this keeps track of how many times particular pairings play
+	// each other
 	$encounters = array();
+	// keep track of how many rounds a player can play in
+	$player_game_counts = array();
+	foreach ($matching['players'] as $pid => $dummy1)
+	{
+		$player_game_counts[$pid] = 0;
 
-	$total_fitness = 0;
-	foreach ($matching['assignments'] as &$game) {
-
-		$sum_fitness = 0;
-		$count = 0;
-
-	foreach ($game['players'] as $pid) {
-		foreach ($game['players'] as $opp) {
+		foreach ($matching['players'] as $opp => $dummy2)
+		{
 			if ($pid < $opp) {
-				$count++;
-				$k = "$pid,$opp";
-				$h = $history[$k];
-				$encounters[$k] = ($encounters[$k] ?: 0) + 1;
-				$f = 1/($encounters[$k]+$h['nplays']/5);
+				$pair_key = "$pid,$opp";
+				$h = $history[$pair_key];
+				$prior_plays = $h['nplays'] / 5;
 				if ($h['same_family']) {
-					$f *= 0.6;
+					$prior_plays += 1.5;
 				} else if ($h['same_home']) {
-					$f *= 0.9;
+					$prior_plays += 0.65;
 				}
-				$sum_fitness += $f;
+				$encounters[$pair_key] = $prior_plays;
 			}
 		}
 	}
-		$avg_fitness = $count ? $sum_fitness / $count : 0;
-		$game['this_fitness'] = $avg_fitness;
-		$total_fitness += $avg_fitness;
+
+	// this keeps track of what round number a pair last played each
+	// other
+	$last_seen = array();
+
+	$tables = $matching['assignments'];
+	usort($tables, 'order_by_round_and_board');
+
+	$sum_game_sizes = 0;
+	foreach ($tables as &$game) {
+		$sum_game_sizes += count($game['players']);
+	}
+	$avg_game_size = $sum_game_sizes / count($tables);
+
+	$player_game_sizes = array();
+	foreach ($tables as &$game) {
+		$this_game_size = count($game['players']);
+
+		foreach ($game['players'] as $pid) {
+			$player_game_counts[$pid]++;
+			$player_game_sizes[$pid] = ($player_game_sizes[$pid] ?: 0) + count($game['players']);
+			foreach ($game['players'] as $opp) {
+				if ($pid < $opp) {
+					$k = "$pid,$opp";
+
+					if (isset($last_seen[$k])) {
+						$elapsed = $game['round'] - $last_seen[$k];
+						$p = $elapsed < 2 ? 150 : 0;
+						$penalties['consecutives'] += $p;
+					}
+					$last_seen[$k] = $game['round'];
+
+					$encounters[$k] = ($encounters[$k] ?: 0) + 1;
+				}
+			}
+		}
 	}
 
-	return $total_fitness;
+	// determine average number of encounters
+	$sum_encounters = 0;
+	$count_encounters = 0;
+	foreach ($encounters as $pair_key => $nplays) {
+		$sum_encounters += $nplays;
+		$count_encounters += 1;
+	}
+	$avg_encounters = $sum_encounters / $count_encounters;
+
+	// add penalties for each pairing where the encounters is not
+	// near the average
+
+	foreach ($encounters as $pair_key => $nplays) {
+		$deviation = abs($nplays - $avg_encounters);
+		$p = pow($deviation, 2) * 100;
+		echo "$pair_key - played $nplays ($avg_encounters)<br>\n";
+		$penalties['repeats'] += $p;
+	}
+
+	$total_penalty = 0;
+	foreach ($penalties as $pen_key => $pen_val) {
+		$total_penalty += $pen_val;
+	}
+	$matching['penalties'] = &$penalties;
+
+echo "got penalty of $total_penalty<br>\n";
+	return 1000/(1+$total_penalty/1000);
 }
 
 function mutate_matching(&$parent_matching)
@@ -183,17 +246,27 @@ function generate_optimal_matching(&$games, &$players, &$weights)
 	$sum_fitness = 0;
 	$pool = array();
 	for ($i = 0; $i < $POOL_SIZE; $i++) {
+		?><div class="driller_container" style="display:none">
+		<h2 class="driller_heading">Random Matching <?php echo($i+1)?></h2>
+		<div class="driller_content"><?php
 		$m = generate_random_matching($games, $players, $weights);
 		$sum_fitness += $m['fitness'];
 		$pool[] = $m;
+		show_matching($m);
+		?></div></div>
+		<?php
 	}
 
 	for ($i = 0; $i < 20; $i++) {
+		?><div class="driller_container" style="display:none">
+		<h2 class="driller_heading">Mutation <?php echo($i+1)?></h2>
+		<div class="driller_content"><?php
 		// first, pick a random solution from pool
 		$r = rand(1, $POOL_SIZE)-1;
 
 		// clone it with mutations
-		$m = mutate_matching($pool[$i]);
+		$m = mutate_matching($pool[$r]);
+		show_matching($m);
 
 		// substitute the new entry for the weakest in pool
 		$worst_i = -1;
@@ -207,6 +280,7 @@ function generate_optimal_matching(&$games, &$players, &$weights)
 		if ($worst_i != -1) {
 			$pool[$worst_i] = $m;
 		}
+		?></div></div><?php
 	}
 
 	//find the best
@@ -219,4 +293,17 @@ function generate_optimal_matching(&$games, &$players, &$weights)
 		}
 	}
 	return $pool[$best_i];
+}
+
+function order_by_round_and_board($a, $b)
+{
+	if ($a['round'] != $b['round']) {
+		return $a['round'] > $b['round'] ? 1 : -1;
+	}
+	else if ($a['board'] != $b['board']) {
+		return $a['board'] > $b['board'] ? 1 : -1;
+	}
+	else {
+		return 0;
+	}
 }
