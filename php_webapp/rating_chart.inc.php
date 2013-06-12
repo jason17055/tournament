@@ -21,7 +21,7 @@ while ($row = mysqli_fetch_row($query)) {
 		echo "\t".json_encode(array("".($session_num-1), +$prior_rating));
 	}
 	echo ",\n";
-	echo "\t".json_encode(array("$session_num", +$post_rating));
+	echo "\t".json_encode(array("$session_num", round($post_rating)));
 } //end foreach session
 ?>
 	];
