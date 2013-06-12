@@ -105,7 +105,7 @@ function do_ratings($tournament_id)
 		SELECT ".db_quote($batch_num).",
 			p.id,
 			0,
-			0
+			".db_quote($_REQUEST['initial_rating']?:0)."
 			FROM person p
 			WHERE tournament=".db_quote($tournament_id);
 	mysqli_query($database, $sql)
@@ -119,7 +119,7 @@ function do_ratings($tournament_id)
 		SELECT DISTINCT ".db_quote($batch_num).",
 			p.id,
 			c.session_num,
-			0
+			".db_quote($_REQUEST['initial_rating']?:0)."
 			FROM person p
 			CROSS JOIN contest c ON c.tournament=p.tournament
 			AND c.id IN (
@@ -185,7 +185,7 @@ function do_ratings($tournament_id)
 		WHERE tournament=".db_quote($tournament_id)."
 		AND status='completed'
 		AND session_num IS NOT NULL
-		AND session_num >= 1";
+		AND session_num >= ".db_quote($_REQUEST['first_session'] ?: 1);
 	$c_query = mysqli_query($database, $sql)
 		or die("SQL error 406: ".db_error($database));
 

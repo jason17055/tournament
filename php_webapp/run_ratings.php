@@ -83,8 +83,19 @@ while ($row = mysqli_fetch_row($query)) {
 
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 
+<div>
+Start at session:
+<input type="text" name="first_session" size="4" value="1">
+</div>
+<div>
+Default initial rating:
+<input type="text" name="initial_rating" size="4" value="1500">
+</div>
+
+<div class="form_buttons_bar">
 <button type="submit" name="action:run_ratings">Run Ratings</button>
 <button type="submit" name="action:cancel">Cancel</button>
+</div>
 
 </form>
 <?php
