@@ -55,6 +55,8 @@ else {
 	die("Invalid query string");
 }
 
+$can_edit = is_director($tournament_id);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
 	$next_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
@@ -64,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	if (!is_director($tournament_id)) {
+	if (!$can_edit) {
 		die("Not authorized.");
 	}
 
@@ -250,18 +252,18 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 			suspended => "Suspended",
 			aborted => "Aborted",
 			completed => "Completed"
-			)
+			),
+		read_only => !$can_edit
 		)) ?></td>
 </tr>
 <tr>
 <td valign="top"><label for="notes_entry">Notes:</label></td>
 <td><textarea name="notes" rows="4" cols="60"><?php h($_REQUEST['notes'])?></textarea></td>
 </tr>
-<?php
-	if ($_GET['id']) {?>
 <tr>
 <td valign="top"><label>Participants:</label></td>
 <td>
+<?php if ($can_edit) { ?>
 <table id="participants_table" class="tabular_form">
 <tr>
 <th class="player_col">Player</th>
@@ -317,21 +319,69 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 </tr>
 </table>
 <?php
-	if (is_director($tournament_id)) {
+	if ($can_edit) {
 	$add_participant_url = "contest_participant.php?contest=".urlencode($_GET['id'])
 		."&next_url=".urlencode($_SERVER['REQUEST_URI']);
 	?>
 <div><a href="#<?php h($add_participant_url)?>" id="add_participant_link">Add Participant</a></div>
 	<?php } //endif is_director ?>
-</td>
 <?php
-	} // endif contest id known
+	} // endif can_edit
+	else { ?>
+<table id="participants_table" class="tabular">
+<tr>
+<th class="player_col">Player</th>
+<th class="rating_col">Rating</th>
+<th class="score_col">Score</th>
+<th class="placement_col">Placement</th>
+</tr>
+<?php
+	$sql = "SELECT cp.id AS id,
+		p.id AS player_id,
+		p.name AS player_name,
+		r.prior_rating AS prior_rating,
+		seat,turn_order,score,placement
+		FROM contest_participant cp
+		JOIN contest c ON c.id=cp.contest
+		JOIN person p ON p.id=cp.player
+		LEFT JOIN player_rating r ON r.id=p.id
+			AND r.session_num=c.session_num
+		WHERE contest=".db_quote($_GET['id'])."
+		ORDER BY turn_order,player_name,cp.id";
+	$query = mysqli_query($database, $sql);
+	while ($row = mysqli_fetch_row($query)) {
+		$cpid = $row[0];
+		$player_id = $row[1];
+		$p_url = "player_scorecard.php?id=".urlencode($player_id)."&next_url=".urlencode($_SERVER['REQUEST_URI']);
+		$player_name = $row[2];
+		$prior_rating = $row[3];
+		$seat = $row[4];
+		$turn_order = $row[5];
+		$score = $row[6];
+		$placement = $row[7];
+		$pre = 'participant_'.$cpid;
+		?>
+<tr data-rowid="<?php h($cpid)?>">
+<td class="player_col"><a href="<?php h($p_url)?>"><?php h($player_name)?></a></td>
+<td class="rating_col"><?php h(sprintf('%.0f', $prior_rating))?></td>
+<td class="score_col"><?php h($score)?></td>
+<td class="placement_col"><?php h($placement)?></td>
+</tr>
+<?php
+	} // end foreach participant
+?>
+</table>
+<?php
+	} // end if !can_edit
 	?>
+</td>
+</tr>
 </table>
 <?php
 	include('list_roster.inc.php');
 	?>
 
+<?php if ($can_edit) { ?>
 <div class="form_buttons_bar">
 <?php if ($_GET['id']) { ?>
 <button type="submit" name="action:update_contest">Update Game</button>
@@ -341,6 +391,13 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <?php } ?>
 <button type="submit" name="action:cancel">Cancel</button>
 </div>
+<?php } else {
+	$go_back_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
+?>
+<p>
+<a href="<?php h($go_back_url)?>">Go Back</a>
+</p>
+<?php } //endif !can_edit ?>
 </form>
 
 <?php

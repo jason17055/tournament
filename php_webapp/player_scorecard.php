@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 begin_page("$person_info[name] - Scorecard");
 
-$go_back_url = 'person.php?id='.urlencode($_GET['id']);
+$go_back_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($go_back_url)?>">Go Back</a>

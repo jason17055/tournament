@@ -128,7 +128,8 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 </form>
 
 <?php
-$scorecard_url = "player_scorecard.php?id=".urlencode($_REQUEST['id']);
+$scorecard_url = "player_scorecard.php?id=".urlencode($_REQUEST['id']).
+	'&next_url='.urlencode($_SERVER['REQUEST_URI']);
 ?>
 <p>
 <a href="<?php h($scorecard_url)?>">Scorecard</a>
