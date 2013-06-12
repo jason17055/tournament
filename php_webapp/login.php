@@ -20,7 +20,8 @@ if ($_GET['ticket'])
 	if (chop($c[0]) == 'yes') {
 		$_SESSION['username'] = chop($c[1]);
 		add_login_attributes();
-		header("Location: $_SESSION[post_login_url]");
+		$next_url = $_SESSION['post_login_url'] ?: '.';
+		header("Location: $next_url");
 		exit();
 	}
 	die("Invalid ticket");
