@@ -189,6 +189,7 @@ function do_ratings($tournament_id)
 
 		$average_score = max($average_score, 10);
 		$weight = $num_players / 2.0;
+		$weight2 = $weight / ($num_players-1);
 
 		$sql = "SELECT a.player,a.score,a.placement,b.player,b.score,b.placement
 			FROM contest_participant a
@@ -223,7 +224,7 @@ function do_ratings($tournament_id)
 					AND player=".db_quote($b_pid)."
 					AND rating_cycle=".db_quote($session_num)."),
 				".db_quote($perf).",
-				".db_quote($weight)."
+				".db_quote($weight2)."
 				FROM dual";
 			mysqli_query($database, $sql)
 				or die("SQL error 409: ".db_error($database));
