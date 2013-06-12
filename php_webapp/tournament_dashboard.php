@@ -23,6 +23,7 @@ begin_page($page_title);
 <table border="1">
 <caption>Players</caption>
 <tr>
+<th></th>
 <th>Player Name</th>
 <th>Email Address</th>
 <th>Status</th>
@@ -75,9 +76,11 @@ while ($row = mysqli_fetch_row($query)) {
 	$w_points = $row[7] ?: 0;
 	$w_points_this_session = $row[8] ?: 0;
 
-	$url = "person.php?id=".urlencode($person_id);
+	$edit_url = "person.php?id=".urlencode($person_id);
+	$url = 'player_scorecard.php?id='.urlencode($person_id);
 
 	?><tr>
+<td class="link_col"><a href="<?php h($edit_url)?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a></td>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
 <td class="mail_col"><?php h($mail)?></td>
 <td class="status_col"><?php

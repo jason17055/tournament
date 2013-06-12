@@ -3,6 +3,7 @@ prefix = /srv/www/htdocs/webtd
 data_files = \
 	webtd.css \
 	webtd.js \
+	images/edit.gif \
 	images/plus.png \
 	images/minus.png \
 	images/red_cross.png \
