@@ -5,7 +5,12 @@ data_files = \
 	webtd.js \
 	images/plus.png \
 	images/minus.png \
-	images/red_cross.png
+	images/red_cross.png \
+	images/bad_result.png \
+	images/good_result.png \
+	images/neutral_result.png \
+	images/very_bad_result.png \
+	images/very_good_result.png
 
 php_scripts = \
 	config.php \

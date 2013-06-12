@@ -53,6 +53,7 @@ $sql = "SELECT c.id,
 	cp1.placement,
 	cp1.w_points,
 	cp1.performance,
+	cp1.expected_performance,
 	(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id) AS nplayers
 	FROM contest_participant cp1
 		JOIN contest c ON c.id=cp1.contest
@@ -89,7 +90,8 @@ while ($row = mysqli_fetch_row($query)) {
 	$placement = $row[6];
 	$w_points = $row[7];
 	$performance = $row[8];
-	$nplayers = $row[9];
+	$exp_perf = $row[9] ?: 0.5;
+	$nplayers = $row[10];
 	if ($placement == 1) {
 		$placement = "1st";
 	}else if ($placement == 2) {
@@ -100,6 +102,7 @@ while ($row = mysqli_fetch_row($query)) {
 		$placement = $placement .= "th";
 	}
 	$placement .= " / $nplayers";
+
 ?>
 <tr>
 <?php if ($tournament_info['multi_session']=='Y'){?>
@@ -111,7 +114,24 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>
 <td class="w_points_col"><?php h($w_points)?></td>
-<td class="performance_col"><?php h(sprintf('%.3f', $performance))?></td>
+<td class="performance_col"><?php
+	if (!is_null($performance)) {
+		$game_weight = $nplayers / 2;
+		$k_val = 16 * $game_weight;
+		$r_adj = $k_val * ($performance - $exp_perf);
+		h(sprintf('%.3f', $performance));
+		h(sprintf(" (%.3f)", $exp_perf));
+
+		if ($r_adj >= 15) $res_icon = 'very_good_result';
+		else if ($r_adj >= 5) $res_icon = 'good_result';
+		else if ($r_adj >= -5) $res_icon = 'neutral_result';
+		else if ($r_adj >= -15) $res_icon = 'bad_result';
+		else $res_icon = 'very_bad_result';
+
+		?><img src="<?php h("images/$res_icon.png")?>" title="<?php sprintf('%+.0f', $r_adj)?>" alt="<?php h($res_icon)?>" width="20" height="20">
+<?php
+	} //endif performance data available
+	?></td>
 </tr>
 <?php
 } // end foreach contest

@@ -31,14 +31,23 @@ function do_all_scores($tournament_id)
 		$weight = $num_players / 2.0;
 		$win_val = (1 + $num_players - $num_winners) / 2;
 
+		// sum of "actual" performance calculations
 		$cp_performances = array();
+		// sum of "expected" performance calculations
+		$cp_exp_perf = array();
 
-		$sql = "SELECT a.id,a.score,a.placement,b.score,b.placement
+		$sql = "SELECT a.id,a.score,a.placement,b.score,b.placement,
+			ar.prior_rating, br.prior_rating
 			FROM contest_participant a
 			CROSS JOIN contest_participant b
 				ON b.contest = a.contest
 				AND NOT (b.player = a.player)
-			WHERE a.contest = ".db_quote($contest_id);
+			JOIN contest c ON c.id=a.contest
+			LEFT JOIN player_rating ar
+				ON ar.id=a.player AND ar.session_num=c.session_num
+			LEFT JOIN player_rating br
+				ON br.id=b.player AND br.session_num=c.session_num
+			WHERE c.id = ".db_quote($contest_id);
 		$query = mysqli_query($database, $sql)
 			or die("SQL error 408: ".db_error($database));
 		while ($row = mysqli_fetch_row($query)) {
@@ -47,20 +56,27 @@ function do_all_scores($tournament_id)
 			$a_place = $row[2];
 			$b_score = $row[3];
 			$b_place = $row[4];
+			$a_rating = $row[5] ?: 0;
+			$b_rating = $row[6] ?: 0;
 
 			$a_effscore = adj_score($a_score, $a_place, $average_score);
 			$b_effscore = adj_score($b_score, $b_place, $average_score);
 
 			$perf = 1.0 / (1.0 + exp($b_effscore - $a_effscore));
 			$cp_performances[$cp_id] = ($cp_performances[$cp_id] ?: 0) + $perf;
+
+			$exp_perf = 1.0 / (1.0 + pow(10, ($b_rating - $a_rating) / 400));
+			$cp_exp_perf[$cp_id] = ($cp_exp_perf[$cp_id] ?: 0) + $exp_perf;
 		}
 
 		foreach ($cp_performances as $cp_id => $perf)
 		{
 			$avg_perf = $perf / ($num_players-1);
+			$avg_eperf = $cp_exp_perf[$cp_id] / ($num_players-1);
 
 			$sql = "UPDATE contest_participant
 				SET performance=".db_quote($avg_perf).",
+				expected_performance=".db_quote($avg_eperf).",
 				w_points=CASE WHEN placement=1 THEN ".db_quote($win_val)." ELSE 0 END
 				WHERE id=".db_quote($cp_id);
 			mysqli_query($database, $sql)
