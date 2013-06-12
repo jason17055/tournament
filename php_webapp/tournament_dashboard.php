@@ -27,25 +27,34 @@ begin_page($page_title);
 <th>Email Address</th>
 <th>Status</th>
 <th>Games Played</th>
-<th>Wins</th>
-<th>Wins This Session</th>
+<th>Games Won</th>
 </tr>
 <?php
 $sql = "SELECT id,name,mail,status,
 	(SELECT COUNT(DISTINCT contest) FROM contest_participant
 			WHERE player=p.id) AS games_played,
-	(SELECT COUNT(DISTINCT contest) FROM contest_participant
-			WHERE player=p.id
-			AND placement=1) AS games_won,
-	(SELECT COUNT(DISTINCT cp.contest) FROM contest_participant cp
-			JOIN contest c ON c.id=cp.contest
-			WHERE cp.player=p.id
-			AND cp.placement=1
-			AND c.session_num=".db_quote($tournament_info['current_session']).") AS games_won_this_session
+	(SELECT COUNT(*) FROM contest c
+		WHERE p.id IN (SELECT player FROM contest_participant
+				WHERE contest=c.id
+				AND placement=1)
+		AND EXISTS (SELECT 1 FROM contest_participant
+				WHERE contest=c.id
+				AND NOT (placement=1))
+		) AS games_won,
+	(SELECT COUNT(*) FROM contest c
+		WHERE p.id IN (SELECT player FROM contest_participant
+				WHERE contest=c.id
+				AND placement=1)
+		AND EXISTS (SELECT 1 FROM contest_participant
+				WHERE contest=c.id
+				AND NOT (placement=1))
+		AND c.session_num=".db_quote($tournament_info['current_session'])."
+		) AS games_won_this_session
 	FROM person p
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY name";
-$query = mysqli_query($database, $sql);
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
 while ($row = mysqli_fetch_row($query)) {
 
 	$person_id = $row[0];
@@ -69,8 +78,7 @@ while ($row = mysqli_fetch_row($query)) {
 	}
 	h($status)?></td>
 <td class="game_count_col"><?php h($games_played)?></td>
-<td class="game_count_col"><?php h($games_won)?></td>
-<td class="game_count_col"><?php h($games_won_this_session)?></td>
+<td class="game_count_col"><?php h("$games_won (+$games_won_this_session)")?></td>
 </tr>
 <?php
 } //end foreach person
