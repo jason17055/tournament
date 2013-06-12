@@ -57,6 +57,68 @@ else {
 
 $can_edit = is_director($tournament_id);
 
+function update_contest_participants($contest_id)
+{
+	global $database;
+
+		$p_updates = array();
+		foreach ($_POST as $k => $v) {
+			if (preg_match('/^participant_(_?\d+)_(.*)$/', $k, $m)) {
+				$cpid = $m[1];
+				$field = $m[2];
+				if (!isset($p_updates[$cpid])) {
+					$p_updates[$cpid] = array();
+				}
+				$p_updates[$cpid][$field] = $v;
+			}
+		}
+		foreach ($p_updates as $cpid => $cp_post) {
+
+			if (isset($cp_post['delete'])) {
+				$sql = "DELETE FROM contest_participant
+					WHERE id=".db_quote($cpid)."
+					AND contest=".db_quote($contest_id);
+				mysqli_query($database, $sql)
+					or die("SQL error: ".db_error($database));
+				continue;
+			}
+
+			$updates = array();
+			$count_nonempty = 0;
+			foreach ($cp_post as $k => $v) {
+				if ($k == 'player' || $k == 'seat' ||
+				$k == 'turn_order' || $k == 'score' ||
+				$k == 'placement')
+				{
+					$updates[] = "$k=".db_quote($v);
+					if (strlen($v)) { $count_nonempty++; }
+				}
+				else {
+					die("unrecognized participant field : $k");
+				}
+			}
+
+			if (count($updates) == 0) {
+				continue;
+			}
+
+			if (preg_match('/^(\d+)$/', $cpid, $m)) {
+				$sql = "UPDATE contest_participant
+					SET ".implode(',',$updates)."
+					WHERE id=".db_quote($cpid)."
+					AND contest=".db_quote($contest_id);
+				mysqli_query($database, $sql);
+			}
+			else if ($count_nonempty) {
+				array_unshift($updates, "contest=".db_quote($contest_id));
+				$sql = "INSERT INTO contest_participant
+					SET ".implode(',',$updates);
+				mysqli_query($database, $sql)
+					or die("SQL error: ".db_error($database));
+			}
+		}
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
 	$next_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
@@ -92,12 +154,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			or die(db_error($database));
 		$contest_id = mysqli_insert_id($database);
 
-		$self_url = "contest.php?id=".urlencode($contest_id);
-		if (isset($_REQUEST['next_url'])) {
-			$self_url .= '&next_url='.urlencode($_REQUEST['next_url']);
-		}
-		$url = "contest_participant.php?contest=".urlencode($contest_id)."&next_url=".urlencode($self_url);
-		header("Location: $url");
+		update_contest_participants($contest_id);
+
+		header("Location: $next_url");
 		exit();
 	}
 
@@ -126,61 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
-		$p_updates = array();
-		foreach ($_POST as $k => $v) {
-			if (preg_match('/^participant_(_?\d+)_(.*)$/', $k, $m)) {
-				$cpid = $m[1];
-				$field = $m[2];
-				if (!isset($p_updates[$cpid])) {
-					$p_updates[$cpid] = array();
-				}
-				$p_updates[$cpid][$field] = $v;
-			}
-		}
-		foreach ($p_updates as $cpid => $cp_post) {
-
-			if (isset($cp_post['delete'])) {
-				$sql = "DELETE FROM contest_participant
-					WHERE id=".db_quote($cpid);
-				mysqli_query($database, $sql)
-					or die("SQL error: ".db_error($database));
-				continue;
-			}
-
-			$updates = array();
-			$count_nonempty = 0;
-			foreach ($cp_post as $k => $v) {
-				if ($k == 'player' || $k == 'seat' ||
-				$k == 'turn_order' || $k == 'score' ||
-				$k == 'placement')
-				{
-					$updates[] = "$k=".db_quote($v);
-					if (strlen($v)) { $count_nonempty++; }
-				}
-				else {
-					die("unrecognized participant field : $k");
-				}
-			}
-
-			if (count($updates) == 0) {
-				continue;
-			}
-
-			if (preg_match('/^(\d+)$/', $cpid, $m)) {
-				$sql = "UPDATE contest_participant
-					SET ".implode(',',$updates)."
-					WHERE id=".db_quote($cpid)."
-					AND contest=".db_quote($_GET['id']);
-				mysqli_query($database, $sql);
-			}
-			else if ($count_nonempty) {
-				array_unshift($updates, "contest=".db_quote($_GET['id']));
-				$sql = "INSERT INTO contest_participant
-					SET ".implode(',',$updates);
-				mysqli_query($database, $sql)
-					or die("SQL error: ".db_error($database));
-			}
-		}
+		update_contest_participants($_GET['id']);
 
 		header("Location: $next_url");
 		exit();
