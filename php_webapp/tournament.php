@@ -126,7 +126,7 @@ begin_page($_GET['id'] ? "Edit Tournament" : "New Tournament");
 <div class="form_buttons_bar">
 <?php if ($_GET['id']) { ?>
 <button type="submit" name="action:update_tournament">Apply Changes</button>
-<button type="submit" name="action:delete_tournament">Delete Tournament</button>
+<button type="submit" name="action:delete_tournament" onclick="return confirm('Really delete this tournament?')">Delete Tournament</button>
 <?php } else { ?>
 <button type="submit" name="action:create_tournament">Create Tournament</button>
 <?php } ?>
