@@ -30,6 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 begin_page("$person_info[name] - Scorecard");
 
+$go_back_url = 'person.php?id='.urlencode($_GET['id']);
+?>
+<p>
+<a href="<?php h($go_back_url)?>">Go Back</a>
+</p>
+<?php
+
+include('rating_chart.inc.php');
+
 $sql = "SELECT c.id,
 	session_num,
 	started,
@@ -109,10 +118,7 @@ while ($row = mysqli_fetch_row($query)) {
 
 ?>
 </table>
-<?php
 
-$go_back_url = 'person.php?id='.urlencode($_GET['id']);
-?>
 <p>
 <a href="<?php h($go_back_url)?>">Go Back</a>
 </p>

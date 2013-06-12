@@ -17,6 +17,7 @@ php_scripts = \
 	pairings.php \
 	person.php \
 	player_scorecard.php \
+	rating_chart.inc.php \
 	run_ratings.php \
 	tournament.php \
 	tournament_dashboard.php \
