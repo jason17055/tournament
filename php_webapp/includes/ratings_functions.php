@@ -1,8 +1,79 @@
 <?php
 
+function do_all_scores($tournament_id)
+{
+	global $database;
+
+	$sql = "SELECT id
+		FROM contest
+		WHERE tournament=".db_quote($tournament_id)."
+		AND status='completed'";
+	$c_query = mysqli_query($database, $sql)
+		or die("SQL error 406: ".db_error($database));
+
+	while ($c_row = mysqli_fetch_row($c_query)) {
+		$contest_id = $c_row[0];
+
+		$sql = "SELECT
+				AVG(IFNULL(score,0)) AS average_score,
+				COUNT(*) AS num_players,
+				SUM(CASE WHEN placement=1 THEN 1 ELSE 0 END) AS num_winners
+			FROM contest_participant
+			WHERE contest=".db_quote($contest_id);
+		$query = mysqli_query($database, $sql)
+			or die("SQL error 407: ".db_error($database));
+		$row = mysqli_fetch_row($query);
+		$average_score = $row[0];
+		$num_players = $row[1];
+		$num_winners = $row[2];
+
+		$average_score = max($average_score, 10);
+		$weight = $num_players / 2.0;
+		$win_val = (1 + $num_players - $num_winners) / 2;
+
+		$cp_performances = array();
+
+		$sql = "SELECT a.id,a.score,a.placement,b.score,b.placement
+			FROM contest_participant a
+			CROSS JOIN contest_participant b
+				ON b.contest = a.contest
+				AND NOT (b.player = a.player)
+			WHERE a.contest = ".db_quote($contest_id);
+		$query = mysqli_query($database, $sql)
+			or die("SQL error 408: ".db_error($database));
+		while ($row = mysqli_fetch_row($query)) {
+			$cp_id = $row[0];
+			$a_score = $row[1];
+			$a_place = $row[2];
+			$b_score = $row[3];
+			$b_place = $row[4];
+
+			$a_effscore = adj_score($a_score, $a_place, $average_score);
+			$b_effscore = adj_score($b_score, $b_place, $average_score);
+
+			$perf = 1.0 / (1.0 + exp($b_effscore - $a_effscore));
+			$cp_performances[$cp_id] = ($cp_performances[$cp_id] ?: 0) + $perf;
+		}
+
+		foreach ($cp_performances as $cp_id => $perf)
+		{
+			$avg_perf = $perf / ($num_players-1);
+
+			$sql = "UPDATE contest_participant
+				SET performance=".db_quote($avg_perf).",
+				w_points=CASE WHEN placement=1 THEN ".db_quote($win_val)." ELSE 0 END
+				WHERE id=".db_quote($cp_id);
+			mysqli_query($database, $sql)
+				or die("SQL error: ".db_error($database));
+		} //end foreach contest participant
+	} //end foreach contest
+}
+
 function do_ratings($tournament_id)
 {
 	global $database;
+
+	do_all_scores($tournament_id);
 
 	// get a ratings batch number
 	$sql = "INSERT INTO rating_batch (tournament,created) VALUES (

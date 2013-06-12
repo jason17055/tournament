@@ -10,7 +10,16 @@
 .player_count_col {
 	text-align: center;
 }
-td.rating_col, td.score_col, td.placement_col {
+td.rating_col, td.score_col {
+	text-align: right;
+}
+td.placement_col {
+	text-align: center;
+}
+td.w_points_col {
+	text-align: center;
+}
+td.performance_col {
 	text-align: right;
 }
 .scenario_col {

@@ -41,7 +41,10 @@ $sql = "SELECT c.id,
 		WHERE cp.contest=c.id
 		AND cp.player<>cp1.player
 		) AS opponents,
-	cp1.placement
+	cp1.placement,
+	cp1.w_points,
+	cp1.performance,
+	(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id) AS nplayers
 	FROM contest_participant cp1
 		JOIN contest c ON c.id=cp1.contest
 	WHERE cp1.player=".db_quote($person_id)."
@@ -61,6 +64,8 @@ $query = mysqli_query($database, $sql)
 <th>Scenario</th>
 <th>Against</th>
 <th>Placement</th>
+<th>W Points</th>
+<th>P Points</th>
 </tr>
 <?php
 
@@ -73,6 +78,9 @@ while ($row = mysqli_fetch_row($query)) {
 	$scenario = $row[4];
 	$opponents = $row[5];
 	$placement = $row[6];
+	$w_points = $row[7];
+	$performance = $row[8];
+	$nplayers = $row[9];
 	if ($placement == 1) {
 		$placement = "1st";
 	}else if ($placement == 2) {
@@ -82,6 +90,7 @@ while ($row = mysqli_fetch_row($query)) {
 	}else if ($placement >= 4 && $placement <= 20) {
 		$placement = $placement .= "th";
 	}
+	$placement .= " / $nplayers";
 ?>
 <tr>
 <?php if ($tournament_info['multi_session']=='Y'){?>
@@ -92,6 +101,8 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>
+<td class="w_points_col"><?php h($w_points)?></td>
+<td class="performance_col"><?php h(sprintf('%.3f', $performance))?></td>
 </tr>
 <?php
 } // end foreach contest
