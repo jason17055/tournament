@@ -19,20 +19,27 @@ $tournament_info = array(
 $page_title = "$tournament_info[name] - Dashboard";
 begin_page($page_title);
 
+$can_edit_players = is_director($tournament_id);
+
 ?>
 <table border="1">
 <caption>Players</caption>
 <tr>
+<?php if ($can_edit_players) { ?>
 <th></th>
+<?php } ?>
 <th>Player Name</th>
+<?php if ($can_edit_players) { ?>
 <th>Email Address</th>
+<?php } ?>
 <th>Status</th>
 <th>Games Played</th>
 <th>Games Won</th>
 <th>Points</th>
+<th>Current Rating</th>
 </tr>
 <?php
-$sql = "SELECT id,name,mail,status,
+$sql = "SELECT p.id,p.name,p.mail,p.status,
 	(SELECT COUNT(DISTINCT contest) FROM contest_participant
 			WHERE player=p.id) AS games_played,
 	(SELECT COUNT(*) FROM contest c
@@ -58,8 +65,14 @@ $sql = "SELECT id,name,mail,status,
 	(SELECT SUM(w_points) FROM contest_participant
 		WHERE player=p.id
 		AND contest IN (SELECT id FROM contest WHERE session_num=".db_quote($tournament_info['current_session']).")
-		) AS w_points_this_session
+		) AS w_points_this_session,
+	IFNULL(r.post_rating,r.prior_rating) AS rating
 	FROM person p
+	JOIN tournament t
+		ON t.id=p.tournament
+	LEFT JOIN player_rating r
+		ON r.id=p.id
+		AND r.session_num=t.current_session
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY name";
 $query = mysqli_query($database, $sql)
@@ -75,14 +88,19 @@ while ($row = mysqli_fetch_row($query)) {
 	$games_won_this_session = $row[6];
 	$w_points = $row[7] ?: 0;
 	$w_points_this_session = $row[8] ?: 0;
+	$cur_rating = $row[9];
 
 	$edit_url = "person.php?id=".urlencode($person_id);
 	$url = 'player_scorecard.php?id='.urlencode($person_id);
 
 	?><tr>
+<?php if ($can_edit_players) { ?>
 <td class="link_col"><a href="<?php h($edit_url)?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a></td>
+<?php } ?>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
+<?php if ($can_edit_players) { ?>
 <td class="mail_col"><?php h($mail)?></td>
+<?php } ?>
 <td class="status_col"><?php
 	if ($status == 'ready') {
 		?><img src="images/plus.png" width="14" height="14" alt=""><?php
@@ -93,6 +111,9 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="game_count_col"><?php h($games_played)?></td>
 <td class="game_count_col"><?php h("$games_won (+$games_won_this_session)")?></td>
 <td class="w_points_col"><?php h("$w_points (+$w_points_this_session)")?></td>
+<td class="rating_col"><?php
+	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
+		}?></td>
 </tr>
 <?php
 } //end foreach person
@@ -100,7 +121,7 @@ while ($row = mysqli_fetch_row($query)) {
 </table>
 
 <?php
-if (is_director($tournament_id)) {
+if ($can_edit_players) {
 $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 ?>
