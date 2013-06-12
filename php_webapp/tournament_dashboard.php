@@ -28,6 +28,7 @@ begin_page($page_title);
 <th>Status</th>
 <th>Games Played</th>
 <th>Games Won</th>
+<th>Points</th>
 </tr>
 <?php
 $sql = "SELECT id,name,mail,status,
@@ -49,7 +50,14 @@ $sql = "SELECT id,name,mail,status,
 				WHERE contest=c.id
 				AND NOT (placement=1))
 		AND c.session_num=".db_quote($tournament_info['current_session'])."
-		) AS games_won_this_session
+		) AS games_won_this_session,
+	(SELECT SUM(w_points) FROM contest_participant
+		WHERE player=p.id
+		) AS w_points,
+	(SELECT SUM(w_points) FROM contest_participant
+		WHERE player=p.id
+		AND contest IN (SELECT id FROM contest WHERE session_num=".db_quote($tournament_info['current_session']).")
+		) AS w_points_this_session
 	FROM person p
 	WHERE tournament=".db_quote($tournament_id)."
 	ORDER BY name";
@@ -64,6 +72,8 @@ while ($row = mysqli_fetch_row($query)) {
 	$games_played = $row[4];
 	$games_won = $row[5];
 	$games_won_this_session = $row[6];
+	$w_points = $row[7] ?: 0;
+	$w_points_this_session = $row[8] ?: 0;
 
 	$url = "person.php?id=".urlencode($person_id);
 
@@ -79,6 +89,7 @@ while ($row = mysqli_fetch_row($query)) {
 	h($status)?></td>
 <td class="game_count_col"><?php h($games_played)?></td>
 <td class="game_count_col"><?php h("$games_won (+$games_won_this_session)")?></td>
+<td class="w_points_col"><?php h("$w_points (+$w_points_this_session)")?></td>
 </tr>
 <?php
 } //end foreach person
