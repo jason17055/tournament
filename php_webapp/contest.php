@@ -339,20 +339,22 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <th class="rating_col">Rating</th>
 <th class="score_col">Score</th>
 <th class="placement_col">Placement</th>
+<th class="performance_col">P Points</th>
 </tr>
 <?php
 	$sql = "SELECT cp.id AS id,
 		p.id AS player_id,
 		p.name AS player_name,
 		r.prior_rating AS prior_rating,
-		seat,turn_order,score,placement
+		seat,turn_order,score,placement,
+		performance
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
 		JOIN person p ON p.id=cp.player
 		LEFT JOIN player_rating r ON r.id=p.id
 			AND r.session_num=c.session_num
 		WHERE contest=".db_quote($_GET['id'])."
-		ORDER BY turn_order,player_name,cp.id";
+		ORDER BY placement,turn_order,player_name,cp.id";
 	$query = mysqli_query($database, $sql);
 	while ($row = mysqli_fetch_row($query)) {
 		$cpid = $row[0];
@@ -364,6 +366,8 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 		$turn_order = $row[5];
 		$score = $row[6];
 		$placement = $row[7];
+		$performance = $row[8];
+
 		$pre = 'participant_'.$cpid;
 		?>
 <tr data-rowid="<?php h($cpid)?>">
@@ -371,6 +375,7 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <td class="rating_col"><?php h(sprintf('%.0f', $prior_rating))?></td>
 <td class="score_col"><?php h($score)?></td>
 <td class="placement_col"><?php h($placement)?></td>
+<td class="performance_col"><?php if (!is_null($performance)) { h(sprintf('%.3f', $performance)); } ?></td>
 </tr>
 <?php
 	} // end foreach participant
