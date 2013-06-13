@@ -128,7 +128,7 @@ while ($row = mysqli_fetch_row($query)) {
 		else if ($r_adj >= -15) $res_icon = 'bad_result';
 		else $res_icon = 'very_bad_result';
 
-		?><img src="<?php h("images/$res_icon.png")?>" title="<?php sprintf('%+.0f', $r_adj)?>" alt="<?php h($res_icon)?>" width="20" height="20">
+		?><img src="<?php h("images/$res_icon.png")?>" title="<?php echo sprintf('%+.1f', $r_adj)?>" alt="<?php h($res_icon)?>" width="20" height="20">
 <?php
 	} //endif performance data available
 	?></td>
