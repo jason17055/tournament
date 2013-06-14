@@ -6,7 +6,9 @@ data_files = \
 	images/edit.gif \
 	images/plus.png \
 	images/minus.png \
+	images/green_check.png \
 	images/red_cross.png \
+	images/tentative_icon.png \
 	images/bad_result.png \
 	images/good_result.png \
 	images/neutral_result.png \
