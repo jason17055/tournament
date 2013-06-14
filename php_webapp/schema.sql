@@ -63,6 +63,7 @@ CREATE TABLE contest_participant (
 	contest INTEGER NOT NULL,
 	player INTEGER,
 	seat VARCHAR(200),
+	status CHAR(1),
 	handicap VARCHAR(200),
 	turn_order INTEGER,
 	score VARCHAR(200),

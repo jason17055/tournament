@@ -93,6 +93,9 @@ function update_contest_participants($contest_id)
 					$updates[] = "$k=".db_quote($v);
 					if (strlen($v)) { $count_nonempty++; }
 				}
+				else if ($k == 'commit') {
+					//handled below
+				}
 				else {
 					die("unrecognized participant field : $k");
 				}
@@ -101,6 +104,8 @@ function update_contest_participants($contest_id)
 			if (count($updates) == 0) {
 				continue;
 			}
+
+			$updates[] = "status=".db_quote($cp_post['commit']?'C':NULL);
 
 			if (preg_match('/^(\d+)$/', $cpid, $m)) {
 				$sql = "UPDATE contest_participant
@@ -271,6 +276,7 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 <?php if ($can_edit) { ?>
 <table id="participants_table" class="tabular_form">
 <tr>
+<th class="commit_col">Commit</th>
 <th class="player_col">Player</th>
 <th class="seat_col">Seat</th>
 <th class="turn_order_col">Turn Order</th>
@@ -282,7 +288,8 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 		p.id AS player_id,
 		p.name AS player_name,
 		r.prior_rating AS prior_rating,
-		seat,turn_order,score,placement
+		seat,turn_order,score,placement,
+		cp.status
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
 		JOIN person p ON p.id=cp.player
@@ -301,9 +308,14 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 		$turn_order = $row[5];
 		$score = $row[6];
 		$placement = $row[7];
+		$status = $row[8];
+		$commit = ($status == 'C');
 		$pre = 'participant_'.$cpid;
 		?>
 <tr data-rowid="<?php h($cpid)?>">
+<td class="commit_col">
+<input type="checkbox" name="<?php h($pre."_commit")?>"<?php echo($commit ? ' checked="checked"':'')?>>
+</td>
 <td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>" data-player_id="<?php h($player_id)?>" class="player_sel"></td>
 <td class="seat_col"><input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"></td>
 <td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($turn_order)?>"></td>
@@ -315,6 +327,9 @@ begin_page($_GET['id'] ? "Edit Game" : "New Game");
 	} // end foreach participant
 	?>
 <tr id="new_participant_row" class="template">
+<td class="commit_col">
+<input type="checkbox" name="_commit" checked="checked">
+</td>
 <td class="player_col"><input type="text" name="_player" class="player_sel"></td>
 <td class="seat_col"><input type="text" size="4" name="_seat"></td>
 <td class="turn_order_col"><input type="text" size="4" name="_turn_order"></td>
