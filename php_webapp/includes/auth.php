@@ -2,9 +2,19 @@
 
 session_start();
 
+if (isset($_SESSION['username']) && !$_SERVER['REMOTE_USER']) {
+	$_SERVER['REMOTE_USER'] = $_SESSION['username'];
+}
+
+if ($_SERVER['REMOTE_USER'] && !isset($_SESSION['username']))
+{
+	$_SESSION['username'] = $_SERVER['REMOTE_USER'];
+	add_login_attributes();
+}
+
 function require_auth()
 {
-	if ($_SESSION['username']) {
+	if ($_SERVER['REMOTE_USER']) {
 		return true;
 	}
 
