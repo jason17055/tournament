@@ -20,7 +20,8 @@ Please select a tournament.
 <?php
 $sql = "SELECT id,name,location,start_time FROM tournament
 	ORDER BY id";
-$query = mysqli_query($database, $sql);
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
 
 while ($row = mysqli_fetch_row($query)) {
 
