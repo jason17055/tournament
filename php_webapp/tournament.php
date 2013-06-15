@@ -33,16 +33,12 @@ else {
 	$tournament_id = NULL;
 	is_sysadmin()
 		or die("Not authorized");
-
-	// defaults for new tournaments
-	$_REQUEST['multi_round'] = 1;
 }
-
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-	$next_url = $_REQUEST['next_url'] ?: '.';
+	$next_url = isset($_REQUEST['next_url']) ? $_REQUEST['next_url'] : '.';
 
 	if (isset($_REQUEST['action:cancel'])) {
 		header("Location: $next_url");
@@ -56,9 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['location']).",
 			".db_quote($_REQUEST['start_time']).",
-			".db_quote($_REQUEST['multi_game']?'Y':'N').",
-			".db_quote($_REQUEST['multi_session']?'Y':'N').",
-			".db_quote($_REQUEST['multi_round']?'Y':'N').",
+			".db_quote(isset($_REQUEST['multi_game'])?'Y':'N').",
+			".db_quote(isset($_REQUEST['multi_session'])?'Y':'N').",
+			".db_quote(isset($_REQUEST['multi_round'])?'Y':'N').",
 			".db_quote($_REQUEST['current_session'])."
 			)";
 		mysqli_query($database, $sql)
@@ -92,7 +88,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
-begin_page($_GET['id'] ? "Edit Tournament" : "New Tournament");
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_GET['id']))
+{
+	// defaults for new tournaments
+	$_REQUEST['name'] = '';
+	$_REQUEST['location'] = '';
+	$_REQUEST['start_time'] = '';
+	$_REQUEST['multi_round'] = 1;
+	$_REQUEST['current_session'] = NULL;
+}
+
+begin_page(isset($_GET['id']) ? "Edit Tournament" : "New Tournament");
 
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
@@ -112,9 +118,9 @@ begin_page($_GET['id'] ? "Edit Tournament" : "New Tournament");
 <tr>
 <td valign="top">Options:</td>
 <td>
-<div><label><input type="checkbox" name="multi_game"<?php echo($_REQUEST['multi_game']?' checked="checked"':'')?>>Multi Game Tournament</label></div>
-<div><label><input type="checkbox" name="multi_session"<?php echo($_REQUEST['multi_session']?' checked="checked"':'')?>>Multiple Sessions</label></div>
-<div><label><input type="checkbox" name="multi_round"<?php echo($_REQUEST['multi_round']?' checked="checked"':'')?>>Multiple Rounds</label></div>
+<div><label><input type="checkbox" name="multi_game"<?php echo(isset($_REQUEST['multi_game'])?' checked="checked"':'')?>>Multi Game Tournament</label></div>
+<div><label><input type="checkbox" name="multi_session"<?php echo(isset($_REQUEST['multi_session'])?' checked="checked"':'')?>>Multiple Sessions</label></div>
+<div><label><input type="checkbox" name="multi_round"<?php echo(isset($_REQUEST['multi_round'])?' checked="checked"':'')?>>Multiple Rounds</label></div>
 </td>
 </tr>
 <tr>
@@ -124,7 +130,7 @@ begin_page($_GET['id'] ? "Edit Tournament" : "New Tournament");
 </table>
 
 <div class="form_buttons_bar">
-<?php if ($_GET['id']) { ?>
+<?php if (isset($_GET['id'])) { ?>
 <button type="submit" name="action:update_tournament">Apply Changes</button>
 <button type="submit" name="action:delete_tournament" onclick="return confirm('Really delete this tournament?')">Delete Tournament</button>
 <?php } else { ?>
