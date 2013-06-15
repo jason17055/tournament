@@ -12,6 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	die("not implemented");
 }
 
+if ($_SERVER['QUERY_STRING'] == 'logout')
+{
+	session_destroy();
+	header("Location: .");
+	exit();
+}
+
 if ($_GET['ticket'])
 {
 	$validate_url = CAS_VALIDATE_URL . '?service=' . urlencode($my_url) . '&ticket=' . urlencode($_GET['ticket']);
