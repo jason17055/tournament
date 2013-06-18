@@ -287,7 +287,8 @@ function roulette(&$R)
 
 function generate_optimal_matching(&$games, &$players, &$weights)
 {
-	$POOL_SIZE = 10;
+	$POOL_SIZE = 15;
+	$GENERATIONS = 40;
 
 	$sum_fitness = 0;
 	$pool = array();
@@ -303,7 +304,7 @@ function generate_optimal_matching(&$games, &$players, &$weights)
 		<?php
 	}
 
-	for ($i = 0; $i < 20; $i++) {
+	for ($i = 0; $i < $GENERATIONS; $i++) {
 		?><div class="driller_container" style="display:none">
 		<h2 class="driller_heading">Mutation <?php echo($i+1)?></h2>
 		<div class="driller_content"><?php
