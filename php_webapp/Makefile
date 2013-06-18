@@ -3,6 +3,10 @@ prefix = /srv/www/htdocs/webtd
 data_files = \
 	webtd.css \
 	webtd.js \
+	scoreboard.html \
+	scoreboard.css \
+	scoreboard.js \
+	scoreboard-data.txt \
 	images/edit.gif \
 	images/plus.png \
 	images/minus.png \
@@ -13,7 +17,9 @@ data_files = \
 	images/good_result.png \
 	images/neutral_result.png \
 	images/very_bad_result.png \
-	images/very_good_result.png
+	images/very_good_result.png \
+	images/win_icon.png \
+	images/lose_icon.png
 
 php_scripts = \
 	config.php \

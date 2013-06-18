@@ -1,0 +1,10 @@
+{
+"players":[
+	{"pid":1,"givenName":"Jason", "name":"Long", "fullName": "Jason Long", "entryRank":"6k"},
+	{"pid":2,"givenName":"Bob", "name":"Crites", "fullName": "Bob Crites", "entryRank":"8k"},
+	{"pid":3,"givenName":"Tom", "name":"Boone", "fullName": "Tom Boone", "entryRank":"11k"}
+	],
+"games":[
+	{"player1":1,"player2":2,"winner":"b"}
+	]
+}

@@ -1,0 +1,10 @@
+body { font-family: sans-serif; font-size: 16pt; }
+table { font-size: 16pt; }
+td { text-align: center; }
+td.fullname_cell { text-align: left; }
+th { background-color: #4f81bd; color: white; height: 3em; }
+tr.evenrow { background-color: #e9edf4; color: black; height: 4em; }
+tr.oddrow { background-color: #d0d8e8; color: black; height: 4em; }
+#playerth { width: 140pt; }
+#wongamesth { width: 55pt; }
+#playedth { width: 55pt; }
