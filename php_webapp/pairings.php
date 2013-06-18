@@ -254,7 +254,7 @@ foreach ($matching['assignments'] as $game) {
 	foreach ($matching['penalties'] as $pen_key => $pen_val) {
 	?><tr>
 	<td><?php h($pen_key)?></td>
-	<td align="right"><?php h($pen_val)?></td>
+	<td align="right"><?php h(sprintf('%.0f',$pen_val))?></td>
 	</tr>
 	<?php
 	}

@@ -68,9 +68,13 @@ function sum_fitness(&$matching)
 	$encounters = array();
 	// keep track of how many rounds a player can play in
 	$player_game_counts = array();
+	// keep track of various other things per player
+	$hits_by_player = array();
+
 	foreach ($matching['players'] as $pid => $dummy1)
 	{
 		$player_game_counts[$pid] = 0;
+		$hits_by_player[$pid] = array();
 
 		foreach ($matching['players'] as $opp => $dummy2)
 		{
@@ -105,9 +109,18 @@ function sum_fitness(&$matching)
 	foreach ($tables as &$game) {
 		$this_game_size = count($game['players']);
 
+		$seat_no = 0;
 		foreach ($game['players'] as $pid) {
 			$player_game_counts[$pid]++;
 			$player_game_sizes[$pid] = ($player_game_sizes[$pid] ?: 0) + count($game['players']);
+
+			$add_hit = function($tag) use (&$hits_by_player,$pid) {
+				$hits_by_player[$pid][$tag] = ($hits_by_player[$pid][$tag] ?: 0) + 1;
+				};
+			$add_hit('game:'.$this_game_size.'player');
+			$seat_no++;
+			$add_hit('seat:'.$seat_no);
+
 			foreach ($game['players'] as $opp) {
 				if ($pid < $opp) {
 					$k = "$pid,$opp";
@@ -124,6 +137,31 @@ function sum_fitness(&$matching)
 			}
 		}
 	}
+
+	// determine average and variance for each type of hit
+	$nplayers = count($matching['players']);
+	$hit_average = array();
+	foreach ($hits_by_player as $pid => $dummy) {
+		foreach ($hits_by_player[$pid] as $tag => $count) {
+			$hit_average[$tag] = ($hit_average[$tag] ?: 0) + $count/$nplayers;
+		}
+	}
+	$hit_variance = array();
+	foreach ($hits_by_player as $pid => $dummy) {
+		foreach ($hits_by_player[$pid] as $tag => $count) {
+			$hit_variance[$tag] = ($hit_variance[$tag] ?: 0)
+				+ pow($count-$hit_average[$tag],2)/$nplayers;
+		}
+	}
+	echo 'Hit variations:<ul>';
+	foreach ($hit_variance as $tag => $amt) {
+		if ($amt >= 0.1) {
+			$penalties[$tag] = 30 * exp(3*$amt);
+		}
+		?><li>Variation of <?php h($tag)?> : <?php h(sprintf('%.3f',$amt))?></li>
+		<?php
+	}
+	echo '</ul>';
 
 	// determine average number of encounters
 	$sum_encounters = 0;
