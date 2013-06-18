@@ -9,11 +9,11 @@ $sql = "SELECT name,multi_game,multi_session,current_session FROM tournament WHE
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
-	id => $tournament_id,
-	name => $row[0],
-	multi_game => $row[1],
-	multi_session => $row[2],
-	current_session => $row[3]
+	'id' => $tournament_id,
+	'name' => $row[0],
+	'multi_game' => $row[1],
+	'multi_session' => $row[2],
+	'current_session' => $row[3]
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";

@@ -22,7 +22,7 @@ function begin_page($page_title)
 <body>
 <h1><?php h($page_title)?></h1>
 <?php
-if ($_SESSION['username']) { ?>
+if (isset($_SESSION['username'])) { ?>
 <p>You are logged in as <b><?php h($_SESSION['username'])?></b>.
 </p>
 <?php } else { ?>

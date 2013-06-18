@@ -10,4 +10,9 @@ define('CAS_LOGIN_URL', 'https://sso.example.com/cas/login');
 define('CAS_VALIDATE_URL', 'https://sso.example.com/cas/validate');
 
 define('DOMINION_ROLLER_URL', 'http://jason.long.name/dominion/roller/');
+
+// uncomment the following line if you are running on the local-machine
+// and don't want to both with authentication
+//$_SERVER['REMOTE_USER'] = 'user';
+
 ?>
