@@ -104,6 +104,14 @@ function sum_fitness(&$matching)
 		$sum_game_sizes += count($game['players']);
 	}
 	$avg_game_size = $sum_game_sizes / count($tables);
+	$game_size_variation = 0;
+	foreach ($tables as &$game) {
+		$this_game_size = count($game['players']);
+		$game_size_variation += pow($this_game_size-$avg_game_size,2)/count($tables);
+	}
+	if ($game_size_variation != 0.0) {
+		$penalties['game:size'] = 50*exp(3*$game_size_variation);
+	}
 
 	$player_game_sizes = array();
 	foreach ($tables as &$game) {
