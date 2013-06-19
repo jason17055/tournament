@@ -153,7 +153,7 @@ function do_ratings($tournament_id)
 		$post_tourn_id = $row[1];
 		$pre_tourn_id = $row[2];
 
-		$weight = 19; // equivalent to nineteen one-vs-one games
+		$weight = 29; // equivalent to nineteen one-vs-one games
 		$perf = 0.51; //and winning a 51% rate.
 
 		$sql = "INSERT INTO rating_data (batch,player_a,player_b,actual_performance,weight)
