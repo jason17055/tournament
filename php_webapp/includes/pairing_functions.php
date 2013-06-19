@@ -207,6 +207,9 @@ function mutate_matching(&$parent_matching)
 	// pick someone to move
 	$R = array();
 	for ($i = 0; $i < count($assignments); $i++) {
+		// don't remove from a "locked" table
+		if (isset($assignments[$i]['locked'])) { continue; }
+
 		$table_size = count($assignments[$i]['players']);
 		$f = pow($table_size,2);
 		$R[] = array(
@@ -230,6 +233,8 @@ function mutate_matching(&$parent_matching)
 	// find a place to insert this player
 	$R = array();
 	for ($i = 0; $i < count($assignments); $i++) {
+		// don't insert into a "locked" table
+		if (isset($assignments[$i]['locked'])) { continue; }
 		// don't re-insert in same table
 		if ($i == $rmtable_idx) { continue; }
 		// don't insert to table in a different round

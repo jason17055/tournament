@@ -215,7 +215,8 @@ while ($row = mysqli_fetch_row($query))
 	$game = array(
 		'round' => $round,
 		'board' => $board,
-		'players' => $m_players
+		'players' => $m_players,
+		'locked' => TRUE
 		);
 	$games[] = $game;
 }
