@@ -14,22 +14,20 @@ function get_url_param(p)
 
 function generate_short_name(p)
 {
-	if (p.givenName)
-	{
-		return p.givenName.substr(0,1) + p.name.substr(0,1);
+	var x = "";
+	var parts = p.name.split(/ /);
+	for (var i in parts) {
+		x += parts[i].substr(0,1);
 	}
-	else
-	{
-		return p.name.substr(0,2);
-	}
+	return x;
 }
 function do_short_names(players_arr)
 {
 	for (var i in players_arr)
 	{
 		var p = players_arr[i];
-		if (!p.shortName) {
-			p.shortName = generate_short_name(p);
+		if (!p.initials) {
+			p.initials = generate_short_name(p);
 		}
 	}
 }
@@ -40,8 +38,8 @@ function to_rank(rankStr)
 }
 function cmp_rank(a, b)
 {
-	var a_r = to_rank(a.entryRank);
-	var b_r = to_rank(b.entryRank);
+	var a_r = to_rank(a.entryRank || "30k");
+	var b_r = to_rank(b.entryRank || "30k");
 	return -(a_r - b_r);
 }
 
@@ -52,7 +50,7 @@ function fetch_all_players()
 	};
 
 	$.ajax({
-		url: 'scoreboard-data.txt',
+		url: 'scoreboard-data.js.php?tournament='+escape(get_url_param('tournament')),
 		dataType: 'json',
 		success: on_players_fetched,
 		error: onError
@@ -80,7 +78,7 @@ for (var i in players)
 {
 	var pc = players[i];
 	var $cell = $('<th width="35"></th>');
-	$cell.text(pc.shortName);
+	$cell.text(pc.initials);
 	$cell.attr('class', 'opponent'+pc.pid+'_col');
 	$('#th_row').append($cell);
 }
@@ -93,7 +91,7 @@ for (var i = 0; i < players.length; i++)
 	var $row = $('<tr><td class="fullname_cell"></td><td class="wins_cell"></td><td class="plays_cell"></td><td></td></tr>');
 	$row.attr('class', (i % 2 == 0) ? 'oddrow' : 'evenrow');
 	$row.attr('id', "scoreboard_row"+i);
-	$('.fullname_cell', $row).text(pr.fullName + ' ' + pr.entryRank);
+	$('.fullname_cell', $row).text(pr.name + (pr.entryRank != null ? (' ' + pr.entryRank) : ""));
 	var count_wins = 0;
 	var count_plays = 0;
 	for (var j in players)

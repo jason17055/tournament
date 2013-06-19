@@ -6,7 +6,6 @@ data_files = \
 	scoreboard.html \
 	scoreboard.css \
 	scoreboard.js \
-	scoreboard-data.txt \
 	images/edit.gif \
 	images/plus.png \
 	images/minus.png \
@@ -33,6 +32,7 @@ php_scripts = \
 	player_scorecard.php \
 	rating_chart.inc.php \
 	run_ratings.php \
+	scoreboard-data.js.php \
 	tournament.php \
 	tournament_dashboard.php \
 	includes/auth.php \

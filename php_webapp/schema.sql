@@ -40,6 +40,7 @@ CREATE TABLE person (
 	home_location VARCHAR(200),
 	mail VARCHAR(200),
 	status VARCHAR(20),
+	entry_rank VARCHAR(20),
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 

@@ -235,4 +235,12 @@ $run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
 
 <?php
 }//endif director
+
+$scoreboard_url = 'scoreboard.html?tournament='.urlencode($tournament_id);
+?>
+<p>
+<a href="<?php h($scoreboard_url)?>">Scoreboard</a>
+</p>
+<?php
+
 end_page();
