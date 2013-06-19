@@ -74,7 +74,7 @@ $sql = "SELECT p.id,p.name,p.mail,p.status,
 		ON r.id=p.id
 		AND r.session_num=t.current_session
 	WHERE tournament=".db_quote($tournament_id)."
-	ORDER BY name";
+	ORDER BY rating DESC, name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 while ($row = mysqli_fetch_row($query)) {
