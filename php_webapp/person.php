@@ -10,7 +10,7 @@ if (isset($_GET['tournament'])) {
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
-		name,member_number,home_location,mail,status
+		name,member_number,entry_rank,home_location,mail,status
 		FROM person WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -20,9 +20,10 @@ else if (isset($_GET['id'])) {
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['name'] = $row[1];
 		$_REQUEST['member_number'] = $row[2];
-		$_REQUEST['home_location'] = $row[3];
-		$_REQUEST['mail'] = $row[4];
-		$_REQUEST['status'] = $row[5];
+		$_REQUEST['entry_rank'] = $row[3];
+		$_REQUEST['home_location'] = $row[4];
+		$_REQUEST['mail'] = $row[5];
+		$_REQUEST['status'] = $row[6];
 	}
 }
 else {
@@ -44,11 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_person'])) {
 
-		$sql = "INSERT INTO person (tournament,name,member_number,home_location,mail,status)
+		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,home_location,mail,status)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['member_number']).",
+			".db_quote($_REQUEST['entry_rank']).",
 			".db_quote($_REQUEST['home_location']).",
 			".db_quote($_REQUEST['mail']).",
 			".db_quote($_REQUEST['status'])."
@@ -65,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$sql = "UPDATE person
 			SET name=".db_quote($_REQUEST['name']).",
 			member_number=".db_quote($_REQUEST['member_number']).",
+			entry_rank=".db_quote($_REQUEST['entry_rank']).",
 			home_location=".db_quote($_REQUEST['home_location']).",
 			mail=".db_quote($_REQUEST['mail']).",
 			status=".db_quote($_REQUEST['status'])."
@@ -93,6 +96,10 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 <tr>
 <td><label for="member_number_entry">Member Number:</label></td>
 <td><input type="text" id="member_number_entry" name="member_number" value="<?php h($_REQUEST['member_number'])?>"></td>
+</tr>
+<tr>
+<td><label for="entry_rank_entry">Entry Rank:</label></td>
+<td><input type="text" id="entry_rank_entry" name="entry_rank" value="<?php h($_REQUEST['entry_rank'])?>"></td>
 </tr>
 <tr>
 <td><label for="home_location_entry">Home Location:</label></td>
