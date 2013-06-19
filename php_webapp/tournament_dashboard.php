@@ -149,6 +149,7 @@ $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 <th>Game</th>
 <?php } ?>
 <th>Scenario</th>
+<th>Status</th>
 <th>Participants</th>
 <th>Winner</th>
 </tr>
@@ -157,7 +158,7 @@ $sql = "SELECT id,
 	session_num,
 	IFNULL(started,'(unknown)') AS started,
 	CONCAT(round,'-',board) AS contest_name,
-	game,scenario,
+	game,scenario,status,
 	(SELECT GROUP_CONCAT(
 		p.name ORDER BY name SEPARATOR ', '
 		)
@@ -188,8 +189,9 @@ while ($row = mysqli_fetch_row($query)) {
 	$contest_name = $row[3];
 	$game = $row[4];
 	$scenario = $row[5];
-	$participants = $row[6];
-	$winner = $row[7];
+	$status = $row[6];
+	$participants = $row[7];
+	$winner = $row[8];
 
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
@@ -203,6 +205,7 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
+<td class="status_col"><?php h($status)?></td>
 <td class="participants_col"><?php h($participants)?></td>
 <td class="winner_col"><?php h($winner)?></td>
 </tr>

@@ -19,7 +19,7 @@ function generate_random_matching(&$games, &$players, &$weights)
 	}
 
 	$nplayers = count($players_list);
-	$ntables = ceil($nplayers/4.0);
+	$ntables = ceil($nplayers/$_REQUEST['max_game_size']);
 
 	// copy the existing games in
 	$assignments = $games;
@@ -203,6 +203,8 @@ echo "got penalty of $total_penalty<br>\n";
 function mutate_matching(&$parent_matching)
 {
 	$assignments = $parent_matching['assignments'];
+	$min_game_size = $_REQUEST['min_game_size'];
+	$max_game_size = $_REQUEST['max_game_size'];
 
 	// pick someone to move
 	$R = array();
@@ -211,14 +213,20 @@ function mutate_matching(&$parent_matching)
 		if (isset($assignments[$i]['locked'])) { continue; }
 
 		$table_size = count($assignments[$i]['players']);
-		$f = pow($table_size,2);
-		$R[] = array(
-			'v' => $i,
-			'f' => $f
-			);
+		if ($table_size > $min_game_size) {
+			$f = pow($table_size-$min_game_size,2);
+			$R[] = array(
+				'v' => $i,
+				'f' => $f
+				);
+		}
 	}
 
 	$rmtable_idx = roulette($R);
+	if (is_null($rmtable_idx)) {
+		return NULL; //unsuccessful mutation
+	}
+
 	$table = $assignments[$rmtable_idx];
 	$rmtable_round = $table['round'];
 
@@ -241,14 +249,20 @@ function mutate_matching(&$parent_matching)
 		if ($assignments[$i]['round'] != $rmtable_round) { continue; }
 
 		$table_size = count($assignments[$i]['players']);
-		$f = 1.0/pow($table_size,2);
-		$R[] = array(
-			'v' => $i,
-			'f' => $f
-			);
+		if ($table_size < $max_game_size) {
+			$f = pow($max_game_size-$table_size,2);
+			$R[] = array(
+				'v' => $i,
+				'f' => $f
+				);
+		}
 	}
 
 	$intable_idx = roulette($R);
+	if (is_null($intable_idx)) {
+		return NULL; //unsuccessful mutation
+	}
+
 	$table = $assignments[$intable_idx];
 
 	// insert at random place in turn order
@@ -318,7 +332,9 @@ function generate_optimal_matching(&$games, &$players, &$weights)
 
 		// clone it with mutations
 		$m = mutate_matching($pool[$r]);
-		show_matching($m);
+		?></div></div><?php
+
+		if (!$m) { continue; }
 
 		// substitute the new entry for the weakest in pool
 		$worst_i = -1;
@@ -332,7 +348,6 @@ function generate_optimal_matching(&$games, &$players, &$weights)
 		if ($worst_i != -1) {
 			$pool[$worst_i] = $m;
 		}
-		?></div></div><?php
 	}
 
 	//find the best

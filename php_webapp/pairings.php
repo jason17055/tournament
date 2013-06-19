@@ -32,8 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 $page_title = "$tournament_info[name] - Generate Pairings";
 begin_page($page_title);
 
-$_REQUEST['first_round'] = $_REQUEST['first_round'] ?: ($tournament_info['last_round']+1);
-$_REQUEST['last_round'] = $_REQUEST['last_round'] ?: $_REQUEST['first_round'];
+if (!isset($_REQUEST['first_round'])) {
+	$_REQUEST['first_round'] = ($tournament_info['last_round']+1);
+}
+if (!isset($_REQUEST['last_round'])) {
+	$_REQUEST['last_round'] = $_REQUEST['first_round'];
+}
+if (!isset($_REQUEST['min_game_size'])) {
+	$_REQUEST['min_game_size'] = 2;
+}
+if (!isset($_REQUEST['max_game_size'])) {
+	$_REQUEST['max_game_size'] = 4;
+}
 
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
@@ -41,6 +51,13 @@ $_REQUEST['last_round'] = $_REQUEST['last_round'] ?: $_REQUEST['first_round'];
 <input type="text" size="4" name="first_round" value="<?php h($_REQUEST['first_round'])?>">
 Last round to pair:
 <input type="text" size="4" name="last_round" value="<?php h($_REQUEST['last_round'])?>">
+</div>
+<div>Min game size:
+<input type="text" size="4" name="min_game_size" value="<?php h($_REQUEST['min_game_size'])?>">
+Max game size:
+<input type="text" size="4" name="max_game_size" value="<?php h($_REQUEST['max_game_size'])?>">
+</div>
+<div>
 <button type="submit" name="action:generate_pairings">GO</button>
 <button type="submit" name="action:cancel">Cancel</button>
 </div>
