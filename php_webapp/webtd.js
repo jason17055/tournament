@@ -99,3 +99,31 @@ $(function() {
 		$(this).next('.driller_content').slideToggle(500);
 		});
 });
+
+$(function() {
+	$('.popup_menu').each(function(idx,el) {
+		$('ul', $(el)).menu();
+		$('ul', $(el)).on('blur', function(evt) {
+			$(el).hide();
+			});
+	});
+
+	$('.popup_menu_btn').click(function(evt) {
+		var elId = $(this).attr('data-for');
+		var el = document.getElementById(elId);
+		var $menu = $(el);
+		$menu.css({
+			left: 0,
+			top: 0
+			});
+		$menu.position(
+			{
+			my: "right top",
+			at: "right bottom",
+			of: this,
+			collision: "none"
+			});
+		$menu.show();
+		$('ul', $menu).focus();
+		});
+	});

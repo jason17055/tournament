@@ -22,6 +22,9 @@ begin_page($page_title);
 $can_edit_players = is_director($tournament_id);
 
 ?>
+	<div class="popup_menu" id="status_popup_menu">
+	<ul><li><a href="#">ready</a></li><li><a href="#">absent</a></li></ul>
+	</div>
 <table border="1">
 <caption>Players</caption>
 <tr>
@@ -107,7 +110,9 @@ while ($row = mysqli_fetch_row($query)) {
 	} else if ($status == 'absent') {
 		?><img src="images/minus.png" width="14" height="14" alt=""><?php
 	}
-	h($status)?></td>
+	h($status)?>
+	<button type="button" class="popup_menu_btn" data-for="status_popup_menu">...</button>
+	</td>
 <td class="game_count_col"><?php h($games_played)?></td>
 <td class="game_count_col"><?php h("$games_won (+$games_won_this_session)")?></td>
 <td class="w_points_col"><?php h("$w_points (+$w_points_this_session)")?></td>

@@ -73,3 +73,10 @@ td.performance_col {
 .driller_content {
 	display: none
 }
+.popup_menu {
+	display: none;
+	position: absolute;
+	padding: 2px;
+	border: solid black 1px;
+	background-color: white;
+}
