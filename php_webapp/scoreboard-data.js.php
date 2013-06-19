@@ -25,7 +25,7 @@ $query = mysqli_query($database, $sql)
 echo '{"players":[';
 $count = 0;
 while ($row = mysqli_fetch_row($query)) {
-	if ($count++) { echo ",\n"; };
+	if ($count++) { echo ",\n"; }
 	$p = array(
 		'pid' => $row[0],
 		'name' => $row[1],
@@ -36,5 +36,36 @@ while ($row = mysqli_fetch_row($query)) {
 echo "],\n";
 echo '"games":[';
 
+$sql = "SELECT a.player,b.player,a.placement,b.placement
+	FROM contest_participant a
+	CROSS JOIN contest_participant b
+		ON b.contest=a.contest
+		AND b.player<>a.player
+	JOIN contest c ON c.id = a.contest
+	WHERE c.tournament=".db_quote($tournament_id)."
+	AND c.status='completed'
+	ORDER BY c.id,a.player,b.player";
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+
+$count = 0;
+while ($row=mysqli_fetch_row($query)) {
+	$g = array(
+		'player1' => $row[0],
+		'player2' => $row[1]
+		);
+	if (($row[2]?:9999) < ($row[3]?:9999)) {
+		$g['winner']='b';
+	}
+	else if (($row[2]?:9999) > ($row[3]?:9999)) {
+		$g['winner'] = 'w';
+	}
+	else {
+		// no winner
+		continue;
+	}
+	if ($count++) { echo ",\n"; }
+	echo json_encode($g);
+}
 echo "]\n";
 echo "}\n";
