@@ -139,7 +139,10 @@ for (var i = 0; i < players.length; i++)
 	{
 		$row.hide();
 	}
-}
+} //end foreach player row
+
+	prune_columns(S.start, S.start+S.ROWS);
+	setTimeout(nextPage,S.DELAY * 1000);
 }
 
 function prune_columns(row0, row1)
@@ -160,7 +163,7 @@ function prune_columns(row0, row1)
 		}
 	}
 
-	var d = COLS - (max_opp - min_opp + 1);
+	var d = S.COLS - (max_opp - min_opp + 1);
 	if (d > 0)
 	{
 		min_opp -= d;
@@ -219,7 +222,5 @@ function nextPage()
 }
 
 fetch_all_players();
-//prune_columns(S.start, S.start+ROWS);
-//setTimeout(nextPage,S.DELAY * 1000);
 
 
