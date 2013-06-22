@@ -128,12 +128,13 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 if ($can_edit_players) {
 $new_person_url = "person.php?tournament=".urlencode($tournament_id);
+$import_persons_url = "import_person.php?tournament=".urlencode($tournament_id);
 $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($new_person_url)?>">New Player</a>
-|
-<a href="<?php h($pairings_url)?>">Generate Pairings</a>
+| <a href="<?php h($import_persons_url)?>">Import Players</a>
+| <a href="<?php h($pairings_url)?>">Generate Pairings</a>
 </p>
 <?php } ?>
 

@@ -24,6 +24,7 @@ php_scripts = \
 	config.php \
 	contest.php \
 	contest_participant.php \
+	import_person.php \
 	index.php \
 	list_roster.inc.php \
 	login.php \

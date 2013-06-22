@@ -41,6 +41,7 @@ CREATE TABLE person (
 	mail VARCHAR(200),
 	status VARCHAR(20),
 	entry_rank VARCHAR(20),
+	rating FLOAT,
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
