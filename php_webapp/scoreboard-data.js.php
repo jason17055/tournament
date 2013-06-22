@@ -18,6 +18,7 @@ header("Content-Type: text/json");
 $sql = "SELECT id,name,entry_rank
 	FROM person
 	WHERE tournament=".db_quote($tournament_id)."
+	AND status IS NOT NULL
 	ORDER BY entry_rank DESC, name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
