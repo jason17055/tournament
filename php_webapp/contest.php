@@ -263,18 +263,18 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 <tr>
 <td><label for="status_cb">Status:</label></td>
 <td><?php select_widget(array(
-		name => "status",
-		value => $_REQUEST['status'],
-		options => array(
+		'name' => "status",
+		'value' => $_REQUEST['status'],
+		'options' => array(
 			'' => "--select--",
-			proposed => "Proposed",
-			assigned => "Assigned",
-			started => "Started",
-			suspended => "Suspended",
-			aborted => "Aborted",
-			completed => "Completed"
+			'proposed' => "Proposed",
+			'assigned' => "Assigned",
+			'started' => "Started",
+			'suspended' => "Suspended",
+			'aborted' => "Aborted",
+			'completed' => "Completed"
 			),
-		read_only => !$can_edit
+		'read_only' => !$can_edit
 		)) ?></td>
 </tr>
 <tr>
@@ -295,6 +295,7 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 <th class="placement_col">Placement</th>
 </tr>
 <?php
+if (isset($_GET['id'])) {
 	$sql = "SELECT cp.id AS id,
 		p.id AS player_id,
 		p.name AS player_name,
@@ -336,6 +337,7 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 </tr>
 <?php
 	} // end foreach participant
+} //end if existing contest
 	?>
 <tr id="new_participant_row" class="template">
 <td class="commit_col">
@@ -351,8 +353,12 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 </table>
 <?php
 	if ($can_edit) {
-	$add_participant_url = "contest_participant.php?contest=".urlencode($_GET['id'])
+		if (isset($_GET['id'])) {
+			$add_participant_url = "contest_participant.php?contest=".urlencode($_GET['id'])
 		."&next_url=".urlencode($_SERVER['REQUEST_URI']);
+		} else {
+			$add_participant_url = "#";
+		}
 	?>
 <div><a href="#<?php h($add_participant_url)?>" id="add_participant_link">Add Participant</a></div>
 	<?php } //endif is_director ?>
@@ -419,7 +425,7 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 
 <?php if ($can_edit) { ?>
 <div class="form_buttons_bar">
-<?php if ($_GET['id']) { ?>
+<?php if (isset($_GET['id'])) { ?>
 <button type="submit" name="action:update_contest">Update Game</button>
 <button type="submit" name="action:delete_contest">Delete Game</button>
 <?php } else { ?>
