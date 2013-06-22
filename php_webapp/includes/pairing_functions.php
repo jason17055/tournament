@@ -200,6 +200,84 @@ echo "got penalty of $total_penalty<br>\n";
 	return 1000/(1+$total_penalty/1000);
 }
 
+function mutate_matching_by_swapping(&$parent_matching)
+{
+	$assignments = $parent_matching['assignments'];
+
+	// pick someone to move
+	$R = array();
+	for ($i = 0; $i < count($assignments); $i++) {
+		// don't remove from a "locked" table
+		if (isset($assignments[$i]['locked'])) { continue; }
+
+		$f = 1;
+		$R[] = array(
+			'v' => $i,
+			'f' => $f
+			);
+	}
+
+	$a_table_idx = roulette($R);
+	$a_table = $assignments[$a_table_idx];
+	$a_seat = rand(1, count($a_table['players'])) - 1;
+	$a_round = $a_table['round'];
+
+	// pick someone to swap with; must be same round
+	$R = array();
+	for ($i = 0; $i < count($assignments); $i++) {
+		// don't remove from a "locked" table
+		if (isset($assignments[$i]['locked'])) { continue; }
+
+		// must be same round
+		if ($assignments[$i]['round'] != $a_round) { continue; }
+
+		$f = 1;
+		$R[] = array(
+			'v' => $i,
+			'f' => $f
+			);
+	}
+		
+	$b_table_idx = roulette($R);
+	$b_table = $assignments[$b_table_idx];
+	if ($b_table_idx == $a_table_idx) {
+		// pick a different seat than first player
+		$n = count($b_table['players'])-1;
+		if ($n > 0) {
+			$b_seat = rand(1, $n) - 1;
+			if ($b_seat >= $a_seat) { $b_seat++; }
+		}
+		else {
+			// unable to do a matching
+			return NULL;
+		}
+	}
+	else {
+		$b_seat = rand(1, count($b_table['players'])) - 1;
+	}
+
+	// make the swap
+	$removed_player = $a_table['players'][$a_seat];
+
+	$a_players = $a_table['players'];
+	$a_players[$a_seat] = $b_table['players'][$b_seat];
+	$a_table['players'] = $a_players;
+	$assignments[$a_table_idx] = $a_table;
+
+	$b_players = $b_table['players'];
+	$b_players[$b_seat] = $removed_player;
+	$b_table['players'] = $b_players;
+	$assignments[$b_table_idx] = $b_table;
+
+	$m = array(
+		'players' => &$parent_matching['players'],
+		'history' => &$parent_matching['weights'],
+		'assignments' => &$assignments
+		);
+	$m['fitness'] = sum_fitness($m);
+	return $m;
+}
+
 function mutate_matching(&$parent_matching)
 {
 	$assignments = $parent_matching['assignments'];
@@ -224,7 +302,8 @@ function mutate_matching(&$parent_matching)
 
 	$rmtable_idx = roulette($R);
 	if (is_null($rmtable_idx)) {
-		return NULL; //unsuccessful mutation
+		// try a different mutation method
+		return mutate_matching_by_swapping($parent_matching);
 	}
 
 	$table = $assignments[$rmtable_idx];
