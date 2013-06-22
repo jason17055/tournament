@@ -54,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_person'])) {
 
+		if (!$_REQUEST['status']) {
+			die("Status must be set.");
+		}
+
 		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,home_location,mail,status)
 			VALUES (
 			".db_quote($tournament_id).",
