@@ -15,11 +15,12 @@ if (!$row) {
 
 header("Content-Type: text/json");
 
-$sql = "SELECT id,name,entry_rank
-	FROM person
-	WHERE tournament=".db_quote($tournament_id)."
-	AND status IS NOT NULL
-	ORDER BY entry_rank DESC, name ASC";
+$sql = "SELECT p.id,p.name,p.entry_rank
+	FROM person p
+	JOIN tournament t ON t.id=p.tournament
+	WHERE t.id=".db_quote($tournament_id)."
+	AND p.status IS NOT NULL
+	ORDER BY p.entry_rank DESC, p.name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
@@ -43,8 +44,10 @@ $sql = "SELECT a.player,b.player,a.placement,b.placement
 		ON b.contest=a.contest
 		AND b.player<>a.player
 	JOIN contest c ON c.id = a.contest
-	WHERE c.tournament=".db_quote($tournament_id)."
+	JOIN tournament t ON t.id = c.tournament
+	WHERE t.id=".db_quote($tournament_id)."
 	AND c.status='completed'
+	AND (c.session_num IS NULL OR c.session_num=t.current_session)
 	ORDER BY c.id,a.player,b.player";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
