@@ -33,7 +33,7 @@ function parse_date_time($date_str, $time_str)
 
 function split_datetime($datetime_str, &$date_str, &$time_str)
 {
-	$parts = explode('T', $datetime_str);
+	$parts = array_pad(explode('T', $datetime_str),2,NULL);
 	$date_str = $parts[0];
 	$time_str = $parts[1];
 }

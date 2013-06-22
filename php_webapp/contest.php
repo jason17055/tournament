@@ -14,12 +14,23 @@ if (isset($_GET['tournament'])) {
 	$row = mysqli_fetch_row($query)
 		or die("Not Found");
 	$tournament_info = array(
-		multi_game => $row[0],
-		multi_session => $row[1],
-		multi_round => $row[2],
-		current_session => $row[3]
+		'multi_game' => $row[0],
+		'multi_session' => $row[1],
+		'multi_round' => $row[2],
+		'current_session' => $row[3]
 		);
-	$_REQUEST['session_num'] = $tournament_info['current_session'];
+
+	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+		$_REQUEST['session_num'] = $tournament_info['current_session'];
+		$_REQUEST['round'] = "";
+		$_REQUEST['board'] = "";
+		$_REQUEST['game'] = "";
+		$_REQUEST['scenario'] = "";
+		$_REQUEST['status'] = "";
+		$_REQUEST['started'] = "";
+		$_REQUEST['finished'] = "";
+		$_REQUEST['notes'] = "";
+	}
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,multi_game,multi_session,multi_round,
@@ -34,9 +45,9 @@ else if (isset($_GET['id'])) {
 		or die("Invalid contest id");
 	$tournament_id = $row[0];
 	$tournament_info = array(
-		multi_game => $row[1],
-		multi_session => $row[2],
-		multi_round => $row[3]
+		'multi_game' => $row[1],
+		'multi_session' => $row[2],
+		'multi_round' => $row[3]
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -204,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 split_datetime($_REQUEST['started'], $_REQUEST['started_date'], $_REQUEST['started_time']);
 split_datetime($_REQUEST['finished'], $_REQUEST['finished_date'], $_REQUEST['finished_time']);
 
-begin_page($_GET['id'] ? "Edit Game" : "New Game");
+begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
