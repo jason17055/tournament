@@ -77,6 +77,7 @@ $sql = "SELECT p.id,p.name,p.mail,p.status,
 		ON r.id=p.id
 		AND r.session_num=t.current_session
 	WHERE tournament=".db_quote($tournament_id)."
+	AND p.status IS NOT NULL
 	ORDER BY rating DESC, name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
@@ -126,6 +127,17 @@ while ($row = mysqli_fetch_row($query)) {
 </table>
 
 <?php
+$sql = "SELECT COUNT(*) FROM person
+	WHERE tournament=".db_quote($tournament_id)."
+	AND status IS NULL";
+$query = mysqli_query($database, $sql);
+$row = mysqli_fetch_row($query);
+if ($row[0]) {
+	?>
+<div>Not shown: <?php h(number_format($row[0]))?> unregistered players</div>
+<?php
+}
+
 if ($can_edit_players) {
 $new_person_url = "person.php?tournament=".urlencode($tournament_id);
 $import_persons_url = "import_person.php?tournament=".urlencode($tournament_id);
