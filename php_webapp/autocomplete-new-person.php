@@ -23,6 +23,7 @@ else {
 $sql = "SELECT p.id,p.name,p.member_number,p.home_location,p.rating
 	FROM person p
 	WHERE tournament=".db_quote($tournament_id)."
+	AND status IS NULL
 	AND $filt_sql
 	ORDER BY name ASC";
 $query = mysqli_query($database, $sql)
