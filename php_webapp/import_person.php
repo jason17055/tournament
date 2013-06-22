@@ -27,12 +27,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:import_tdlist'])) {
 
-		$lines = explode("\n", file_get_contents('http://www.usgo.org/ratings/TDListA.txt'));
+		echo "<html><body>\n";
+		echo "Importing TDList from AGA website...<br>\n";
+		flush();
+		ignore_user_abort();
+		set_time_limit(60);
+
+		$raw_contents = file_get_contents('http://www.usgo.org/ratings/TDListA.txt');
+		if ($raw_contents === FALSE) {
+			die("Error getting TDList from AGA website");
+		}
+
+		mysqli_autocommit($database, FALSE);
+
+		$lines = explode("\n", $raw_contents);
 		$count = 0;
 		foreach ($lines as $l) {
+			if ($count % 250 == 0) {
+				mysqli_commit($database);
+				echo "Processed $count records...<br>\n";
+				flush();
+				set_time_limit(60);
+			}
+
 			$count++;
 			$l = chop($l);
-			$parts = explode("\t", $l);
+			$parts = array_pad(explode("\t", $l), 7, "");
 			$name = trim($parts[0], " ,");
 			$member_number = $parts[1];
 			$rating = $parts[3];
@@ -46,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 				".db_quote($home).",
 				".db_quote($rating)."
 				FROM dual
-				WHERE ".db_quote($member_number)." NOT IN (SELECT member_number FROM person WHERE tournament=".db_quote($tournament_id).")";
+				WHERE ".db_quote($member_number)." NOT IN (SELECT member_number FROM person WHERE tournament=".db_quote($tournament_id)." AND member_number IS NOT NULL)";
 			mysqli_query($database, $sql)
 				or die("SQL error: ".db_error($database));
 			$id = mysqli_insert_id($database);
@@ -63,7 +83,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			} //endif already exists
 		}
 
-		header("Location: $next_url");
+		mysqli_commit($database);
+		echo "Processed $count records (finished)<br>\n";
+		?>
+<script type="text/javascript">
+var u = <?php echo json_encode($next_url)?>;
+setTimeout(function() {
+	location.href=u;
+	}, 5000);
+</script>
+</body>
+</html>
+<?php
 		exit();
 	}
 
