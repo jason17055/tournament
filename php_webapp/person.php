@@ -7,6 +7,15 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
+
+	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+		$_REQUEST['name'] = "";
+		$_REQUEST['member_number'] = "";
+		$_REQUEST['entry_rank'] = "";
+		$_REQUEST['home_location'] = "";
+		$_REQUEST['mail'] = "";
+		$_REQUEST['status'] = "";
+	}
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
@@ -84,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
-begin_page($_GET['id'] ? "Edit Player" : "New Player");
+begin_page(isset($_GET['id']) ? "Edit Player" : "New Player");
 
 ?>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
@@ -112,9 +121,9 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 <tr>
 <td><label for="status_cb">Status:</label></td>
 <td><?php select_widget(array(
-	name => 'status',
-	value => $_REQUEST['status'],
-	options => array(""=>"--select--",
+	'name' => 'status',
+	'value' => $_REQUEST['status'],
+	'options' => array(""=>"--select--",
 		"ready"=>"Ready",
 		"not_ready"=>"Not Ready",
 		"absent" => "Absent"
@@ -124,7 +133,7 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 </table>
 
 <div class="form_buttons_bar">
-<?php if ($_GET['id']) { ?>
+<?php if (isset($_GET['id'])) { ?>
 <button type="submit" name="action:update_person">Update Player</button>
 <button type="submit" name="action:delete_person">Delete Player</button>
 <?php } else { ?>
@@ -135,6 +144,7 @@ begin_page($_GET['id'] ? "Edit Player" : "New Player");
 </form>
 
 <?php
+if (isset($_GET['id'])) {
 $scorecard_url = "player_scorecard.php?id=".urlencode($_REQUEST['id']).
 	'&next_url='.urlencode($_SERVER['REQUEST_URI']);
 ?>
@@ -143,4 +153,6 @@ $scorecard_url = "player_scorecard.php?id=".urlencode($_REQUEST['id']).
 </p>
 
 <?php
+} //endif existing player
+
 end_page();
