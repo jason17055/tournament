@@ -4,6 +4,7 @@ players_src = [
 	$sql = "SELECT id,name
 		FROM person
 		WHERE tournament=".db_quote($tournament_id)."
+		AND status IS NOT NULL
 		AND (id=".db_quote($_REQUEST['player'])."
 			OR id NOT IN (SELECT player FROM contest_participant WHERE contest=".db_quote($contest_id)." AND player IS NOT NULL)
 		    )
