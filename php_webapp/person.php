@@ -12,6 +12,7 @@ if (isset($_GET['tournament'])) {
 		$_REQUEST['name'] = "";
 		$_REQUEST['member_number'] = "";
 		$_REQUEST['entry_rank'] = "";
+		$_REQUEST['rating'] = "";
 		$_REQUEST['home_location'] = "";
 		$_REQUEST['mail'] = "";
 		$_REQUEST['status'] = "ready";
@@ -19,7 +20,7 @@ if (isset($_GET['tournament'])) {
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
-		name,member_number,entry_rank,home_location,mail,status
+		name,member_number,entry_rank,rating,home_location,mail,status
 		FROM person WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -30,9 +31,10 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['name'] = $row[1];
 		$_REQUEST['member_number'] = $row[2];
 		$_REQUEST['entry_rank'] = $row[3];
-		$_REQUEST['home_location'] = $row[4];
-		$_REQUEST['mail'] = $row[5];
-		$_REQUEST['status'] = $row[6];
+		$_REQUEST['rating'] = $row[4];
+		$_REQUEST['home_location'] = $row[5];
+		$_REQUEST['mail'] = $row[6];
+		$_REQUEST['status'] = $row[7];
 	}
 }
 else {
@@ -58,12 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			die("Status must be set.");
 		}
 
-		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,home_location,mail,status)
+		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,rating,home_location,mail,status)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['member_number']).",
 			".db_quote($_REQUEST['entry_rank']).",
+			".db_quote($_REQUEST['rating']).",
 			".db_quote($_REQUEST['home_location']).",
 			".db_quote($_REQUEST['mail']).",
 			".db_quote($_REQUEST['status'])."
@@ -81,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			SET name=".db_quote($_REQUEST['name']).",
 			member_number=".db_quote($_REQUEST['member_number']).",
 			entry_rank=".db_quote($_REQUEST['entry_rank']).",
+			rating=".db_quote($_REQUEST['rating']).",
 			home_location=".db_quote($_REQUEST['home_location']).",
 			mail=".db_quote($_REQUEST['mail']).",
 			status=".db_quote($_REQUEST['status'])."
@@ -116,6 +120,10 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <tr>
 <td><label for="entry_rank_entry">Entry Rank:</label></td>
 <td><input type="text" id="entry_rank_entry" name="entry_rank" value="<?php h($_REQUEST['entry_rank'])?>"></td>
+</tr>
+<tr>
+<td><label for="rating_entry">Current Rating:</label></td>
+<td><input type="text" id="rating_entry" name="rating" value="<?php h($_REQUEST['rating'])?>"></td>
 </tr>
 <tr>
 <td><label for="home_location_entry">Home Location:</label></td>
