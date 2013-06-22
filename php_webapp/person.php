@@ -14,7 +14,7 @@ if (isset($_GET['tournament'])) {
 		$_REQUEST['entry_rank'] = "";
 		$_REQUEST['home_location'] = "";
 		$_REQUEST['mail'] = "";
-		$_REQUEST['status'] = "";
+		$_REQUEST['status'] = "ready";
 	}
 }
 else if (isset($_GET['id'])) {

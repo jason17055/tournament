@@ -43,6 +43,7 @@ while ($row = mysqli_fetch_row($query)) {
 		'rating' => $row[4]
 		);
 	$tmp['value'] = $tmp[$field];
+	$tmp['label'] = "[" . $tmp['member_number'] . "] ".$tmp['name'];
 	echo json_encode($tmp);
 }
 echo "\n]\n";

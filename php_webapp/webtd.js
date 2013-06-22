@@ -142,9 +142,10 @@ $(function() {
 		source: 'autocomplete-new-person.php?tournament='+webtd_tournament_id,
 		minLength: 2,
 		select: on_new_player_select
-		});
+	});
+
 	$('#new_person_form #member_number_entry').autocomplete({
 		source: 'autocomplete-new-person.php?tournament='+webtd_tournament_id+'&field=member_number',
 		select: on_new_player_select
-		});
 	});
+});
