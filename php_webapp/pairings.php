@@ -14,10 +14,10 @@ $sql = "SELECT name,current_session,
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
-	id => $tournament_id,
-	name => $row[0],
-	current_session => $row[1],
-	last_round => ($row[2] ?: 0)
+	'id' => $tournament_id,
+	'name' => $row[0],
+	'current_session' => $row[1],
+	'last_round' => ($row[2] ?: 0)
 	);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
