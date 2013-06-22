@@ -95,8 +95,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 begin_page(isset($_GET['id']) ? "Edit Player" : "New Player");
 
+$form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
+
 ?>
-<form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
+<form id="<?php h($form_id)?>"
+	method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <table>
 <tr>
 <td><label for="name_entry">Name:</label></td>

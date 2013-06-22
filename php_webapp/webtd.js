@@ -127,3 +127,24 @@ $(function() {
 		$('ul', $menu).focus();
 		});
 	});
+
+function on_new_player_select(evt, ui)
+{
+	var f = document.getElementById('new_person_form');
+	f.name.value = ui.item.name;
+	f.member_number.value = ui.item.member_number;
+	f.entry_rank.value = ui.item.rating;
+	f.home_location.value = ui.item.home_location;
+}
+
+$(function() {
+	$('#new_person_form #name_entry').autocomplete({
+		source: 'autocomplete-new-person.php?tournament='+webtd_tournament_id,
+		minLength: 2,
+		select: on_new_player_select
+		});
+	$('#new_person_form #member_number_entry').autocomplete({
+		source: 'autocomplete-new-person.php?tournament='+webtd_tournament_id+'&field=member_number',
+		select: on_new_player_select
+		});
+	});

@@ -9,12 +9,16 @@ function h($str)
 
 function begin_page($page_title)
 {
+	global $tournament_id;
 ?><!DOCTYPE HTML>
 <html>
 <head>
 <title><?php h($page_title)?></title>
 <link type="text/css" rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/ui-lightness/jquery-ui.min.css">
 <link type="text/css" rel="stylesheet" href="webtd.css">
+<script type="text/javascript"><!--
+webtd_tournament_id = <?php echo(json_encode($tournament_id))?>;
+//--></script>
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.1.min.js"></script>
 <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
 <script type="text/javascript" src="webtd.js"></script>

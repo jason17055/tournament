@@ -21,6 +21,7 @@ data_files = \
 	images/lose_icon.png
 
 php_scripts = \
+	autocomplete-new-person.php \
 	config.php \
 	contest.php \
 	contest_participant.php \
