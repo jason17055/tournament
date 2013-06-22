@@ -27,7 +27,7 @@ if (isset($_GET['tournament'])) {
 		$_REQUEST['game'] = "";
 		$_REQUEST['scenario'] = "";
 		$_REQUEST['status'] = "";
-		$_REQUEST['started'] = "";
+		$_REQUEST['started'] = strftime('%Y-%m-%d', time());
 		$_REQUEST['finished'] = "";
 		$_REQUEST['notes'] = "";
 	}
