@@ -13,14 +13,14 @@ $row = mysqli_fetch_row($query)
 	or die("Not Found");
 $tournament_id = $row[0];
 $tournament_info = array(
-	id => $tournament_id,
-	multi_game => $row[1],
-	multi_session => $row[2]
+	'id' => $tournament_id,
+	'multi_game' => $row[1],
+	'multi_session' => $row[2]
 	);
 $person_id = $_GET['id'];
 $person_info = array(
-	id => $person_id,
-	name => $row[3]
+	'id' => $person_id,
+	'name' => $row[3]
 	);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 begin_page("$person_info[name] - Scorecard");
 
-$go_back_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
+$go_back_url = isset($_REQUEST['next_url']) ? $_REQUEST['next_url'] : 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($go_back_url)?>">Go Back</a>
