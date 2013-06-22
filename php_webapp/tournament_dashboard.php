@@ -33,7 +33,8 @@ $can_edit_players = is_director($tournament_id);
 <?php } ?>
 <th>Player Name</th>
 <?php if ($can_edit_players) { ?>
-<th>Email Address</th>
+<th>Member Number</th>
+<th>Home Location</th>
 <?php } ?>
 <th>Status</th>
 <th>Games Played</th>
@@ -42,7 +43,7 @@ $can_edit_players = is_director($tournament_id);
 <th>Current Rating</th>
 </tr>
 <?php
-$sql = "SELECT p.id,p.name,p.mail,p.status,
+$sql = "SELECT p.id,p.name,p.member_number,p.home_location,p.status,
 	(SELECT COUNT(DISTINCT contest) FROM contest_participant
 			WHERE player=p.id) AS games_played,
 	(SELECT COUNT(*) FROM contest c
@@ -85,14 +86,15 @@ while ($row = mysqli_fetch_row($query)) {
 
 	$person_id = $row[0];
 	$name = $row[1];
-	$mail = $row[2];
-	$status = $row[3];
-	$games_played = $row[4];
-	$games_won = $row[5];
-	$games_won_this_session = $row[6];
-	$w_points = $row[7] ?: 0;
-	$w_points_this_session = $row[8] ?: 0;
-	$cur_rating = $row[9];
+	$member_number = $row[2];
+	$home_location = $row[3];
+	$status = $row[4];
+	$games_played = $row[5];
+	$games_won = $row[6];
+	$games_won_this_session = $row[7];
+	$w_points = $row[8] ?: 0;
+	$w_points_this_session = $row[9] ?: 0;
+	$cur_rating = $row[10];
 
 	$edit_url = "person.php?id=".urlencode($person_id);
 	$url = 'player_scorecard.php?id='.urlencode($person_id);
@@ -103,7 +105,8 @@ while ($row = mysqli_fetch_row($query)) {
 <?php } ?>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
 <?php if ($can_edit_players) { ?>
-<td class="mail_col"><?php h($mail)?></td>
+<td class="member_number_col"><?php h($member_number)?></td>
+<td class="home_location_col"><?php h($home_location)?></td>
 <?php } ?>
 <td class="status_col"><?php
 	if ($status == 'ready') {
