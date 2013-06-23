@@ -46,6 +46,7 @@ $sql = "SELECT a.player,b.player,a.placement,b.placement,c.status
 	JOIN contest c ON c.id = a.contest
 	WHERE c.tournament=".db_quote($tournament_id)."
 	AND c.status IN ('completed','started')
+	AND a.player < b.player
 	ORDER BY c.id,a.player,b.player";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));

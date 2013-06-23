@@ -112,11 +112,13 @@ for (var i = 0; i < players.length; i++)
 			var result = null;
 			if (play.player1 == pr.pid && play.player2 == pc.pid)
 			{
-				result = play.winner == 'b' ? 'L' : 'W';
+				result = play.in_progress ? 'P' :
+					play.winner == 'b' ? 'L' : 'W';
 			}
 			else if (play.player1 == pc.pid && play.player2 == pr.pid)
 			{
-				result = play.winner == 'b' ? 'W' : 'L';
+				result = play.in_progress ? 'P' :
+					play.winner == 'b' ? 'W' : 'L';
 			}
 			else
 			{
@@ -134,6 +136,7 @@ for (var i = 0; i < players.length; i++)
 			$('img',$img).attr('alt', result);
 			$('img',$img).attr('title', 'details');
 			$('img',$img).attr('src',
+				result == "P" ? 'images/game_in_progress_icon.png' :
 				result == "W" ? 'images/win_icon.png' : 'images/lose_icon.png');
 			$cell.append($img);
 		}
