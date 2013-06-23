@@ -68,7 +68,7 @@ var players = [];
 var games = [];
 var S = {
 	start: get_url_param('start'),
-	ROWS: 6,
+	ROWS: 7,
 	COLS: 12,
 	DELAY: 30 //seconds
 	};
@@ -113,12 +113,12 @@ for (var i = 0; i < players.length; i++)
 			if (play.player1 == pr.pid && play.player2 == pc.pid)
 			{
 				result = play.in_progress ? 'P' :
-					play.winner == 'b' ? 'L' : 'W';
+					play.winner == '1' ? 'W' : 'L';
 			}
 			else if (play.player1 == pc.pid && play.player2 == pr.pid)
 			{
 				result = play.in_progress ? 'P' :
-					play.winner == 'b' ? 'W' : 'L';
+					play.winner == '2' ? 'W' : 'L';
 			}
 			else
 			{

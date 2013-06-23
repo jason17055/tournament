@@ -61,10 +61,10 @@ while ($row=mysqli_fetch_row($query)) {
 		$g['in_progress'] = true;
 	}
 	else if (($row[2]?:9999) < ($row[3]?:9999)) {
-		$g['winner']='b';
+		$g['winner']='1';
 	}
 	else if (($row[2]?:9999) > ($row[3]?:9999)) {
-		$g['winner'] = 'w';
+		$g['winner'] = '2';
 	}
 	else {
 		// no winner
