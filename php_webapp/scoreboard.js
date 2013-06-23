@@ -125,11 +125,15 @@ for (var i = 0; i < players.length; i++)
 				continue;
 			}
 
-			count_plays++;
-			if (result == 'W')
+			if (result != 'P') {
+				count_plays++;
+			}
+			if (result == 'W') {
 				count_wins++;
-			if (S.min_opp_by_pid[pr.pid] == null)
+			}
+			if (S.min_opp_by_pid[pr.pid] == null) {
 				S.min_opp_by_pid[pr.pid] = j;
+			}
 			S.max_opp_by_pid[pr.pid] = j;
 
 			var $img = $('<div><img width="28" height="28"></div>');
