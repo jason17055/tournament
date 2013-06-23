@@ -19,6 +19,7 @@ $sql = "SELECT id,name,entry_rank
 	FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	AND status IS NOT NULL
+	AND status NOT IN ('prereg')
 	ORDER BY entry_rank DESC, name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
@@ -37,14 +38,14 @@ while ($row = mysqli_fetch_row($query)) {
 echo "],\n";
 echo '"games":[';
 
-$sql = "SELECT a.player,b.player,a.placement,b.placement
+$sql = "SELECT a.player,b.player,a.placement,b.placement,c.status
 	FROM contest_participant a
 	CROSS JOIN contest_participant b
 		ON b.contest=a.contest
 		AND b.player<>a.player
 	JOIN contest c ON c.id = a.contest
 	WHERE c.tournament=".db_quote($tournament_id)."
-	AND c.status='completed'
+	AND c.status IN ('completed','started')
 	ORDER BY c.id,a.player,b.player";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
@@ -55,7 +56,10 @@ while ($row=mysqli_fetch_row($query)) {
 		'player1' => $row[0],
 		'player2' => $row[1]
 		);
-	if (($row[2]?:9999) < ($row[3]?:9999)) {
+	if ($row[4] != 'completed') {
+		$g['in_progress'] = true;
+	}
+	else if (($row[2]?:9999) < ($row[3]?:9999)) {
 		$g['winner']='b';
 	}
 	else if (($row[2]?:9999) > ($row[3]?:9999)) {
