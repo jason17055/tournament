@@ -14,8 +14,15 @@ function get_url_param(p)
 
 function generate_short_name(p)
 {
+	var n = p.name;
+	if (n.match(/,/)) {
+		var i = n.indexOf(',');
+		n = n.substring(i+1) + ' ' + n.substring(0,i);
+	}
+
+	var parts = n.split(/ /);
+
 	var x = "";
-	var parts = p.name.split(/ /);
 	for (var i in parts) {
 		x += parts[i].substr(0,1);
 	}
