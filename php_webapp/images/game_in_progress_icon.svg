@@ -10,8 +10,8 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="150"
-   height="150"
+   width="28"
+   height="28"
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.48.2 r9819"
@@ -81,27 +81,29 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(0,-122)">
     <path
        sodipodi:type="arc"
-       style="opacity:1;fill:url(#linearGradient3166);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.87333345000000007;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:url(#linearGradient3166);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.87333345;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path2383"
        sodipodi:cx="508.57144"
        sodipodi:cy="566.64789"
        sodipodi:rx="140"
        sodipodi:ry="140"
-       d="M 648.57144,566.64789 A 140,140 0 1 1 368.57144,566.64789 A 140,140 0 1 1 648.57144,566.64789 z"
-       transform="matrix(0.5321539,0,0,0.5321539,-195.63829,-226.54392)" />
+       d="m 648.57144,566.64789 a 140,140 0 1 1 -280,0 140,140 0 1 1 280,0 z"
+       transform="matrix(0.09933539,0,0,0.0993354,-36.519158,79.711767)" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="Icon" />
+     inkscape:label="Icon"
+     transform="translate(0,-122)" />
 </svg>
