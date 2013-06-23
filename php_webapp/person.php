@@ -138,9 +138,10 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <td><?php select_widget(array(
 	'name' => 'status',
 	'value' => $_REQUEST['status'],
-	'options' => array(""=>"--select--",
+	'options' => array(
 		"ready"=>"Ready",
-		"not_ready"=>"Not Ready",
+		"prereg"=>"Pre-Registered",
+		""=>"Unregistered",
 		"absent" => "Absent"
 		)
 	))?></td>
