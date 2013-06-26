@@ -91,6 +91,15 @@ Start at session:
 Default initial rating:
 <input type="text" name="initial_rating" size="4" value="1500">
 </div>
+<div>
+Weight of initial rating:
+<input type="text" name="initial_weight" size="4" value="10">
+</div>
+<div>
+Weight of inter-session ratings link:
+<input type="text" name="inter_session_weight" size="4" value="30">
+</div>
+
 
 <div class="form_buttons_bar">
 <button type="submit" name="action:run_ratings">Run Ratings</button>

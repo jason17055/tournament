@@ -133,7 +133,11 @@ function do_ratings($tournament_id)
 	// generate dummy games to connect each player's rating identity
 	// to that player's rating identity of the previous session
 
-	$sql = "SELECT p.id AS person_id,
+	$sql = "SELECT person_id,post_rating_id,
+			pre_rating_id,
+			(SELECT rating_cycle FROM rating_identity WHERE id=pre_rating_id) AS pre_rating_cycle
+		FROM (
+		SELECT p.id AS person_id,
 		a.id AS post_rating_id,
 		(SELECT b.id FROM rating_identity b
 			WHERE b.player=p.id
@@ -145,16 +149,19 @@ function do_ratings($tournament_id)
 			ON a.player=p.id
 			AND a.batch=".db_quote($batch_num)."
 		WHERE p.tournament=".db_quote($tournament_id)."
-		AND a.rating_cycle<>0";
+		AND a.rating_cycle<>0) t1";
 
 	$query = mysqli_query($database, $sql);
 	while ($row = mysqli_fetch_row($query)) {
 		
 		$post_tourn_id = $row[1];
 		$pre_tourn_id = $row[2];
+		$pre_rating_cycle = $row[3];
 
-		$weight = 29; // equivalent to nineteen one-vs-one games
-		$perf = 0.51; //and winning a 51% rate.
+		$weight = $pre_rating_cycle == 0 ?
+				$_REQUEST['initial_weight'] :
+				$_REQUEST['inter_session_weight'];
+		$perf = 0.53; //and winning a 53% rate.
 
 		$sql = "INSERT INTO rating_data (batch,player_a,player_b,actual_performance,weight)
 			VALUES (
