@@ -133,7 +133,11 @@ function do_ratings($tournament_id)
 	// generate dummy games to connect each player's rating identity
 	// to that player's rating identity of the previous session
 
-	$sql = "SELECT p.id AS person_id,
+	$sql = "SELECT person_id,post_rating_id,
+			pre_rating_id,
+			(SELECT rating_cycle FROM rating_identity WHERE id=pre_rating_id) AS pre_rating_cycle
+		FROM (
+		SELECT p.id AS person_id,
 		a.id AS post_rating_id,
 		(SELECT b.id FROM rating_identity b
 			WHERE b.player=p.id
@@ -145,16 +149,19 @@ function do_ratings($tournament_id)
 			ON a.player=p.id
 			AND a.batch=".db_quote($batch_num)."
 		WHERE p.tournament=".db_quote($tournament_id)."
-		AND a.rating_cycle<>0";
+		AND a.rating_cycle<>0) t1";
 
 	$query = mysqli_query($database, $sql);
 	while ($row = mysqli_fetch_row($query)) {
 		
 		$post_tourn_id = $row[1];
 		$pre_tourn_id = $row[2];
+		$pre_rating_cycle = $row[3];
 
-		$weight = 29; // equivalent to nineteen one-vs-one games
-		$perf = 0.51; //and winning a 51% rate.
+		$weight = $pre_rating_cycle == 0 ?
+				$_REQUEST['initial_weight'] :
+				$_REQUEST['inter_session_weight'];
+		$perf = 0.53; //and winning a 53% rate.
 
 		$sql = "INSERT INTO rating_data (batch,player_a,player_b,actual_performance,weight)
 			VALUES (
@@ -279,6 +286,7 @@ function do_ratings_pass($batch_num)
 	$adjustments = array();
 
 	$sum_errors = 0;
+	$count_errors = 0;
 	while ($row = mysqli_fetch_row($query))
 	{
 		$a_pid = $row[0];
@@ -298,7 +306,11 @@ function do_ratings_pass($batch_num)
 		$adjustments[$a_pid] += $adj;
 
 		$sum_errors += pow($adj, 2);
+		$count_errors++;
 	}
+
+	$iteration_count = isset($_REQUEST['iterations']) ? +$_REQUEST['iterations'] : 0;
+	$iteration_count++;
 
 	$max_abs_adj = 0;
 	foreach ($adjustments as $pid => $adj) {
@@ -306,7 +318,9 @@ function do_ratings_pass($batch_num)
 			$max_abs_adj = abs($adj);
 		}
 	}
-	$k = max(1, 20/$max_abs_adj);
+
+	# start with a K value of 8, gradually decay
+	$k = 8/(1+exp(($iteration_count-40)/15.0));
 
 	foreach ($adjustments as $pid => $adj) {
 		$sql = "UPDATE rating_identity
@@ -321,10 +335,13 @@ function do_ratings_pass($batch_num)
 <html>
 <body>
 <p>Batch number: <?php h($batch_num)?></p>
-<p>Current error: <?php h($sum_errors)?></p>
-<p>Current k value: <?php h($k)?></p>
+<p>Iterations: <?php h($iteration_count)?></p>
+<p>Current error: <?php h(sprintf('%.1f',$sum_errors/$count_errors))?></p>
+<p>Current k value: <?php h(sprintf('%.3f',$k))?></p>
+<p>Current max adj: <?php h(sprintf('%.3f',$max_abs_adj))?></p>
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <input type="hidden" name="batch" value="<?php h($batch_num)?>">
+<input type="hidden" name="iterations" value="<?php h($iteration_count)?>">
 <button type="submit" name="action:run_ratings">Another Pass</button>
 <button type="submit" name="action:commit_ratings">Save Ratings</button>
 <button type="submit" name="action:cancel">Cancel</button>

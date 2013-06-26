@@ -86,3 +86,56 @@ td.performance_col {
 	color: #444;
 	background-color: #fc4;
 }
+
+.pairings_container {
+	overflow: scroll;
+	left: 0;
+	right: 0;
+	height: 500px;
+	border: 1px solid black;
+	background-color: #8f8;
+	font-family: Verdana, sans-serif;
+}
+
+.pairings_container td {
+	text-align: left;
+	vertical-align: top;
+	padding-right: 1em;
+	padding-bottom: 1em;
+}
+
+.match_container .caption {
+	background-color: #ccc;
+	text-align: center;
+	border: 1px outset #888;
+}
+
+.match_container {
+	display: block;
+	border: 2px outset #888;
+	background-color: #eee;
+	color: black;
+}
+.match_container.template {
+	display: none;
+	}
+.match_container.over {
+	border: 2px solid #fff;
+	}
+
+.match_container .players_list {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+.match_container .players_list li {
+	border-bottom: 1px solid #ccc;
+	padding: 1pt 2pt 1pt 2pt;
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: default;
+}
+
+.match_container .players_list li:last-child {
+	border-bottom: none;
+}

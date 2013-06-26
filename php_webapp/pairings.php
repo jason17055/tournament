@@ -46,6 +46,19 @@ if (!isset($_REQUEST['max_game_size'])) {
 }
 
 ?>
+<div class="pairings_container">
+<table class="pairings_grid">
+</table>
+<div class="match_container template">
+<div class="caption">
+Round: <span class="round"></span>
+Table: <span class="table"></span>
+</div>
+<ul class="players_list">
+</ul>
+</div>
+</div>
+
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <div>First round to pair:
 <input type="text" size="4" name="first_round" value="<?php h($_REQUEST['first_round'])?>">
@@ -69,7 +82,7 @@ if (isset($_REQUEST['action:generate_pairings'])) {
 
 $players = array();
 
-$sql = "SELECT id,name,
+$sql = "SELECT id,name,status,
 	(SELECT COUNT(*) FROM contest c
 		WHERE tournament=p.tournament
 		AND session_num<".db_quote($tournament_info['current_session'])."
@@ -99,8 +112,7 @@ $sql = "SELECT id,name,
 		AND 5<=(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id)
 		) AS count5p
 	FROM person p
-	WHERE tournament=".db_quote($tournament_id)."
-	AND status='ready'";
+	WHERE tournament=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
@@ -125,11 +137,13 @@ while ($row = mysqli_fetch_row($query))
 	$pid = $row[0];
 	$p = array(
 		'name' => $row[1],
-		'count2p' => $row[2],
-		'count3p' => $row[3],
-		'count4p' => $row[4],
-		'count5p' => $row[5]
+		'status' => $row[2],
+		'count2p' => $row[3],
+		'count3p' => $row[4],
+		'count4p' => $row[5],
+		'count5p' => $row[6]
 		);
+	$p['ready'] = ($row[2] == 'ready');
 	$players[$pid] = $p;
 
 	?><tr>
@@ -252,12 +266,13 @@ usort($matching['assignments'], 'order_by_round_and_board');
 </tr>
 <?php
 foreach ($matching['assignments'] as $game) {
+	if ($game['locked']) { continue; }
 	?><tr>
 <td><?php h("Table $game[round]-$game[board]")?></td>
 <td><ul class="player_inline_list"><?php
 	foreach ($game['players'] as $pid) {
 		$p = $players[$pid];
-		?><li><span class="player_name" data-player-id="<?php h($pid)?>"><?php h($p['name'])?></span></li>
+		?><li><span class="player_name" data-player-id="<?php h($pid)?>"><?php h($p['name'] ?: $pid)?></span></li>
 <?php
 	}
 	?></ul></td>
