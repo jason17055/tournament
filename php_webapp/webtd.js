@@ -150,38 +150,76 @@ $(function() {
 	});
 });
 
-$(function() {
-	var assignments = [
-		{ round: '1', table: '1', players: [ '1', '2', '3' ] },
-		{ round: '1', table: '2', players: [ '4', '5', '6' ] }
-		];
-	var players = {
-		'1': { name: "Jason" },
-		'2': { name: "Dana" },
-		'3': { name: "Zach" },
-		'4': { name: "Bob" },
-		'5': { name: "Susan" },
-		'6': { name: "Jon" }
-		};
+function load_pairings_into(pairings_data, container_el)
+{
+	var players = pairings_data.players;
+	var assignments = pairings_data.contests;
 
-	function load_pairings_into(container_el)
-	{
-		for (var i in assignments) {
-			var a = assignments[i];
-			var $a = $('.match.template',container_el).clone();
-			$a.removeClass('template');
-			$('.round',$a).text(a.round);
-			$('.table',$a).text(a.table);
-			for (var j in a.players) {
-				var p = players[a.players[j]];
-				var $p = $('<li></li>');
-				$p.text(p.name);
-				$('.players_list',$a).append($p);
-			}
-			$(container_el).append($a);
-		}
+	var all_rounds = {};
+	var all_tables = {};
+	for (var i = 0; i < assignments.length; i++) {
+		var a = assignments[i];
+		all_rounds[a.round] = {};
+		all_tables[a.table] = {};
 	}
 
-	$("#pairings_container").each(function(idx,el) { load_pairings_into(el); });
+	var rounds_sorted = Object.keys(all_rounds).sort();
+	var tables_sorted = Object.keys(all_tables).sort();
+
+	for (var i = 0; i < tables_sorted.length; i++) {
+		var table_id = tables_sorted[i];
+		var $tr = $('<tr></tr>');
+		$tr.attr('data-webtd-table', table_id);
+
+		for (var j = 0; j < rounds_sorted.length; j++) {
+			var round_name = rounds_sorted[j];
+			var $td = $('<td></td>');
+			$td.attr('data-webtd-round', round_name);
+			$tr.append($td);
+		}
+
+		$('.pairings_grid', container_el).append($tr);
+	}
+
+	function get_cell(round, table)
+	{
+		return $('.pairings_grid tr[data-webtd-table='+table+'] td[data-webtd-round='+round+']', container_el);
+	}
+
+	for (var i in assignments) {
+		var a = assignments[i];
+		var $a = $('.match_container.template',container_el).clone();
+		$a.removeClass('template');
+		$('.round',$a).text(a.round);
+		$('.table',$a).text(a.table);
+		for (var j in a.players) {
+			var pid = a.players[j].pid;
+			var p = players[pid];
+			var $p = $('<li></li>');
+			$p.text(p != null ? p.name : ("?"+pid));
+			$('.players_list',$a).append($p);
+		}
+
+		var $td = get_cell(a.round, a.table);
+		$td.append($a);
+	}
+}
+
+$(function() {
+	function onError(jqxhr, textStatus, errorThrown) { }
+	function onSuccess(data) {
+		$('.pairings_container').each(function(idx,el) {
+			load_pairings_into(data, el);
+		});
+	}
+
+	if ($(".pairings_container").length) {
+		$.ajax({
+		url: 'assignments-data.js.php?tournament='+escape(webtd_tournament_id),
+		dataType: 'json',
+		error: onError,
+		success: onSuccess
+		});
+	}
 });
 

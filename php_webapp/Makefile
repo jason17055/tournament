@@ -22,6 +22,7 @@ data_files = \
 	images/game_in_progress_icon.png
 
 php_scripts = \
+	assignments-data.js.php \
 	autocomplete-new-person.php \
 	config.php \
 	contest.php \

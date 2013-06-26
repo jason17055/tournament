@@ -46,10 +46,14 @@ if (!isset($_REQUEST['max_game_size'])) {
 }
 
 ?>
-<div id="pairings_container">
-<div class="match template">
-<div>Round: <span class="round"></span>
-Table: <span class="table"></span></div>
+<div class="pairings_container">
+<table class="pairings_grid">
+</table>
+<div class="match_container template">
+<div class="caption">
+Round: <span class="round"></span>
+Table: <span class="table"></span>
+</div>
 <ul class="players_list">
 </ul>
 </div>
