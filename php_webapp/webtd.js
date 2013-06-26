@@ -166,6 +166,54 @@ function load_pairings_into(pairings_data, container_el)
 	var rounds_sorted = Object.keys(all_rounds).sort();
 	var tables_sorted = Object.keys(all_tables).sort();
 
+	function setup_contest_box_handlers(contest_box_el)
+	{
+		function onDragEnter(evt) {
+			this.classList.add('over');
+		}
+		function onDragOver(evt) {
+			evt.preventDefault();
+			evt.dataTransfer.dropEffect = 'move';
+		}
+		function onDragLeave(evt) {
+			this.classList.remove('over');
+		}
+		function onDrop(evt) {
+			evt.stopPropagation();
+
+			var data = evt.dataTransfer.getData('application/webtd+person');
+			var dataType = null;
+			if (data) {
+				dataType = 'person';
+			}
+			else {
+				data = evt.dataTransfer.getData('application/webtd+seat');
+				dataType = 'seat';
+			}
+			alert('got '+dataType+' '+data);
+		}
+		contest_box_el.addEventListener('dragenter', onDragEnter);
+		contest_box_el.addEventListener('dragover', onDragOver);
+		contest_box_el.addEventListener('dragleave', onDragLeave);
+		contest_box_el.addEventListener('drop', onDrop);
+	}
+
+	function setup_seat_box_handlers($p)
+	{
+		function handleDragStart(evt) {
+			this.style.opacity = '0.4';
+			evt.dataTransfer.effectAllowed = 'move';
+
+			if (this.getAttribute('data-webtd-person')) {
+				evt.dataTransfer.setData('application/webtd+person', this.getAttribute('data-webtd-person'));
+			}
+			else {
+				evt.dataTransfer.setData('application/webtd+seat', this.getAttribute('data-webtd-seat'));
+			}
+		}
+		$p.get(0).addEventListener('dragstart', handleDragStart, false);
+	}
+
 	for (var i = 0; i < tables_sorted.length; i++) {
 		var table_id = tables_sorted[i];
 		var $tr = $('<tr></tr>');
@@ -189,15 +237,20 @@ function load_pairings_into(pairings_data, container_el)
 	for (var i in assignments) {
 		var a = assignments[i];
 		var $a = $('.match_container.template',container_el).clone();
+		setup_contest_box_handlers($a.get(0));
 		$a.removeClass('template');
 		$('.round',$a).text(a.round);
 		$('.table',$a).text(a.table);
 		for (var j in a.players) {
 			var pid = a.players[j].pid;
 			var p = players[pid];
-			var $p = $('<li><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>');
+			var $p = $('<li class="seat_box" draggable="draggable"><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>');
+			$p.attr('data-webtd-person', pid);
+			$p.attr('data-webtd-seat', a.players[j].seat);
 			$('.person_name',$p).text(p != null ? p.name : ("?"+pid));
 			$('.players_list',$a).append($p);
+
+			setup_seat_box_handlers($p);
 		}
 
 		var $td = get_cell(a.round, a.table);

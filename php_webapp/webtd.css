@@ -119,6 +119,9 @@ td.performance_col {
 .match_container.template {
 	display: none;
 	}
+.match_container.over {
+	border: 2px solid #fff;
+	}
 
 .match_container .players_list {
 	list-style-type: none;
@@ -128,6 +131,9 @@ td.performance_col {
 .match_container .players_list li {
 	border-bottom: 1px solid #ccc;
 	padding: 1pt 2pt 1pt 2pt;
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: default;
 }
 
 .match_container .players_list li:last-child {
