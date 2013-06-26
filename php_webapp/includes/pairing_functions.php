@@ -14,8 +14,10 @@ function check_common_surname($a_name, $b_name)
 function generate_random_matching(&$games, &$players, &$weights)
 {
 	$players_list = array();
-	foreach ($players as $k=>$v) {
-		$players_list[] = $k;
+	foreach ($players as $k=>&$v) {
+		if ($v['ready']) {
+			$players_list[] = $k;
+		}
 	}
 
 	$nplayers = count($players_list);

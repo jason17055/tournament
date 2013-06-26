@@ -69,7 +69,7 @@ if (isset($_REQUEST['action:generate_pairings'])) {
 
 $players = array();
 
-$sql = "SELECT id,name,
+$sql = "SELECT id,name,status,
 	(SELECT COUNT(*) FROM contest c
 		WHERE tournament=p.tournament
 		AND session_num<".db_quote($tournament_info['current_session'])."
@@ -99,8 +99,7 @@ $sql = "SELECT id,name,
 		AND 5<=(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id)
 		) AS count5p
 	FROM person p
-	WHERE tournament=".db_quote($tournament_id)."
-	AND status='ready'";
+	WHERE tournament=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
@@ -125,11 +124,13 @@ while ($row = mysqli_fetch_row($query))
 	$pid = $row[0];
 	$p = array(
 		'name' => $row[1],
-		'count2p' => $row[2],
-		'count3p' => $row[3],
-		'count4p' => $row[4],
-		'count5p' => $row[5]
+		'status' => $row[2],
+		'count2p' => $row[3],
+		'count3p' => $row[4],
+		'count4p' => $row[5],
+		'count5p' => $row[6]
 		);
+	$p['ready'] = ($row[2] == 'ready');
 	$players[$pid] = $p;
 
 	?><tr>
