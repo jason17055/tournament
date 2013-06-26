@@ -4,7 +4,7 @@ require_once('config.php');
 require_once('includes/db.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT 1 FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,location,start_time FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 $row = mysqli_fetch_row($query);
@@ -12,10 +12,18 @@ if (!$row) {
 	header("HTTP/1.0 404 Not Found");
 	exit();
 }
+$tournament_info = array(
+	'name' => $row[0],
+	'location' => $row[1],
+	'start_time' => $row[2]
+	);
 
 header("Content-Type: text/json");
 
-$sql = "SELECT id,name,entry_rank
+echo "{\n";
+echo '"tournament":'.json_encode($tournament_info).",\n";
+
+$sql = "SELECT id,name,entry_rank,member_number
 	FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	AND status IS NOT NULL
@@ -24,52 +32,59 @@ $sql = "SELECT id,name,entry_rank
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
-echo '{"players":[';
+echo '"players":[';
 $count = 0;
 while ($row = mysqli_fetch_row($query)) {
 	if ($count++) { echo ",\n"; }
 	$p = array(
 		'pid' => $row[0],
 		'name' => $row[1],
-		'entryRank' => $row[2]
+		'entryRank' => $row[2],
+		'member_number' => $row[3]
 		);
 	echo json_encode($p);
 }
 echo "],\n";
 echo '"games":[';
 
-$sql = "SELECT a.player,b.player,a.placement,b.placement,c.status
-	FROM contest_participant a
-	CROSS JOIN contest_participant b
-		ON b.contest=a.contest
-		AND b.player<>a.player
-	JOIN contest c ON c.id = a.contest
+$sql = "SELECT c.id,c.status,c.scenario
+	FROM contest c
 	WHERE c.tournament=".db_quote($tournament_id)."
 	AND c.status IN ('completed','started')
-	AND a.player < b.player
-	ORDER BY c.id,a.player,b.player";
+	ORDER BY c.id";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
 $count = 0;
 while ($row=mysqli_fetch_row($query)) {
-	$g = array(
-		'player1' => $row[0],
-		'player2' => $row[1]
-		);
-	if ($row[4] != 'completed') {
+	$contest_id = $row[0];
+	$game_status = $row[1];
+	$scenario = $row[2];
+
+	$g = array();
+	if ($game_status != 'completed') {
 		$g['in_progress'] = true;
 	}
-	else if (($row[2]?:9999) < ($row[3]?:9999)) {
-		$g['winner']='1';
+	if ($row[2]) {
+		$g['scenario'] = $row[2];
 	}
-	else if (($row[2]?:9999) > ($row[3]?:9999)) {
-		$g['winner'] = '2';
+
+	$sql = "SELECT a.player,a.placement,a.seat
+		FROM contest_participant a
+		WHERE a.contest=".db_quote($contest_id);
+	$query1 = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	$seat_count=0;
+	while ($row1 = mysqli_fetch_row($query1))
+	{
+		$a_seat = $row1[2] ?: (++$seat_count);
+		$g['player.'.$a_seat] = $row1[0];
+
+		if ($row1[1] == 1) {
+			$g['winner'] = $a_seat;
+		}
 	}
-	else {
-		// no winner
-		continue;
-	}
+
 	if ($count++) { echo ",\n"; }
 	echo json_encode($g);
 }
