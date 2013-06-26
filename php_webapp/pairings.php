@@ -46,6 +46,15 @@ if (!isset($_REQUEST['max_game_size'])) {
 }
 
 ?>
+<div id="pairings_container">
+<div class="match template">
+<div>Round: <span class="round"></span>
+Table: <span class="table"></span></div>
+<ul class="players_list">
+</ul>
+</div>
+</div>
+
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <div>First round to pair:
 <input type="text" size="4" name="first_round" value="<?php h($_REQUEST['first_round'])?>">
@@ -253,6 +262,7 @@ usort($matching['assignments'], 'order_by_round_and_board');
 </tr>
 <?php
 foreach ($matching['assignments'] as $game) {
+	if ($game['locked']) { continue; }
 	?><tr>
 <td><?php h("Table $game[round]-$game[board]")?></td>
 <td><ul class="player_inline_list"><?php

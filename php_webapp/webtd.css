@@ -86,3 +86,11 @@ td.performance_col {
 	color: #444;
 	background-color: #fc4;
 }
+
+.match {
+	display: block;
+	border: 1px solid black;
+}
+.match.template {
+	display: none;
+	}

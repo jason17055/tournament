@@ -149,3 +149,39 @@ $(function() {
 		select: on_new_player_select
 	});
 });
+
+$(function() {
+	var assignments = [
+		{ round: '1', table: '1', players: [ '1', '2', '3' ] },
+		{ round: '1', table: '2', players: [ '4', '5', '6' ] }
+		];
+	var players = {
+		'1': { name: "Jason" },
+		'2': { name: "Dana" },
+		'3': { name: "Zach" },
+		'4': { name: "Bob" },
+		'5': { name: "Susan" },
+		'6': { name: "Jon" }
+		};
+
+	function load_pairings_into(container_el)
+	{
+		for (var i in assignments) {
+			var a = assignments[i];
+			var $a = $('.match.template',container_el).clone();
+			$a.removeClass('template');
+			$('.round',$a).text(a.round);
+			$('.table',$a).text(a.table);
+			for (var j in a.players) {
+				var p = players[a.players[j]];
+				var $p = $('<li></li>');
+				$p.text(p.name);
+				$('.players_list',$a).append($p);
+			}
+			$(container_el).append($a);
+		}
+	}
+
+	$("#pairings_container").each(function(idx,el) { load_pairings_into(el); });
+});
+
