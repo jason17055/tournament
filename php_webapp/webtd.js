@@ -195,8 +195,8 @@ function load_pairings_into(pairings_data, container_el)
 		for (var j in a.players) {
 			var pid = a.players[j].pid;
 			var p = players[pid];
-			var $p = $('<li></li>');
-			$p.text(p != null ? p.name : ("?"+pid));
+			var $p = $('<li><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>');
+			$('.person_name',$p).text(p != null ? p.name : ("?"+pid));
 			$('.players_list',$a).append($p);
 		}
 

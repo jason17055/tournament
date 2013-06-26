@@ -89,10 +89,12 @@ td.performance_col {
 
 .pairings_container {
 	overflow: scroll;
-	width: 100%;
-	height: 300px;
+	left: 0;
+	right: 0;
+	height: 500px;
 	border: 1px solid black;
 	background-color: #8f8;
+	font-family: Verdana, sans-serif;
 }
 
 .pairings_container td {
