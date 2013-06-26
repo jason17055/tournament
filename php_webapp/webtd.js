@@ -152,8 +152,13 @@ $(function() {
 
 function load_pairings_into(pairings_data, container_el)
 {
-	var players = pairings_data.players;
+	var players_raw = pairings_data.players;
 	var assignments = pairings_data.contests;
+
+	var players = {};
+	for (var i = 0; i < players_raw.length; i++) {
+		players[players_raw[i].pid] = players_raw[i];
+	}
 
 	var all_rounds = {};
 	var all_tables = {};

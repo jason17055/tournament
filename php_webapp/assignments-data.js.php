@@ -15,7 +15,7 @@ if (!$row) {
 
 header("Content-Type: text/json");
 
-$sql = "SELECT id,name,entry_rank
+$sql = "SELECT id,name
 	FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	AND status IS NOT NULL
@@ -24,19 +24,18 @@ $sql = "SELECT id,name,entry_rank
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
-echo '{"players":[';
+echo '{"players":['."\n";
 $count = 0;
 while ($row = mysqli_fetch_row($query)) {
 	if ($count++) { echo ",\n"; }
 	$p = array(
 		'pid' => $row[0],
-		'name' => $row[1],
-		'entryRank' => $row[2]
+		'name' => $row[1]
 		);
 	echo json_encode($p);
 }
 echo "],\n";
-echo '"contests":[';
+echo '"contests":['."\n";
 
 $sql = "SELECT c.id,c.round,c.board,c.status
 	FROM contest c
