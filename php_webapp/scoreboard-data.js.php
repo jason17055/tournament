@@ -15,12 +15,12 @@ if (!$row) {
 
 header("Content-Type: text/json");
 
-$sql = "SELECT p.id,p.name,p.entry_rank
-	FROM person p
-	JOIN tournament t ON t.id=p.tournament
-	WHERE t.id=".db_quote($tournament_id)."
-	AND p.status IS NOT NULL
-	ORDER BY p.entry_rank DESC, p.name ASC";
+$sql = "SELECT id,name,entry_rank
+	FROM person
+	WHERE tournament=".db_quote($tournament_id)."
+	AND status IS NOT NULL
+	AND status NOT IN ('prereg')
+	ORDER BY entry_rank DESC, name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
@@ -38,7 +38,7 @@ while ($row = mysqli_fetch_row($query)) {
 echo "],\n";
 echo '"games":[';
 
-$sql = "SELECT a.player,b.player,a.placement,b.placement
+$sql = "SELECT a.player,b.player,a.placement,b.placement,c.status
 	FROM contest_participant a
 	CROSS JOIN contest_participant b
 		ON b.contest=a.contest
@@ -46,7 +46,7 @@ $sql = "SELECT a.player,b.player,a.placement,b.placement
 	JOIN contest c ON c.id = a.contest
 	JOIN tournament t ON t.id = c.tournament
 	WHERE t.id=".db_quote($tournament_id)."
-	AND c.status='completed'
+	AND c.status IN ('completed','started')
 	AND (c.session_num IS NULL OR c.session_num=t.current_session)
 	ORDER BY c.id,a.player,b.player";
 $query = mysqli_query($database, $sql)
@@ -58,11 +58,14 @@ while ($row=mysqli_fetch_row($query)) {
 		'player1' => $row[0],
 		'player2' => $row[1]
 		);
-	if (($row[2]?:9999) < ($row[3]?:9999)) {
-		$g['winner']='b';
+	if ($row[4] != 'completed') {
+		$g['in_progress'] = true;
+	}
+	else if (($row[2]?:9999) < ($row[3]?:9999)) {
+		$g['winner']='1';
 	}
 	else if (($row[2]?:9999) > ($row[3]?:9999)) {
-		$g['winner'] = 'w';
+		$g['winner'] = '2';
 	}
 	else {
 		// no winner

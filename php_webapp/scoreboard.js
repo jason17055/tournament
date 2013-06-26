@@ -14,8 +14,15 @@ function get_url_param(p)
 
 function generate_short_name(p)
 {
+	var n = p.name;
+	if (n.match(/,/)) {
+		var i = n.indexOf(',');
+		n = n.substring(i+1) + ' ' + n.substring(0,i);
+	}
+
+	var parts = n.split(/ /);
+
 	var x = "";
-	var parts = p.name.split(/ /);
 	for (var i in parts) {
 		x += parts[i].substr(0,1);
 	}
@@ -61,7 +68,7 @@ var players = [];
 var games = [];
 var S = {
 	start: get_url_param('start'),
-	ROWS: 6,
+	ROWS: 7,
 	COLS: 12,
 	DELAY: 30 //seconds
 	};
@@ -105,28 +112,35 @@ for (var i = 0; i < players.length; i++)
 			var result = null;
 			if (play.player1 == pr.pid && play.player2 == pc.pid)
 			{
-				result = play.winner == 'b' ? 'L' : 'W';
+				result = play.in_progress ? 'P' :
+					play.winner == '1' ? 'W' : 'L';
 			}
 			else if (play.player1 == pc.pid && play.player2 == pr.pid)
 			{
-				result = play.winner == 'b' ? 'W' : 'L';
+				result = play.in_progress ? 'P' :
+					play.winner == '2' ? 'W' : 'L';
 			}
 			else
 			{
 				continue;
 			}
 
-			count_plays++;
-			if (result == 'W')
+			if (result != 'P') {
+				count_plays++;
+			}
+			if (result == 'W') {
 				count_wins++;
-			if (S.min_opp_by_pid[pr.pid] == null)
+			}
+			if (S.min_opp_by_pid[pr.pid] == null) {
 				S.min_opp_by_pid[pr.pid] = j;
+			}
 			S.max_opp_by_pid[pr.pid] = j;
 
 			var $img = $('<div><img width="28" height="28"></div>');
 			$('img',$img).attr('alt', result);
 			$('img',$img).attr('title', 'details');
 			$('img',$img).attr('src',
+				result == "P" ? 'images/game_in_progress_icon.png' :
 				result == "W" ? 'images/win_icon.png' : 'images/lose_icon.png');
 			$cell.append($img);
 		}
