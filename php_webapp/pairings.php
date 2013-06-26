@@ -257,7 +257,7 @@ foreach ($matching['assignments'] as $game) {
 <td><ul class="player_inline_list"><?php
 	foreach ($game['players'] as $pid) {
 		$p = $players[$pid];
-		?><li><span class="player_name" data-player-id="<?php h($pid)?>"><?php h($p['name'])?></span></li>
+		?><li><span class="player_name" data-player-id="<?php h($pid)?>"><?php h($p['name'] ?: $pid)?></span></li>
 <?php
 	}
 	?></ul></td>
