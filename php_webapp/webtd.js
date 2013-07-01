@@ -150,6 +150,116 @@ $(function() {
 	});
 });
 
+function make_game_results_file()
+{
+	var onError = function(jqxhr, status, errorThrown) {
+		alert(status + ' ' + errorThrown);
+	};
+	var onSuccess = function(data) {
+
+		var w = window.open(null, null, "width=360,height=480,scrollbars=yes");
+		w.document.write("<pre>");
+		w.document.write("TOURNEY "+data.tournament.name);
+		if (data.tournament.location) {
+			w.document.write(", "+data.tournament.location);
+		}
+		w.document.write("\n");
+		if (data.tournament.start_time) {
+			w.document.write("        start="+data.tournament.start_time+"\n");
+		}
+		if (data.tournament.end_time) {
+			w.document.write("        finish="+data.tournament.end_time+"\n");
+		}
+		w.document.write("        rules=AGA\n");
+
+		var players = data.players;
+		var max_name_len = 0;
+		for (var i in players) {
+			var p = players[i];
+			if (p.name.length > max_name_len) {
+				max_name_len = p.name.length;
+			}
+		}
+
+		w.document.write("PLAYERS\n");
+
+		var players_by_pid = {};
+		var tmp_number = 99999;
+		for (var i in players) {
+			var p = players[i];
+			if (!p.member_number) {
+				p.member_number = tmp_number--;
+			}
+			players_by_pid[p.pid] = p;
+			w.document.write(strpad_l(p.member_number,5)+" ");
+			w.document.write(strpad_r(p.name, max_name_len) + " ");
+			w.document.write(p.entryRank + "\n");
+		}
+
+		w.document.write("GAMES\n");
+		var plays = data.games;
+		for (var i in plays) {
+			var play = plays[i];
+			var p1 = players_by_pid[play['player.W']];
+			if (!p1) {
+				w.document.write("WARNING: invalid W player\n");
+				continue;
+			}
+			var p2 = players_by_pid[play['player.B']];
+			if (!p2) {
+				w.document.write("WARNING: invalid B player\n");
+				continue;
+			}
+
+			var handicapStones = 0;
+			var m = play.scenario.match(/(\d+) stone/);
+			if (m) {
+				handicapStones = +m[1];
+			}
+			var komi = 0;
+			var m = play.scenario.match(/([\d.]+) komi/);
+			if (m) {
+				komi = +m[1];
+			}
+			w.document.write(p1.member_number +
+				" " + p2.member_number +
+				" " + (play.winner == 'W' ? 'w' : 'b') + " " +
+				handicapStones + " " +
+				komi + "\n");
+		}
+		w.document.write("</pre>");
+	};
+
+	$.ajax({
+		url: 'scoreboard-data.js.php?tournament='+escape(webtd_tournament_id),
+		dataType: 'json',
+		success: onSuccess,
+		error: onError
+		});
+}
+
+function strpad_l(str, len)
+{
+	while (len - str.length >= 10)
+		str = "          " + str;
+	if (str.length < len)
+		str = "          ".substr(0,len - str.length) + str;
+	return str;
+}
+
+function strpad_r(str, len)
+{
+	while (len - str.length >= 10)
+		str += "          ";
+	if (str.length < len)
+		str += "          ".substr(0,len - str.length);
+	return str;
+}
+
+$(function() {
+	$('#make_game_results_link').click(make_game_results_file);
+});
+
 function load_pairings_into(pairings_data, container_el)
 {
 	var players_raw = pairings_data.players;
@@ -280,4 +390,3 @@ $(function() {
 		});
 	}
 });
-
