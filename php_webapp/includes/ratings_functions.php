@@ -100,7 +100,7 @@ function do_ratings($tournament_id)
 	$batch_num = mysqli_insert_id($database);
 
 	// each player has a "prior" rating (rating_cycle=0),
-	// fixed at 0
+	// fixed at 100 (or whatever "initial rating" user declared)
 	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
 		SELECT ".db_quote($batch_num).",
 			p.id,
