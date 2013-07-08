@@ -104,7 +104,7 @@ function do_ratings($tournament_id)
 	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
 		SELECT ".db_quote($batch_num).",
 			p.id,
-			0,
+			".db_quote($multi_session_ratings ? 0 : 1).",
 			".db_quote($_REQUEST['initial_rating']?:0)."
 			FROM person p
 			WHERE tournament=".db_quote($tournament_id);
@@ -115,6 +115,7 @@ function do_ratings($tournament_id)
 	// that they participated in...
 	// the "post" ratings are determined by this algorithm
 
+	if ($multi_session_ratings) {
 	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
 		SELECT DISTINCT ".db_quote($batch_num).",
 			p.id,
@@ -185,6 +186,7 @@ function do_ratings($tournament_id)
 		mysqli_query($database, $sql)
 			or die("SQL error 405: ".db_error($database));
 	}
+	} //end if multi_session_ratings
 
 	// now record the actual game data
 
@@ -198,7 +200,7 @@ function do_ratings($tournament_id)
 
 	while ($c_row = mysqli_fetch_row($c_query)) {
 		$contest_id = $c_row[0];
-		$session_num = $c_row[1];
+		$session_num = $multi_session_ratings ? $c_row[1] : 1;
 
 		$sql = "SELECT AVG(score),COUNT(*)
 			FROM contest_participant
