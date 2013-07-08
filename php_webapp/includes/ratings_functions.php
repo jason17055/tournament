@@ -92,8 +92,9 @@ function do_ratings($tournament_id)
 	do_all_scores($tournament_id);
 
 	// get a ratings batch number
-	$sql = "INSERT INTO rating_batch (tournament,created) VALUES (
+	$sql = "INSERT INTO rating_batch (tournament,target_session,created) VALUES (
 		".db_quote($tournament_id).",
+		".db_quote($_REQUEST['target_session']).",
 		NOW())";
 	mysqli_query($database, $sql)
 		or die("SQL error 401: ".db_error($database));
@@ -107,7 +108,13 @@ function do_ratings($tournament_id)
 			".db_quote($multi_session_ratings ? 0 : 1).",
 			".db_quote($_REQUEST['initial_rating']?:0)."
 			FROM person p
-			WHERE tournament=".db_quote($tournament_id);
+			WHERE p.id IN (
+				SELECT player FROM contest_participant cp
+				JOIN contest c ON c.id=cp.contest
+				WHERE c.tournament=".db_quote($tournament_id)."
+				AND c.session_num>=".db_quote($_REQUEST['first_session']?:0)."
+				AND c.session_num<=".db_quote($_REQUEST['target_session']?:1)."
+				AND c.status='completed')";
 	mysqli_query($database, $sql)
 		or die("SQL error 402: ".db_error($database));
 
@@ -194,7 +201,8 @@ function do_ratings($tournament_id)
 		WHERE tournament=".db_quote($tournament_id)."
 		AND status='completed'
 		AND session_num IS NOT NULL
-		AND session_num >= ".db_quote($_REQUEST['first_session'] ?: 1);
+		AND session_num >= ".db_quote($_REQUEST['first_session'] ?: 1)."
+		AND session_num <= ".db_quote($_REQUEST['target_session']);
 	$c_query = mysqli_query($database, $sql)
 		or die("SQL error 406: ".db_error($database));
 
@@ -417,25 +425,24 @@ function do_ratings_commit($batch_num)
 {
 	global $database;
 
-	$sql = "SELECT tournament FROM rating_batch
+	$sql = "SELECT tournament,target_session FROM rating_batch
 		WHERE id=".db_quote($batch_num);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Invalid batch number");
 	$tournament_id = $row[0];
+	$target_session = $row[1];
 
 	$sql = "DELETE FROM player_rating
 		WHERE id IN (
 		SELECT id FROM person WHERE tournament=".db_quote($tournament_id)."
 		)
-		AND session_num =(
-			SELECT current_session FROM tournament
-			WHERE id=".db_quote($tournament_id).")";
+		AND session_num =".db_quote($target_session);
 	mysqli_query($database, $sql)
 		or die("SQL error 43: ".db_error($database));
 
 	$sql = "INSERT INTO player_rating (id,session_num,post_rating,prior_rating)
-		SELECT r.player,(SELECT current_session FROM tournament WHERE id=".db_quote($tournament_id)."),
+		SELECT r.player,".db_quote($target_session).",
 			ri.rating AS post_rating,
 			(SELECT b.rating FROM rating_identity b
 				WHERE b.batch=ri.batch

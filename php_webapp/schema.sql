@@ -98,6 +98,7 @@ CREATE TABLE player_rating (
 CREATE TABLE rating_batch (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,
+	target_session INTEGER,
 	created DATETIME NOT NULL,
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);

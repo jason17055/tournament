@@ -43,7 +43,8 @@ $sql = "SELECT session_num,
 	(SELECT COUNT(*) FROM contest WHERE session_num=t.session_num AND tournament=t.tournament) AS contest_count,
 	(SELECT COUNT(DISTINCT player) FROM contest_participant cp
 			JOIN contest c ON c.id=cp.contest
-			WHERE c.tournament=t.tournament) AS player_count
+			WHERE c.tournament=t.tournament
+			AND c.session_num=t.session_num) AS player_count
 	FROM (
 		SELECT DISTINCT tournament,session_num
 		FROM contest
@@ -80,13 +81,18 @@ while ($row = mysqli_fetch_row($query)) {
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 
 <div>
-Start at session:
+Generate ratings for session:
+<input type="text" name="target_session" size="4" value="<?php h($tournament_info['current_session'])?>">
+</div>
+<div>
+Using games starting from session:
 <input type="text" name="first_session" size="4" value="1">
 </div>
 <div>
 Default initial rating:
-<input type="text" name="initial_rating" size="4" value="1500">
+<input type="text" name="initial_rating" size="4" value="200">
 </div>
+<!--
 <div>
 Weight of initial rating:
 <input type="text" name="initial_weight" size="4" value="10">
@@ -95,6 +101,7 @@ Weight of initial rating:
 Weight of inter-session ratings link:
 <input type="text" name="inter_session_weight" size="4" value="30">
 </div>
+-->
 
 
 <div class="form_buttons_bar">
