@@ -287,6 +287,10 @@ function do_ratings_pass($batch_num)
 
 	$adjustments = array();
 
+	$strongest_rating = -INF;
+	$strongest_player = null;
+	$weakest_rating = INF;
+	$weakest_player = null;
 	$sum_errors = 0;
 	$count_errors = 0;
 	while ($row = mysqli_fetch_row($query))
@@ -297,6 +301,15 @@ function do_ratings_pass($batch_num)
 		$b_rating = $row[3];
 		$act_perf = $row[4];
 		$weight = $row[5];
+
+		if ($a_rating < $weakest_rating) {
+			$weakest_rating = $a_rating;
+			$weakest_player = $a_pid;
+		}
+		if ($a_rating > $strongest_rating) {
+			$strongest_rating = $a_rating;
+			$strongest_player = $a_pid;
+		}
 
 		$exp_perf = 1.0 / (1.0 + pow(10, ($b_rating-$a_rating)/400));
 
@@ -315,14 +328,22 @@ function do_ratings_pass($batch_num)
 	$iteration_count++;
 
 	$max_abs_adj = 0;
+	$strongest_adj = 0;
+	$weakest_adj = 0;
 	foreach ($adjustments as $pid => $adj) {
 		if (abs($adj) > $max_abs_adj) {
 			$max_abs_adj = abs($adj);
 		}
+		if ($pid == $strongest_player) {
+			$strongest_adj = $adj;
+		}
+		if ($pid == $weakest_player) {
+			$weakest_adj = $adj;
+		}
 	}
 
 	# start with a K value of 8, gradually decay
-	$k = 8/(1+exp(($iteration_count-40)/15.0));
+	$k = 8/(1+exp(($iteration_count-80)/30.0));
 
 	foreach ($adjustments as $pid => $adj) {
 		$sql = "UPDATE rating_identity
@@ -341,10 +362,10 @@ function do_ratings_pass($batch_num)
 <p>Current error: <?php h(sprintf('%.1f',$sum_errors/$count_errors))?></p>
 <p>Current k value: <?php h(sprintf('%.3f',$k))?></p>
 <p>Current max adj: <?php h(sprintf('%.3f',$max_abs_adj))?></p>
-<form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
+<form method="post" name="form1" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <input type="hidden" name="batch" value="<?php h($batch_num)?>">
 <input type="hidden" name="iterations" value="<?php h($iteration_count)?>">
-<button type="submit" name="action:run_ratings">Another Pass</button>
+<button type="submit">Another Pass</button>
 <button type="submit" name="action:commit_ratings">Save Ratings</button>
 <button type="submit" name="action:cancel">Cancel</button>
 </form>
@@ -376,6 +397,17 @@ function do_ratings_pass($batch_num)
 	} //end foreach rating
 	?>
 </table>
+<?php
+	if ($iteration_count<200) {
+		?>
+<script type="text/javascript"><!--
+setTimeout(function() {
+	document.form1.submit();
+	}, 100);
+//--></script>
+<?php
+	}
+?>
 </body>
 </html>
 <?php
@@ -395,23 +427,33 @@ function do_ratings_commit($batch_num)
 	$sql = "DELETE FROM player_rating
 		WHERE id IN (
 		SELECT id FROM person WHERE tournament=".db_quote($tournament_id)."
-		)";
+		)
+		AND session_num =(
+			SELECT current_session FROM tournament
+			WHERE id=".db_quote($tournament_id).")";
 	mysqli_query($database, $sql)
 		or die("SQL error 43: ".db_error($database));
 
 	$sql = "INSERT INTO player_rating (id,session_num,post_rating,prior_rating)
-		SELECT r.player,r.rating_cycle,
-			r.rating AS post_rating,
+		SELECT r.player,(SELECT current_session FROM tournament WHERE id=".db_quote($tournament_id)."),
+			ri.rating AS post_rating,
 			(SELECT b.rating FROM rating_identity b
-				WHERE b.batch=r.batch
-				AND b.player=r.player
-				AND b.rating_cycle<r.rating_cycle
+				WHERE b.batch=ri.batch
+				AND b.player=ri.player
+				AND b.rating_cycle<ri.rating_cycle
 				ORDER BY b.rating_cycle DESC
 				LIMIT 1
 				) AS prior_rating
-		FROM rating_identity r
-			WHERE r.batch=".db_quote($batch_num)."
-			AND r.rating_cycle>0";
+		FROM (SELECT player, MAX(rating_cycle) AS rating_cycle
+			FROM rating_identity
+			WHERE batch=".db_quote($batch_num)."
+			AND rating_cycle<>0
+			GROUP BY player) r
+		JOIN rating_identity ri
+			ON ri.player=r.player
+			AND ri.rating_cycle=r.rating_cycle
+			AND ri.batch=".db_quote($batch_num)."
+		";
 	mysqli_query($database, $sql)
 		or die("SQL error 44: ".db_error($database));
 

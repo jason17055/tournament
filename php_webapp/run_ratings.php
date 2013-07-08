@@ -24,19 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 	else if (isset($_REQUEST['action:run_ratings'])) {
 
-		if ($_REQUEST['batch']) {
-			do_ratings_pass($_REQUEST['batch']);
-		}
-		else {
-			do_ratings($tournament_id);
-		}
+		do_ratings($tournament_id);
 		exit();
 	}
 	else if (isset($_REQUEST['action:commit_ratings'])) {
 		do_ratings_commit($_REQUEST['batch']);
 	}
-	else {
-		die("Not implemented");
+	else if ($_REQUEST['batch']) {
+		do_ratings_pass($_REQUEST['batch']);
+		exit();
 	}
 }
 
