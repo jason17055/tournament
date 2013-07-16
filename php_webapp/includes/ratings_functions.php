@@ -100,29 +100,11 @@ function do_ratings($tournament_id)
 		or die("SQL error 401: ".db_error($database));
 	$batch_num = mysqli_insert_id($database);
 
-	// each player has a "prior" rating (rating_cycle=0),
-	// fixed at 100 (or whatever "initial rating" user declared)
-	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
-		SELECT ".db_quote($batch_num).",
-			p.id,
-			".db_quote($multi_session_ratings ? 0 : 1).",
-			".db_quote($_REQUEST['initial_rating']?:0)."
-			FROM person p
-			WHERE p.id IN (
-				SELECT player FROM contest_participant cp
-				JOIN contest c ON c.id=cp.contest
-				WHERE c.tournament=".db_quote($tournament_id)."
-				AND c.session_num>=".db_quote($_REQUEST['first_session']?:0)."
-				AND c.session_num<=".db_quote($_REQUEST['target_session']?:1)."
-				AND c.status='completed')";
-	mysqli_query($database, $sql)
-		or die("SQL error 402: ".db_error($database));
-
+	if ($multi_session_ratings) {
 	// and each player has a "post" rating for EACH session
 	// that they participated in...
 	// the "post" ratings are determined by this algorithm
 
-	if ($multi_session_ratings) {
 	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
 		SELECT DISTINCT ".db_quote($batch_num).",
 			p.id,
@@ -194,6 +176,32 @@ function do_ratings($tournament_id)
 			or die("SQL error 405: ".db_error($database));
 	}
 	} //end if multi_session_ratings
+	else
+	{
+
+	// for "prior" rating, use last session's post rating, if available,
+	// otherwise, use the specified initial rating
+
+	$sql = "INSERT INTO rating_identity (batch,player,rating_cycle,rating)
+		SELECT ".db_quote($batch_num).",
+			p.id,
+			1,
+			IFNULL(r.post_rating,".db_quote($_REQUEST['initial_rating']?:0).") AS rating
+			FROM person p
+			LEFT JOIN player_rating r
+				ON r.id=p.id
+				AND r.session_num=".db_quote($_REQUEST['target_session']-1)."
+			WHERE p.id IN (
+				SELECT player FROM contest_participant cp
+				JOIN contest c ON c.id=cp.contest
+				WHERE c.tournament=".db_quote($tournament_id)."
+				AND c.session_num>=".db_quote($_REQUEST['first_session']?:0)."
+				AND c.session_num<=".db_quote($_REQUEST['target_session']?:1)."
+				AND c.status='completed')";
+	mysqli_query($database, $sql)
+		or die("SQL error 402: ".db_error($database));
+
+	} //endif !$multi_session_ratings
 
 	// now record the actual game data
 
@@ -444,13 +452,15 @@ function do_ratings_commit($batch_num)
 	$sql = "INSERT INTO player_rating (id,session_num,post_rating,prior_rating)
 		SELECT r.player,".db_quote($target_session).",
 			ri.rating AS post_rating,
+			IFNULL(pr.post_rating,
 			(SELECT b.rating FROM rating_identity b
 				WHERE b.batch=ri.batch
 				AND b.player=ri.player
 				AND b.rating_cycle<ri.rating_cycle
 				ORDER BY b.rating_cycle DESC
 				LIMIT 1
-				) AS prior_rating
+				)
+			)AS prior_rating
 		FROM (SELECT player, MAX(rating_cycle) AS rating_cycle
 			FROM rating_identity
 			WHERE batch=".db_quote($batch_num)."
@@ -460,6 +470,9 @@ function do_ratings_commit($batch_num)
 			ON ri.player=r.player
 			AND ri.rating_cycle=r.rating_cycle
 			AND ri.batch=".db_quote($batch_num)."
+		LEFT JOIN player_rating pr
+			ON pr.id=r.player
+			AND pr.session_num=".db_quote($target_session-1)."
 		";
 	mysqli_query($database, $sql)
 		or die("SQL error 44: ".db_error($database));
