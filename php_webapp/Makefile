@@ -25,6 +25,7 @@ data_files = \
 php_scripts = \
 	assignments-data.js.php \
 	autocomplete-new-person.php \
+	card_stats.php \
 	config.php \
 	contest.php \
 	contest_participant.php \

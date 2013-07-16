@@ -260,6 +260,7 @@ $scoreboard_url = 'scoreboard.html?tournament='.urlencode($tournament_id);
 <p>
 <a href="<?php h($scoreboard_url)?>">Scoreboard</a>
 | <a href="#" id="make_game_results_link">AGA Results File</a>
+| <a href="<?php h('card_stats.php?tournament='.urlencode($tournament_id))?>">Dominion Card Stats</a>
 </p>
 <?php
 
