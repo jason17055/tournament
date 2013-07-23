@@ -14,6 +14,7 @@ $sql = "SELECT name,current_session,
 	FROM tournament t WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
+$current_session = $row[1];
 $tournament_info = array(
 	'id' => $tournament_id,
 	'name' => $row[0],
@@ -63,6 +64,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
+	if (isset($_REQUEST['action:add_table'])) {
+		$round = $_REQUEST['first_round'];
+
+		// determine what table numbers already exist in the
+		// selected starting round
+		$sql = "SELECT DISTINCT board
+			FROM contest
+			WHERE tournament=".db_quote($tournament_id)."
+			AND session_num=".db_quote($current_session)."
+			AND round=".db_quote($round);
+		$query = mysqli_query($database, $sql)
+			or die("SQL error 1: ".db_error($database));
+		$seen_table_numbers = array();
+		while ($row = mysqli_fetch_row($query)) {
+			$seen_table_numbers[$row[0]] = TRUE;
+		}
+
+		// select next table number
+		$new_table_id = 1;
+		while ($seen_table_numbers["".$new_table_id]) {
+			$new_table_id++;
+		}
+
+		$sql = "INSERT INTO contest (tournament,session_num,round,board,status)
+			VALUES (
+			".db_quote($tournament_id).",
+			".db_quote($current_session).",
+			".db_quote($round).",
+			".db_quote($new_table_id).",
+			'proposed')";
+		mysqli_query($database, $sql)
+			or die("SQL error 2: ".db_error($database));
+
+		$contest_id = mysqli_insert_id($database);
+
+		$sql = "INSERT INTO contest_participant (contest) VALUES (".db_quote($contest_id)."), (".db_quote($contest_id).")";
+		mysqli_query($database, $sql)
+			or die("SQL error 3: ".db_error($database));
+
+		echo '{"status":"success"}';
+		exit();
+	}
+
 	if (isset($_REQUEST['action:assign_person_to_contest'])) {
 		$person_id = $_REQUEST['person'];
 		$contest_id = $_REQUEST['contest'];
@@ -104,6 +148,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 <li><a href="#" onclick="edit_contest_clicked()">edit</a></li>
 <li><a href="#" onclick="add_seat_clicked()">add seat</a></li>
 <li><a href="#" onclick="remove_seat_clicked()">remove seat</a></li>
+<li><a href="#" onclick="add_table_clicked()">add table</a></li>
 </ul>
 </div>
 <div class="pairings_container">
