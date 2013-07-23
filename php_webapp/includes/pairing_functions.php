@@ -196,46 +196,71 @@ while ($row = mysqli_fetch_row($query))
 	return $m;
 }
 
-function generate_random_matching(&$games, &$players, &$weights)
+function initialize_matching(&$original_matching)
 {
-	$players_list = array();
-	foreach ($players as $k=>&$v) {
-		if ($v['ready']) {
-			$players_list[] = $k;
+	$games = $original_matching['assignments'];
+	$players = &$original_matching['players'];
+
+	$seen_round = array();
+
+	// for each game that isn't "locked", clear out the
+	// unconfirmed participants
+	for ($i = 0; $i < count($games); $i++) {
+		if (isset($games[$i]['locked'])) { continue; }
+
+		$g = $games[$i]; //copy the game struct
+		$g['size'] = count($g['players']);
+		$g['players'] = array();
+		for ($j = 0; $j < $g['size']; $j++) {
+			$g['players'][] = 0;
 		}
+		$games[$i] = $g;
+
+		$seen_round[$g['round']] = $g['round'];
 	}
 
-	$nplayers = count($players_list);
-	$ntables = ceil($nplayers/$_REQUEST['max_game_size']);
-
-	// copy the existing games in
-	$assignments = $games;
-	for ($round = $_REQUEST['first_round']; $round <= $_REQUEST['last_round']; $round++) {
-
-		$tables = array();
-		for ($i = 0; $i < $ntables; $i++) {
-			$tables[] = array(
-				'board' => ($i+1),
-				'round' => $round,
-				'players' => array()
-				);
+	foreach ($seen_round as $round_no)
+	{
+		// generate a set available players
+		$avail = array();
+		foreach ($players as $k=>&$v) {
+			if ($v['ready']) {
+				$avail[$k] = $k;
+			}
 		}
 
+		// filter out players already assigned this round
+		foreach ($games as &$g) {
+			if ($g['round'] != $round_no) { continue; }
+			foreach ($g['players'] as &$pid) {
+				if ($pid != 0 && isset($avail[$pid])) {
+					unset($avail[$pid]);
+				}
+			}
+		}
+
+		// make a randomly-sorted list of players
+		$players_list = array_keys($avail);
 		shuffle($players_list);
-		for ($i = 0; $i < $nplayers; $i++) {
-			$tableno = ($i % $ntables);
-			$tables[$tableno]['players'][] = $players_list[$i];
-		}
 
-		foreach ($tables as $tab) {
-			$assignments[] = $tab;
+		// assign players to empty seats
+		foreach ($games as &$g) {
+			if ($g['round'] != $round_no) { continue; }
+			if ($g['locked']) { continue; }
+
+			for ($j = 0; $j < count($g['players']); $j++) {
+				if ($g['players'][$j] == 0 && count($players_list)) {
+					$next_pid = array_shift($players_list);
+					$g['players'][$j] = $next_pid;
+				}
+			}
 		}
 	}
 
 	$m = array(
-		'players' => &$players,
-		'history' => &$weights,
-		'assignments' => &$assignments
+		'players' => &$original_matching['players'],
+		'history' => &$original_matching['history'],
+		'assignments' => &$games
 		);
 	$m['fitness'] = sum_fitness($m);
 	return $m;
@@ -458,7 +483,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 
 	$m = array(
 		'players' => &$parent_matching['players'],
-		'history' => &$parent_matching['weights'],
+		'history' => &$parent_matching['history'],
 		'assignments' => &$assignments
 		);
 	$m['fitness'] = sum_fitness($m);
@@ -582,10 +607,6 @@ function roulette(&$R)
 
 function optimize_matching(&$original_matching)
 {
-	$games = $original_matching['assignments'];
-	$players = $original_matching['players'];
-	$weights = $original_matching['history'];
-
 	$POOL_SIZE = 15;
 	$GENERATIONS = 40;
 
@@ -595,7 +616,7 @@ function optimize_matching(&$original_matching)
 		?><div class="driller_container" style="display:none">
 		<h2 class="driller_heading">Random Matching <?php echo($i+1)?></h2>
 		<div class="driller_content"><?php
-		$m = generate_random_matching($games, $players, $weights);
+		$m = initialize_matching($original_matching);
 		$sum_fitness += $m['fitness'];
 		$pool[] = $m;
 		show_matching($m);
