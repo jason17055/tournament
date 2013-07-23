@@ -1,5 +1,9 @@
 <?php
 
+class Webtd_Seat
+{
+}
+
 function check_common_surname($a_name, $b_name)
 {
 	$a_names = explode(' ', $a_name);
@@ -161,13 +165,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 
 $games = array();
-$sql = "SELECT id,round,board,status,
-		(SELECT GROUP_CONCAT(
-			player ORDER BY player SEPARATOR ','
-			)
-		FROM contest_participant
-		WHERE contest=c.id
-		) AS players
+$sql = "SELECT id,round,board,status
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
 	AND session_num=".db_quote($current_session);
@@ -178,16 +176,30 @@ while ($row = mysqli_fetch_row($query))
 	$round = $row[1];
 	$board = $row[2];
 	$game_status = $row[3];
-	$m_players = explode(',',$row[4]);
 	$game = array(
 		'id' => $contest_id,
 		'round' => $round,
-		'board' => $board,
-		'players' => $m_players
+		'board' => $board
 		);
 	if ($game_status != 'proposed') {
 		$game['locked'] = TRUE;
 	}
+
+	$seats = array();
+	$sql = "SELECT id,player
+		FROM contest_participant
+		WHERE contest=".db_quote($contest_id)."
+		ORDER BY turn_order,id";
+	$query2 = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	while ($row2 = mysqli_fetch_row($query2)) {
+		$s = new Webtd_Seat;
+		$s->id = $row2[0];
+		$s->player = $row2[1];
+		$seats[] = $s;
+	}
+	$game['seats'] = $seats;
+
 	$games[] = $game;
 }
 
@@ -213,11 +225,14 @@ function initialize_matching(&$original_matching)
 		if (isset($games[$i]['locked'])) { continue; }
 
 		$g = $games[$i]; //copy the game struct
-		$g['size'] = count($g['players']);
-		$g['players'] = array();
-		for ($j = 0; $j < $g['size']; $j++) {
-			$g['players'][] = 0;
+		$size = count($g['seats']);
+		$seats = $g['seats']; //copy the seats array
+		for ($j = 0; $j < $size; $j++) {
+			$seats[$j] = clone $seats[$j];
+			$seats[$j]->player = NULL;
 		}
+
+		$g['seats'] = $seats;
 		$games[$i] = $g;
 
 		$seen_round[$g['round']] = $g['round'];
@@ -236,9 +251,9 @@ function initialize_matching(&$original_matching)
 		// filter out players already assigned this round
 		foreach ($games as &$g) {
 			if ($g['round'] != $round_no) { continue; }
-			foreach ($g['players'] as &$pid) {
-				if ($pid != 0 && isset($avail[$pid])) {
-					unset($avail[$pid]);
+			foreach ($g['seats'] as $seat) {
+				if (isset($seat->player) && isset($avail[$seat->player])) {
+					unset($avail[$seat->player]);
 				}
 			}
 		}
@@ -247,15 +262,18 @@ function initialize_matching(&$original_matching)
 		$players_list = array_keys($avail);
 		shuffle($players_list);
 
+echo "Round $round_no: ".count($players_list)." players available<br>";
+
 		// assign players to empty seats
 		foreach ($games as &$g) {
 			if ($g['round'] != $round_no) { continue; }
 			if ($g['locked']) { continue; }
 
-			for ($j = 0; $j < count($g['players']); $j++) {
-				if ($g['players'][$j] == 0 && count($players_list)) {
+echo " At table $g[board], size ".count($g['seats']).": ".count($players_list)." players available<br>\n";
+			foreach ($g['seats'] as $seat) {
+				if (!$seat->player && count($players_list)) {
 					$next_pid = array_shift($players_list);
-					$g['players'][$j] = $next_pid;
+					$seat->player = $next_pid;
 				}
 			}
 		}
@@ -317,12 +335,12 @@ function sum_fitness(&$matching)
 
 	$sum_game_sizes = 0;
 	foreach ($tables as &$game) {
-		$sum_game_sizes += count($game['players']);
+		$sum_game_sizes += count($game['seats']);
 	}
 	$avg_game_size = $sum_game_sizes / count($tables);
 	$game_size_variation = 0;
 	foreach ($tables as &$game) {
-		$this_game_size = count($game['players']);
+		$this_game_size = count($game['seats']);
 		$game_size_variation += pow($this_game_size-$avg_game_size,2)/count($tables);
 	}
 	if ($game_size_variation != 0.0) {
@@ -331,12 +349,14 @@ function sum_fitness(&$matching)
 
 	$player_game_sizes = array();
 	foreach ($tables as &$game) {
-		$this_game_size = count($game['players']);
+		$this_game_size = count($game['seats']);
 
 		$seat_no = 0;
-		foreach ($game['players'] as $pid) {
+		foreach ($game['seats'] as $seat) {
+			if (!$seat->player) { continue; }
+			$pid = $seat->player;
 			$player_game_counts[$pid]++;
-			$player_game_sizes[$pid] = ($player_game_sizes[$pid] ?: 0) + count($game['players']);
+			$player_game_sizes[$pid] = ($player_game_sizes[$pid] ?: 0) + $this_game_size;
 
 			$add_hit = function($tag) use (&$hits_by_player,$pid) {
 				$hits_by_player[$pid][$tag] = ($hits_by_player[$pid][$tag] ?: 0) + 1;
@@ -345,7 +365,9 @@ function sum_fitness(&$matching)
 			$seat_no++;
 			$add_hit('seat:'.$seat_no);
 
-			foreach ($game['players'] as $opp) {
+			foreach ($game['seats'] as $opp_seat) {
+				if (!$opp_seat->player) { continue; }
+				$opp = $opp_seat->player;
 				if ($pid < $opp) {
 					$k = "$pid,$opp";
 
@@ -435,7 +457,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 
 	$a_table_idx = roulette($R);
 	$a_table = $assignments[$a_table_idx];
-	$a_seat = rand(1, count($a_table['players'])) - 1;
+	$a_seat = rand(1, count($a_table['seats'])) - 1;
 	$a_round = $a_table['round'];
 
 	// pick someone to swap with; must be same round
@@ -458,7 +480,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 	$b_table = $assignments[$b_table_idx];
 	if ($b_table_idx == $a_table_idx) {
 		// pick a different seat than first player
-		$n = count($b_table['players'])-1;
+		$n = count($b_table['seats'])-1;
 		if ($n > 0) {
 			$b_seat = rand(1, $n) - 1;
 			if ($b_seat >= $a_seat) { $b_seat++; }
@@ -469,20 +491,22 @@ function mutate_matching_by_swapping(&$parent_matching)
 		}
 	}
 	else {
-		$b_seat = rand(1, count($b_table['players'])) - 1;
+		$b_seat = rand(1, count($b_table['seats'])) - 1;
 	}
 
 	// make the swap
-	$removed_player = $a_table['players'][$a_seat];
+	$vacated_seat = $a_table['seats'][$a_seat];
 
-	$a_players = $a_table['players'];
-	$a_players[$a_seat] = $b_table['players'][$b_seat];
-	$a_table['players'] = $a_players;
+	$a_seats = $a_table['seats'];
+	$a_seats[$a_seat] = clone $vacated_seat;
+	$a_seats[$a_seat]->player = $b_table['seats'][$b_seat]->player;
+	$a_table['seats'] = $a_seats;
 	$assignments[$a_table_idx] = $a_table;
 
-	$b_players = $b_table['players'];
-	$b_players[$b_seat] = $removed_player;
-	$b_table['players'] = $b_players;
+	$b_seats = $b_table['seats'];
+	$b_seats[$b_seat] = clone $b_seats[$b_seat];
+	$b_seats[$b_seat]->player = $vacated_seat->player;
+	$b_table['seats'] = $b_seats;
 	$assignments[$b_table_idx] = $b_table;
 
 	$m = array(
@@ -517,9 +541,16 @@ function mutate_matching_by_moving(&$parent_matching)
 		// don't remove from a "locked" table
 		if (isset($assignments[$i]['locked'])) { continue; }
 
-		$table_size = count($assignments[$i]['players']);
-		if ($table_size > $min_game_size) {
-			$f = pow($table_size-$min_game_size,2);
+		// determine number of players here
+		$pcount = 0;
+		foreach ($assignments[$i]['seats'] as $seat) {
+			if ($seat->player) {
+				$pcount++;
+			}
+		}
+
+		if ($pcount > $min_game_size) {
+			$f = pow($pcount-$min_game_size,2);
 			$R[] = array(
 				'v' => $i,
 				'f' => $f
@@ -532,16 +563,30 @@ function mutate_matching_by_moving(&$parent_matching)
 		return NULL; //unsuccessful mutation
 	}
 
-	$table = $assignments[$rmtable_idx];
-	$rmtable_round = $table['round'];
+	$a_table = $assignments[$rmtable_idx];
+	$rmtable_round = $a_table['round'];
 
-	$player_idx = rand(1, count($table['players'])) - 1;
-	$new_players = $table['players'];
-	$removed_player = $table['players'][$player_idx];
+	$R = array();
+	for ($i = 0; $i < count($a_table['seats']); $i++) {
+		if ($a_table['seats'][$i]->player) {
+			$R[] = array(
+				'v' => $i,
+				'f' => 1.0
+				);
+		}
+	}
+	$player_idx = roulette($R);
+	if (is_null($player_idx)) {
+		return NULL;
+	}
 
-	array_splice($new_players, $player_idx, 1);
-	$table['players'] = $new_players;
-	$assignments[$rmtable_idx] = $table;
+	$a_seats = $a_table['seats'];
+	$vacated_seat = $a_table['seats'][$player_idx];
+
+	$a_seats[$player_idx] = clone $a_seats[$player_idx];
+	$a_seats[$player_idx]->player = NULL;
+	$a_table['players'] = $a_seats;
+	$assignments[$rmtable_idx] = $a_table;
 
 	// find a place to insert this player
 	$R = array();
@@ -553,9 +598,15 @@ function mutate_matching_by_moving(&$parent_matching)
 		// don't insert to table in a different round
 		if ($assignments[$i]['round'] != $rmtable_round) { continue; }
 
-		$table_size = count($assignments[$i]['players']);
-		if ($table_size < $max_game_size) {
-			$f = pow($max_game_size-$table_size,2);
+		$pcount = 0;
+		foreach ($assignments[$i]['seats'] as $seat) {
+			if ($seat->player) {
+				$pcount++;
+			}
+		}
+
+		if ($pcount < $max_game_size) {
+			$f = pow($max_game_size-$pcount,2);
 			$R[] = array(
 				'v' => $i,
 				'f' => $f
@@ -568,15 +619,29 @@ function mutate_matching_by_moving(&$parent_matching)
 		return NULL; //unsuccessful mutation
 	}
 
-	$table = $assignments[$intable_idx];
+	$b_table = $assignments[$intable_idx];
+	$b_seats = $b_table['seats'];
 
 	// insert at random place in turn order
-	$player_idx = rand(0, count($table['players']));
-	$new_players = $table['players'];
+	$R = array();
+	for ($i = 0; $i < count($b_seats); $i++) {
+		if (is_null($b_seats[$i]->player)) {
+			$R[] = array(
+				'v' => $i,
+				'f' => 1.0
+				);
+		}
+	}
 
-	array_splice($new_players, $player_idx, 0, $removed_player);
-	$table['players'] = $new_players;
-	$assignments[$intable_idx] = $table;
+	$player_idx = roulette($R);
+	if (is_null($player_idx)) {
+		return NULL;
+	}
+
+	$b_seats[$player_idx] = clone $b_seats[$player_idx];
+	$b_seats[$player_idx]->player = $vacated_seat->player;
+	$b_table['players'] = $b_seats;
+	$assignments[$intable_idx] = $b_table;
 
 	$m = array(
 		'players' => &$parent_matching['players'],
@@ -748,20 +813,10 @@ function save_matching(&$matching)
 			$contest_id = mysqli_insert_id($database);
 		}
 
-		$sql = "DELETE FROM contest_participant
-			WHERE contest = ".db_quote($contest_id);
-		mysqli_query($database, $sql)
-			or die("SQL error:".db_error($sql));
-
-		$pcount=0;
-		foreach ($game['players'] as $pid) {
-			$pcount++;
-			$sql = "INSERT INTO contest_participant (
-					contest,player,turn_order)
-				VALUES (
-				".db_quote($contest_id).",
-				".db_quote($pid).",
-				".db_quote($pcount).")";
+		foreach ($game['seats'] as $seat) {
+			$sql = "UPDATE contest_participant
+				SET player=".db_quote($seat->player)."
+				WHERE id=".db_quote($seat->id);
 			mysqli_query($database, $sql)
 				or die("SQL error: ".db_error($database));
 		}

@@ -22,6 +22,32 @@ $tournament_info = array(
 	'last_round' => ($row[2] ?: 0)
 	);
 
+function add_table_to_round($round, $new_table_id)
+{
+	global $database;
+	global $tournament_id;
+	global $current_session;
+
+	$sql = "INSERT INTO contest (tournament,session_num,round,board,status)
+		VALUES (
+		".db_quote($tournament_id).",
+		".db_quote($current_session).",
+		".db_quote($round).",
+		".db_quote($new_table_id).",
+		'proposed')";
+	mysqli_query($database, $sql)
+		or die("SQL error 2: ".db_error($database));
+
+	$contest_id = mysqli_insert_id($database);
+
+	$sql = "INSERT INTO contest_participant (contest)
+		VALUES (".db_quote($contest_id)."),
+		       (".db_quote($contest_id).")
+		";
+	mysqli_query($database, $sql)
+		or die("SQL error 3: ".db_error($database));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
 	if (isset($_REQUEST['action:cancel'])) {
@@ -87,21 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			$new_table_id++;
 		}
 
-		$sql = "INSERT INTO contest (tournament,session_num,round,board,status)
-			VALUES (
-			".db_quote($tournament_id).",
-			".db_quote($current_session).",
-			".db_quote($round).",
-			".db_quote($new_table_id).",
-			'proposed')";
-		mysqli_query($database, $sql)
-			or die("SQL error 2: ".db_error($database));
-
-		$contest_id = mysqli_insert_id($database);
-
-		$sql = "INSERT INTO contest_participant (contest) VALUES (".db_quote($contest_id)."), (".db_quote($contest_id).")";
-		mysqli_query($database, $sql)
-			or die("SQL error 3: ".db_error($database));
+		add_table_to_round($round, $new_table_id);
 
 		echo '{"status":"success"}';
 		exit();
@@ -233,20 +245,24 @@ foreach ($matching['assignments'] as $game) {
 
 if (isset($_REQUEST['action:generate_pairings'])) {
 
-$m = load_matching($tournament_id, $current_session);
-
-echo "(1)Number of games: ".count($m['assignments'])."<br>\n";
 
 for ($round_no = $_REQUEST['first_round']; $round_no <= $_REQUEST['last_round']; $round_no++) {
-	if (!matching_has_round($m, $round_no)) {
-		$g = array(
-			'round' => $round_no,
-			'board' => 1,
-			'players' => array(NULL,NULL)
-			);
-		$m['assignments'][] = $g;
+
+	// check whether any table exists for this round
+	$sql = "SELECT COUNT(*) FROM contest
+		WHERE tournament=".db_quote($tournament_id)."
+		AND session_num=".db_quote($current_session)."
+		AND round=".db_quote($round_no);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query);
+	if ($row[0] == 0) {
+
+		// add a table to this round
+		add_table_to_round($round_no, 1);
 	}
 }
+
+$m = load_matching($tournament_id, $current_session);
 
 echo "(2)Number of games: ".count($m['assignments'])."<br>\n";
 $m = initialize_matching($m);
