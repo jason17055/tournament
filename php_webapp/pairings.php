@@ -56,6 +56,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
+	if (isset($_REQUEST['action:mutate_matching'])) {
+		$m = load_matching($tournament_id, $current_session);
+		$m = mutate_matching($m);
+		save_matching($m);
+		$url = $_SERVER['REQUEST_URI'];
+		header("Location: $url");
+		exit();
+	}
+
 	if (isset($_REQUEST['action:reset_matching'])) {
 
 		$contests_sql = "
@@ -208,13 +217,16 @@ Table: <span class="table"></span>
 Last round to pair:
 <input type="text" size="4" name="last_round" value="<?php h($_REQUEST['last_round'])?>">
 </div>
+<!--
 <div>Min game size:
 <input type="text" size="4" name="min_game_size" value="<?php h($_REQUEST['min_game_size'])?>">
 Max game size:
 <input type="text" size="4" name="max_game_size" value="<?php h($_REQUEST['max_game_size'])?>">
 </div>
+-->
 <div>
 <button type="submit" name="action:generate_pairings">GO</button>
+<button type="submit" name="action:mutate_matching">Mutate</button>
 <button type="submit" name="action:reset_matching">Reset</button>
 <button type="submit" name="action:cancel">Cancel</button>
 </div>
