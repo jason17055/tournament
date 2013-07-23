@@ -167,11 +167,7 @@ if (isset($_REQUEST['action:generate_pairings'])) {
 
 $m = load_matching($tournament_id, $tournament_info['current_session']);
 
-$matching = generate_optimal_matching(
-	$m['assignments'],
-	$m['players'],
-	$m['history']
-	);
+$matching = optimize_matching($m);
 show_matching($matching);
 propose_matching($matching);
 

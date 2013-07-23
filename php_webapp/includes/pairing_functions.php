@@ -580,8 +580,12 @@ function roulette(&$R)
 	return $R[$i]['v'];
 }
 
-function generate_optimal_matching(&$games, &$players, &$weights)
+function optimize_matching(&$original_matching)
 {
+	$games = $original_matching['assignments'];
+	$players = $original_matching['players'];
+	$weights = $original_matching['history'];
+
 	$POOL_SIZE = 15;
 	$GENERATIONS = 40;
 
