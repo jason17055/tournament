@@ -84,14 +84,23 @@ function load_matching($tournament_id, $current_session)
 		AND c.status='completed'
 		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
 		AND q.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
-		) AS nplays
+		) AS nplays,
+	IFNULL(pr.post_rating,pr.prior_rating) AS p_rating,
+	IFNULL(qr.post_rating,qr.prior_rating) AS q_rating
 	FROM person p
+	LEFT JOIN player_rating pr
+		ON pr.id=p.id
+		AND pr.session_num=".db_quote($current_session)."
 	CROSS JOIN person q ON q.tournament = p.tournament
 		AND q.id>p.id
+	LEFT JOIN player_rating qr
+		ON qr.id=q.id
+		AND qr.session_num=".db_quote($current_session)."
 	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.status='ready'
 	AND q.status='ready'";
-	$query = mysqli_query($database, $sql);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
 	while ($row = mysqli_fetch_row($query)) {
 		$key = "$row[0],$row[1]";
 		$p_name = $row[2];
@@ -99,6 +108,8 @@ function load_matching($tournament_id, $current_session)
 		$p_home = $row[4];
 		$q_home = $row[5];
 		$nplays = $row[6];
+		$p_rating = $row[7];
+		$q_rating = $row[8];
 
 		$same_home = $row[4] == $row[5];
 		$same_family = $same_home && check_common_surname($p_name, $q_name);
@@ -106,7 +117,8 @@ function load_matching($tournament_id, $current_session)
 		$weights[$key] = array(
 			'nplays' => $nplays,
 			'same_home' => $same_home,
-			'same_family' => $same_family
+			'same_family' => $same_family,
+			'rating_diff' => 20*(is_null($p_rating) || is_null($q_rating) ? 0 : abs($p_rating-$q_rating))
 			);
 	}
 
@@ -255,6 +267,7 @@ function sum_fitness(&$matching)
 	// this keeps track of how many times particular pairings play
 	// each other
 	$encounters = array();
+	$rating_diffs = array();
 	// keep track of how many rounds a player can play in
 	$player_game_counts = array();
 	// keep track of various other things per player
@@ -277,6 +290,7 @@ function sum_fitness(&$matching)
 					$prior_plays += 0.65;
 				}
 				$encounters[$pair_key] = $prior_plays;
+				$rating_diffs[$pair_key] = $h['rating_diff'];
 			}
 		}
 	}
@@ -334,10 +348,17 @@ function sum_fitness(&$matching)
 					$last_seen[$k] = $game->round;
 
 					$encounters[$k] = ($encounters[$k] ?: 0) + 1;
+
+					$rating_diff = $rating_diffs[$k] ?: 0;
+					$k2 = 'rating_diff_round_'.$game->round;
+					$k2_p = pow(2,$game->round)*$rating_diff/100;
+					if ($k2_p) {
+						$penalties[$k2] = ($penalties[$k2] ?: 0) + $k2_p;
+					}
 				}
-			}
-		}
-	}
+			} // end foreach seat*opp
+		} // end foreach seat
+	} //end foreach game
 
 	// determine average and variance for each type of hit
 	$nplayers = count($matching['players']);
@@ -378,7 +399,7 @@ function sum_fitness(&$matching)
 
 	foreach ($encounters as $pair_key => $nplays) {
 		$deviation = abs($nplays - $avg_encounters);
-		$p = pow($deviation, 2) * 100;
+		$p = pow($deviation, 2) * 50;
 		echo "$pair_key - played $nplays ($avg_encounters)<br>\n";
 		$penalties['repeats'] += $p;
 	}
@@ -387,7 +408,7 @@ function sum_fitness(&$matching)
 	foreach ($penalties as $pen_key => $pen_val) {
 		$total_penalty += $pen_val;
 	}
-	$matching['penalties'] = &$penalties;
+	$matching['penalties'] = $penalties;
 
 echo "got penalty of $total_penalty<br>\n";
 	return 1000/(1+$total_penalty/1000);
@@ -657,7 +678,7 @@ function optimize_matching(&$original_matching)
 		<?php
 	$INITIAL_GEN_SIZE = 15;
 	$POOL_SIZE = 20;
-	$GENERATIONS = 50;
+	$GENERATIONS = 200;
 
 	$sum_fitness = 0;
 	$pool = array();

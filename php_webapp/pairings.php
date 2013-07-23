@@ -327,6 +327,8 @@ if (isset($_REQUEST['action:optimize_matching'])) {
 	$m = load_matching($tournament_id, $current_session);
 	$m = optimize_matching($m);
 	save_matching($m);
+
+	show_matching($m);
 }
 
 
