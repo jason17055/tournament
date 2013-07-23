@@ -416,6 +416,18 @@ $(function() {
 	}
 });
 
+function edit_contest_clicked()
+{
+	var el = popup_menu_trigger_btn;
+	while (el && !el.hasAttribute('data-webtd-contest')) {
+		el = el.parentElement;
+	}
+	if (!el) { return false; }
+
+	var contest_id = el.getAttribute('data-webtd-contest');
+	location.href='contest.php?id='+escape(contest_id)+'&next_url='+escape(location.href);
+}
+
 function add_seat_clicked()
 {
 	var el = popup_menu_trigger_btn;

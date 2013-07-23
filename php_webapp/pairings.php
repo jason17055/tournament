@@ -78,7 +78,11 @@ if (!isset($_REQUEST['max_game_size'])) {
 
 ?>
 <div class="popup_menu" id="contest_popup_menu">
-<ul><li><a href="#" onclick="add_seat_clicked()">add seat</a></li><li><a href="#" onclick="remove_seat_clicked()">remove seat</a></li></ul>
+<ul>
+<li><a href="#" onclick="edit_contest_clicked()">edit</a></li>
+<li><a href="#" onclick="add_seat_clicked()">add seat</a></li>
+<li><a href="#" onclick="remove_seat_clicked()">remove seat</a></li>
+</ul>
 </div>
 <div class="pairings_container">
 <table class="pairings_grid">
