@@ -167,6 +167,17 @@ if (isset($_REQUEST['action:generate_pairings'])) {
 
 $m = load_matching($tournament_id, $tournament_info['current_session']);
 
+for ($round_no = $_REQUEST['first_round']; $round_no <= $_REQUEST['last_round']; $round_no++) {
+	if (!matching_has_round($m, $round_no)) {
+		$g = array(
+			'round' => $round_no,
+			'board' => 1,
+			'players' => array(0,0)
+			);
+		$m['assignments'][] = $g;
+	}
+}
+
 $matching = optimize_matching($m);
 show_matching($matching);
 propose_matching($matching);

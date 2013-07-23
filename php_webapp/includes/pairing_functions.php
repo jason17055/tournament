@@ -161,7 +161,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 
 $games = array();
-$sql = "SELECT id,round,board,
+$sql = "SELECT id,round,board,status,
 		(SELECT GROUP_CONCAT(
 			player ORDER BY player SEPARATOR ','
 			)
@@ -177,13 +177,16 @@ while ($row = mysqli_fetch_row($query))
 {
 	$round = $row[1];
 	$board = $row[2];
-	$m_players = explode(',',$row[3]);
+	$game_status = $row[3];
+	$m_players = explode(',',$row[4]);
 	$game = array(
 		'round' => $round,
 		'board' => $board,
-		'players' => $m_players,
-		'locked' => TRUE
+		'players' => $m_players
 		);
+	if ($game_status != 'proposed') {
+		$game['locked'] = TRUE;
+	}
 	$games[] = $game;
 }
 
@@ -607,6 +610,13 @@ function roulette(&$R)
 
 function optimize_matching(&$original_matching)
 {
+		?><div class="driller_container">
+		<h2 class="driller_heading">Original Matching</h2>
+		<div class="driller_content"><?php
+		show_matching($original_matching);
+		?></div></div>
+
+		<?php
 	$POOL_SIZE = 15;
 	$GENERATIONS = 40;
 
@@ -740,3 +750,12 @@ function propose_matching(&$matching)
 	die("got here! $gcount");
 }
 
+function matching_has_round(&$matching, $round_no)
+{
+	foreach ($matching['assignments'] as &$game) {
+		if ($game['round'] == $round_no) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
