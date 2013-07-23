@@ -160,29 +160,36 @@ function initialize_matching(&$original_matching)
 	$games = $original_matching['assignments'];
 	$players = &$original_matching['players'];
 
+	// generate a list of all rounds that have unlocked games
 	$seen_round = array();
-
-	// for each game that isn't "locked", clear out the
-	// unconfirmed participants
-	for ($i = 0; $i < count($games); $i++) {
-		if (isset($games[$i]['locked'])) { continue; }
-
-		$g = $games[$i]; //copy the game struct
-		$size = count($g['seats']);
-		$seats = $g['seats']; //copy the seats array
-		for ($j = 0; $j < $size; $j++) {
-			$seats[$j] = clone $seats[$j];
-			$seats[$j]->player = NULL;
-		}
-
-		$g['seats'] = $seats;
-		$games[$i] = $g;
-
+	foreach ($games as &$g) {
+		if (isset($g['locked'])) { continue; }
 		$seen_round[$g['round']] = $g['round'];
 	}
 
 	foreach ($seen_round as $round_no)
 	{
+		// empty any seats not at a locked table
+		$empty_seat_count = 0;
+		for ($i = 0; $i < count($games); $i++) {
+			$g = $games[$i];
+			if ($g['round'] != $round_no) { continue; }
+			if ($g['locked']) { continue; }
+
+			// copy the game struct so our changes do
+			// not modify the original
+			$g = $games[$i]; //copy the game struct
+			$size = count($g['seats']);
+			$seats = $g['seats']; //copy the seats array
+			for ($j = 0; $j < $size; $j++) {
+				$seats[$j] = clone $seats[$j];
+				$seats[$j]->player = NULL;
+				$empty_seat_count++;
+			}
+			$g['seats'] = $seats;
+			$games[$i] = $g;
+		}
+
 		// generate a set available players
 		$avail = array();
 		foreach ($players as $k=>&$v) {
@@ -191,21 +198,28 @@ function initialize_matching(&$original_matching)
 			}
 		}
 
-		// filter out players already assigned this round
+		// filter out players assigned to locked games this round
 		foreach ($games as &$g) {
 			if ($g['round'] != $round_no) { continue; }
-			foreach ($g['seats'] as $seat) {
-				if (isset($seat->player) && isset($avail[$seat->player])) {
-					unset($avail[$seat->player]);
+			if ($g['locked']) {
+				foreach ($g['seats'] as $seat) {
+					if ($seat->player) {
+						unset($avail[$seat->player]);
+					}
 				}
 			}
 		}
 
 		// make a randomly-sorted list of players
 		$players_list = array_keys($avail);
+		while (count($players_list) < $empty_seat_count) {
+			// add null to players list so they get
+			// randomly distributed
+			$players_list[] = NULL;
+		}
 		shuffle($players_list);
 
-echo "Round $round_no: ".count($players_list)." players available<br>";
+echo "Round $round_no: ".count($players_list)." ($empty_seat_count) players available<br>";
 
 		// assign players to empty seats
 		foreach ($games as &$g) {
