@@ -207,6 +207,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
+	else if (isset($_REQUEST['action:delete_contest'])) {
+		$sql = "DELETE FROM contest_participant
+			WHERE contest=".db_quote($_GET['id']);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$sql = "DELETE FROM contest WHERE id=".db_quote($_GET['id']);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		header("Location: $next_url");
+		exit();
+	}
+
 	else {
 		die("Invalid POST");
 	}
@@ -427,7 +440,8 @@ if (isset($_GET['id'])) {
 <div class="form_buttons_bar">
 <?php if (isset($_GET['id'])) { ?>
 <button type="submit" name="action:update_contest">Update Game</button>
-<button type="submit" name="action:delete_contest">Delete Game</button>
+<button type="submit" name="action:delete_contest"
+	onclick="return confirm('Really delete this game?')">Delete Game</button>
 <?php } else { ?>
 <button type="submit" name="action:create_contest">Create Game</button>
 <?php } ?>
