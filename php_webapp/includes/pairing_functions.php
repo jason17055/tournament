@@ -747,7 +747,6 @@ function save_matching(&$matching)
 				or die("SQL error: ".db_error($database));
 		}
 	}
-	die("got here! $gcount");
 }
 
 function matching_has_round(&$matching, $round_no)

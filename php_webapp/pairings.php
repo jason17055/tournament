@@ -195,15 +195,16 @@ for ($round_no = $_REQUEST['first_round']; $round_no <= $_REQUEST['last_round'];
 		$g = array(
 			'round' => $round_no,
 			'board' => 1,
-			'players' => array(0,0)
+			'players' => array(NULL,NULL)
 			);
 		$m['assignments'][] = $g;
 	}
 }
 
+$m = initialize_matching($m);
 //$matching = optimize_matching($m);
 //show_matching($matching);
-save_matching($matching);
+save_matching($m);
 
 } //endif action:generate_pairings
 
