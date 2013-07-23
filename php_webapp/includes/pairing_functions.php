@@ -3,6 +3,9 @@
 class Webtd_Seat
 {
 }
+class Webtd_Contest
+{
+}
 
 function check_common_surname($a_name, $b_name)
 {
@@ -119,14 +122,13 @@ function load_matching($tournament_id, $current_session)
 		$round = $row[1];
 		$board = $row[2];
 		$game_status = $row[3];
-		$game = array(
-			'id' => $contest_id,
-			'round' => $round,
-			'board' => $board
-			);
-		if ($game_status != 'proposed') {
-			$game['locked'] = TRUE;
-		}
+
+		$game = new Webtd_Contest;
+		$game->id = $contest_id;
+		$game->round = $round;
+		$game->board = $board;
+		$game->status = $game_status;
+		$game->locked = ($game_status != 'proposed');
 
 		$seats = array();
 		$sql = "SELECT id,player
@@ -141,7 +143,7 @@ function load_matching($tournament_id, $current_session)
 			$s->player = $row2[1];
 			$seats[] = $s;
 		}
-		$game['seats'] = $seats;
+		$game->seats = $seats;
 
 		$games[] = $game;
 	}
@@ -162,9 +164,9 @@ function initialize_matching(&$original_matching)
 
 	// generate a list of all rounds that have unlocked games
 	$seen_round = array();
-	foreach ($games as &$g) {
-		if (isset($g['locked'])) { continue; }
-		$seen_round[$g['round']] = $g['round'];
+	foreach ($games as $g) {
+		if ($g->locked) { continue; }
+		$seen_round[$g->round] = $g->round;
 	}
 
 	foreach ($seen_round as $round_no)
@@ -172,21 +174,18 @@ function initialize_matching(&$original_matching)
 		// empty any seats not at a locked table
 		$empty_seat_count = 0;
 		for ($i = 0; $i < count($games); $i++) {
-			$g = $games[$i];
-			if ($g['round'] != $round_no) { continue; }
-			if ($g['locked']) { continue; }
+			if ($games[$i]->round != $round_no) { continue; }
+			if ($games[$i]->locked) { continue; }
 
 			// copy the game struct so our changes do
 			// not modify the original
-			$g = $games[$i]; //copy the game struct
-			$size = count($g['seats']);
-			$seats = $g['seats']; //copy the seats array
+			$g = clone $games[$i];
+			$size = count($g->seats);
 			for ($j = 0; $j < $size; $j++) {
-				$seats[$j] = clone $seats[$j];
-				$seats[$j]->player = NULL;
+				$g->seats[$j] = clone $g->seats[$j];
+				$g->seats[$j]->player = NULL;
 				$empty_seat_count++;
 			}
-			$g['seats'] = $seats;
 			$games[$i] = $g;
 		}
 
@@ -199,10 +198,10 @@ function initialize_matching(&$original_matching)
 		}
 
 		// filter out players assigned to locked games this round
-		foreach ($games as &$g) {
-			if ($g['round'] != $round_no) { continue; }
-			if ($g['locked']) {
-				foreach ($g['seats'] as $seat) {
+		foreach ($games as $g) {
+			if ($g->round != $round_no) { continue; }
+			if ($g->locked) {
+				foreach ($g->seats as $seat) {
 					if ($seat->player) {
 						unset($avail[$seat->player]);
 					}
@@ -219,15 +218,12 @@ function initialize_matching(&$original_matching)
 		}
 		shuffle($players_list);
 
-echo "Round $round_no: ".count($players_list)." ($empty_seat_count) players available<br>";
-
 		// assign players to empty seats
-		foreach ($games as &$g) {
-			if ($g['round'] != $round_no) { continue; }
-			if ($g['locked']) { continue; }
+		foreach ($games as $g) {
+			if ($g->round != $round_no) { continue; }
+			if ($g->locked) { continue; }
 
-echo " At table $g[board], size ".count($g['seats']).": ".count($players_list)." players available<br>\n";
-			foreach ($g['seats'] as $seat) {
+			foreach ($g->seats as $seat) {
 				if (!$seat->player && count($players_list)) {
 					$next_pid = array_shift($players_list);
 					$seat->player = $next_pid;
@@ -239,7 +235,7 @@ echo " At table $g[board], size ".count($g['seats']).": ".count($players_list)."
 	$m = array(
 		'players' => &$original_matching['players'],
 		'history' => &$original_matching['history'],
-		'assignments' => &$games
+		'assignments' => $games
 		);
 	$m['fitness'] = sum_fitness($m);
 	return $m;
@@ -291,13 +287,13 @@ function sum_fitness(&$matching)
 	usort($tables, 'order_by_round_and_board');
 
 	$sum_game_sizes = 0;
-	foreach ($tables as &$game) {
-		$sum_game_sizes += count($game['seats']);
+	foreach ($tables as $game) {
+		$sum_game_sizes += count($game->seats);
 	}
 	$avg_game_size = $sum_game_sizes / count($tables);
 	$game_size_variation = 0;
-	foreach ($tables as &$game) {
-		$this_game_size = count($game['seats']);
+	foreach ($tables as $game) {
+		$this_game_size = count($game->seats);
 		$game_size_variation += pow($this_game_size-$avg_game_size,2)/count($tables);
 	}
 	if ($game_size_variation != 0.0) {
@@ -305,11 +301,11 @@ function sum_fitness(&$matching)
 	}
 
 	$player_game_sizes = array();
-	foreach ($tables as &$game) {
-		$this_game_size = count($game['seats']);
+	foreach ($tables as $game) {
+		$this_game_size = count($game->seats);
 
 		$seat_no = 0;
-		foreach ($game['seats'] as $seat) {
+		foreach ($game->seats as $seat) {
 			if (!$seat->player) { continue; }
 			$pid = $seat->player;
 			$player_game_counts[$pid]++;
@@ -322,18 +318,18 @@ function sum_fitness(&$matching)
 			$seat_no++;
 			$add_hit('seat:'.$seat_no);
 
-			foreach ($game['seats'] as $opp_seat) {
+			foreach ($game->seats as $opp_seat) {
 				if (!$opp_seat->player) { continue; }
 				$opp = $opp_seat->player;
 				if ($pid < $opp) {
 					$k = "$pid,$opp";
 
 					if (isset($last_seen[$k])) {
-						$elapsed = $game['round'] - $last_seen[$k];
+						$elapsed = $game->round - $last_seen[$k];
 						$p = $elapsed < 2 ? 150 : 0;
 						$penalties['consecutives'] += $p;
 					}
-					$last_seen[$k] = $game['round'];
+					$last_seen[$k] = $game->round;
 
 					$encounters[$k] = ($encounters[$k] ?: 0) + 1;
 				}
@@ -403,7 +399,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 	$R = array();
 	for ($i = 0; $i < count($assignments); $i++) {
 		// don't remove from a "locked" table
-		if (isset($assignments[$i]['locked'])) { continue; }
+		if (isset($assignments[$i]->locked)) { continue; }
 
 		$f = 1;
 		$R[] = array(
@@ -414,17 +410,17 @@ function mutate_matching_by_swapping(&$parent_matching)
 
 	$a_table_idx = roulette($R);
 	$a_table = $assignments[$a_table_idx];
-	$a_seat = rand(1, count($a_table['seats'])) - 1;
-	$a_round = $a_table['round'];
+	$a_seat = rand(1, count($a_table->seats)) - 1;
+	$a_round = $a_table->round;
 
 	// pick someone to swap with; must be same round
 	$R = array();
 	for ($i = 0; $i < count($assignments); $i++) {
 		// don't remove from a "locked" table
-		if (isset($assignments[$i]['locked'])) { continue; }
+		if ($assignments[$i]->locked) { continue; }
 
 		// must be same round
-		if ($assignments[$i]['round'] != $a_round) { continue; }
+		if ($assignments[$i]->round != $a_round) { continue; }
 
 		$f = 1;
 		$R[] = array(
@@ -437,7 +433,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 	$b_table = $assignments[$b_table_idx];
 	if ($b_table_idx == $a_table_idx) {
 		// pick a different seat than first player
-		$n = count($b_table['seats'])-1;
+		$n = count($b_table->seats)-1;
 		if ($n > 0) {
 			$b_seat = rand(1, $n) - 1;
 			if ($b_seat >= $a_seat) { $b_seat++; }
@@ -448,28 +444,26 @@ function mutate_matching_by_swapping(&$parent_matching)
 		}
 	}
 	else {
-		$b_seat = rand(1, count($b_table['seats'])) - 1;
+		$b_seat = rand(1, count($b_table->seats)) - 1;
 	}
 
 	// make the swap
-	$vacated_seat = $a_table['seats'][$a_seat];
+	$vacated_seat = $a_table->seats[$a_seat];
 
-	$a_seats = $a_table['seats'];
-	$a_seats[$a_seat] = clone $vacated_seat;
-	$a_seats[$a_seat]->player = $b_table['seats'][$b_seat]->player;
-	$a_table['seats'] = $a_seats;
+	$a_table = clone $a_table;
+	$a_table->seats[$a_seat] = clone $vacated_seat;
+	$a_table->seats[$a_seat]->player = $b_table->seats[$b_seat]->player;
 	$assignments[$a_table_idx] = $a_table;
 
-	$b_seats = $b_table['seats'];
-	$b_seats[$b_seat] = clone $b_seats[$b_seat];
-	$b_seats[$b_seat]->player = $vacated_seat->player;
-	$b_table['seats'] = $b_seats;
+	$b_table = clone $b_table;
+	$b_table->seats[$b_seat] = clone $b_table->seats[$b_seat];
+	$b_table->seats[$b_seat]->player = $vacated_seat->player;
 	$assignments[$b_table_idx] = $b_table;
 
 	$m = array(
 		'players' => &$parent_matching['players'],
 		'history' => &$parent_matching['history'],
-		'assignments' => &$assignments
+		'assignments' => $assignments
 		);
 	$m['fitness'] = sum_fitness($m);
 	return $m;
@@ -698,11 +692,11 @@ function optimize_matching(&$original_matching)
 
 function order_by_round_and_board($a, $b)
 {
-	if ($a['round'] != $b['round']) {
-		return $a['round'] > $b['round'] ? 1 : -1;
+	if ($a->round != $b->round) {
+		return $a->round > $b->round ? 1 : -1;
 	}
-	else if ($a['board'] != $b['board']) {
-		return $a['board'] > $b['board'] ? 1 : -1;
+	else if ($a->board != $b->board) {
+		return $a->board > $b->board ? 1 : -1;
 	}
 	else {
 		return 0;
@@ -727,14 +721,14 @@ function save_matching(&$matching)
 
 	foreach ($assignments as $game) {
 		// skip over the "locked" tables
-		if ($game['locked']) { continue; }
+		if ($game->locked) { continue; }
 
-		$contest_id = $game['id'];
+		$contest_id = $game->id;
 
 		//TODO - update contest properties?
 
 		// update seat assignments
-		foreach ($game['seats'] as $seat) {
+		foreach ($game->seats as $seat) {
 			$sql = "UPDATE contest_participant
 				SET player=".db_quote($seat->player)."
 				WHERE id=".db_quote($seat->id);
@@ -742,14 +736,4 @@ function save_matching(&$matching)
 				or die("SQL error: ".db_error($database));
 		}
 	}
-}
-
-function matching_has_round(&$matching, $round_no)
-{
-	foreach ($matching['assignments'] as &$game) {
-		if ($game['round'] == $round_no) {
-			return TRUE;
-		}
-	}
-	return FALSE;
 }
