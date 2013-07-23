@@ -40,6 +40,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		echo '{"status":"success"}';
 		exit();
 	}
+
+	if (isset($_REQUEST['action:assign_person_to_contest'])) {
+		$person_id = $_REQUEST['person'];
+		$contest_id = $_REQUEST['contest'];
+
+		// TODO-unassign from any other contest that is during same
+		// round 
+
+		$sql = "INSERT INTO contest_participant
+			(contest,player) VALUES (
+			".db_quote($contest_id).",
+			".db_quote($person_id).")";
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		echo '{"status":"success"}';
+		exit();
+	}
 }
 
 $page_title = "$tournament_info[name] - Generate Pairings";

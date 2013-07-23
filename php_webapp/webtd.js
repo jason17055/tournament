@@ -292,6 +292,7 @@ function load_pairings_into(pairings_data, container_el)
 
 	function setup_contest_box_handlers(contest_box_el)
 	{
+		var contest_id = contest_box_el.getAttribute('data-webtd-contest');
 		function onDragEnter(evt) {
 			this.classList.add('over');
 		}
@@ -314,7 +315,13 @@ function load_pairings_into(pairings_data, container_el)
 				data = evt.dataTransfer.getData('application/webtd+seat');
 				dataType = 'seat';
 			}
-			alert('got '+dataType+' '+data);
+
+			if (dataType == 'person') {
+				move_person_to(data, contest_id);
+			}
+			else {
+				alert('got '+dataType+' '+data);
+			}
 		}
 		contest_box_el.addEventListener('dragenter', onDragEnter);
 		contest_box_el.addEventListener('dragover', onDragOver);
@@ -379,7 +386,7 @@ function load_pairings_into(pairings_data, container_el)
 			if (pid) {
 				$('.person_name',$p).text(p != null ? p.name : ("?"+pid));
 			} else {
-				$('.person_name',$p).text('(open)');
+				$('.person_name',$p).text('(empty)');
 			}
 			$('.players_list',$a).append($p);
 
@@ -447,5 +454,27 @@ function remove_seat_clicked()
 	if (!el.hasAttribute('data-webtd-contest')) { return; }
 
 	var contest_id = el.getAttribute('data-webtd-contest');
+	return false;
+}
+
+function move_person_to(person_id, contest_id)
+{
+	var onError = function (jqxhr, textStatus, errorThrown) {
+		alert(textStatus + ' ' + errorThrown);
+		};
+	var onSuccess = function(data) { location.reload(); };
+
+	$.ajax({
+		url: 'pairings.php?tournament='+escape(webtd_tournament_id),
+		type: 'POST',
+		data: {
+			'action:assign_person_to_contest': '1',
+			'person': person_id,
+			'contest': contest_id
+			},
+		dataType: 'json',
+		error: onError,
+		success: onSuccess
+		});
 	return false;
 }
