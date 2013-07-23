@@ -472,18 +472,20 @@ function propose_matching(&$matching)
 		'current_session' => $row[0]
 		);
 
-	$contests_sql = "SELECT id FROM contest
-		WHERE tournament=".db_quote($tournament_id)."
+	$contests_sql = "
+		tournament=".db_quote($tournament_id)."
 		AND status='proposed'
 		AND session_num=".db_quote($tournament_info['current_session']);
 
 	$sql = "DELETE FROM contest_participant
-		WHERE contest IN ($contests_sql)";
-	mysqli_query($database, $sql);
+		WHERE contest IN (SELECT id FROM contest WHERE $contests_sql)";
+	mysqli_query($database, $sql)
+		or die("SQL error:".db_error($sql));
 
 	$sql = "DELETE FROM contest
-		WHERE id IN ($contests_sql)";
-	mysqli_query($database, $sql);
+		WHERE $contests_sql";
+	mysqli_query($database, $sql)
+		or die("SQL error:".db_error($sql));
 
 	$gcount = 0;
 	foreach ($assignments as $game) {
