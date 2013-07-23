@@ -463,10 +463,10 @@ function mutate_matching_by_swapping(&$parent_matching)
 
 function mutate_matching(&$parent_matching)
 {
-	$new_matching = mutate_matching_by_moving($parent_matching);
-	if ($new_matching) {
-		return $new_matching;
-	}
+//	$new_matching = mutate_matching_by_moving($parent_matching);
+//	if ($new_matching) {
+//		return $new_matching;
+//	}
 
 	$new_matching = mutate_matching_by_swapping($parent_matching);
 	return $new_matching;
