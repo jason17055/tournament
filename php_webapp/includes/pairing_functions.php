@@ -174,11 +174,13 @@ $sql = "SELECT id,round,board,status,
 $query = mysqli_query($database, $sql);
 while ($row = mysqli_fetch_row($query))
 {
+	$contest_id = $row[0];
 	$round = $row[1];
 	$board = $row[2];
 	$game_status = $row[3];
 	$m_players = explode(',',$row[4]);
 	$game = array(
+		'id' => $contest_id,
 		'round' => $round,
 		'board' => $board,
 		'players' => $m_players
