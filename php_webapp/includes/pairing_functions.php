@@ -180,9 +180,11 @@ function initialize_matching(&$original_matching)
 			// copy the game struct so our changes do
 			// not modify the original
 			$g = clone $games[$i];
+			$g->dirty = TRUE;
 			$size = count($g->seats);
 			for ($j = 0; $j < $size; $j++) {
 				$g->seats[$j] = clone $g->seats[$j];
+				$g->seats[$j]->dirty = TRUE;
 				$g->seats[$j]->player = NULL;
 				$empty_seat_count++;
 			}
@@ -391,7 +393,7 @@ echo "got penalty of $total_penalty<br>\n";
 	return 1000/(1+$total_penalty/1000);
 }
 
-function mutate_matching_by_swapping(&$parent_matching)
+function mutate_matching_by_swapping($parent_matching)
 {
 	$assignments = $parent_matching['assignments'];
 
@@ -399,7 +401,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 	$R = array();
 	for ($i = 0; $i < count($assignments); $i++) {
 		// don't remove from a "locked" table
-		if (isset($assignments[$i]->locked)) { continue; }
+		if ($assignments[$i]->locked) { continue; }
 
 		$f = 1;
 		$R[] = array(
@@ -409,9 +411,13 @@ function mutate_matching_by_swapping(&$parent_matching)
 	}
 
 	$a_table_idx = roulette($R);
+	if (is_null($a_table_idx)) { return NULL; }
+
 	$a_table = $assignments[$a_table_idx];
 	$a_seat = rand(1, count($a_table->seats)) - 1;
 	$a_round = $a_table->round;
+
+echo "<div>Picked seat #$a_seat from table $a_table_idx (round $a_round)</div>\n";
 
 	// pick someone to swap with; must be same round
 	$R = array();
@@ -430,6 +436,11 @@ function mutate_matching_by_swapping(&$parent_matching)
 	}
 		
 	$b_table_idx = roulette($R);
+	if (is_null($b_table_idx)) {
+die("died here");
+		return NULL;
+	}
+
 	$b_table = $assignments[$b_table_idx];
 	if ($b_table_idx == $a_table_idx) {
 		// pick a different seat than first player
@@ -437,26 +448,33 @@ function mutate_matching_by_swapping(&$parent_matching)
 		if ($n > 0) {
 			$b_seat = rand(1, $n) - 1;
 			if ($b_seat >= $a_seat) { $b_seat++; }
+			echo "<div>Other is seat #$b_seat at same table.</div>\n";
 		}
 		else {
 			// unable to do a matching
+			die("picked a table with only one seat");
 			return NULL;
 		}
 	}
 	else {
 		$b_seat = rand(1, count($b_table->seats)) - 1;
+		echo "<div>Other is seat #$b_seat from table $b_table_idx</div>\n";
 	}
 
 	// make the swap
 	$vacated_seat = $a_table->seats[$a_seat];
 
 	$a_table = clone $a_table;
+	$a_table->dirty = TRUE;
 	$a_table->seats[$a_seat] = clone $vacated_seat;
+	$a_table->seats[$a_seat]->dirty = TRUE;
 	$a_table->seats[$a_seat]->player = $b_table->seats[$b_seat]->player;
 	$assignments[$a_table_idx] = $a_table;
 
-	$b_table = clone $b_table;
+	$b_table = clone $assignments[$b_table_idx];
+	$b_table->dirty = TRUE;
 	$b_table->seats[$b_seat] = clone $b_table->seats[$b_seat];
+	$b_table->seats[$b_seat]->dirty = TRUE;
 	$b_table->seats[$b_seat]->player = $vacated_seat->player;
 	$assignments[$b_table_idx] = $b_table;
 
@@ -466,6 +484,7 @@ function mutate_matching_by_swapping(&$parent_matching)
 		'assignments' => $assignments
 		);
 	$m['fitness'] = sum_fitness($m);
+
 	return $m;
 }
 
@@ -535,6 +554,7 @@ function mutate_matching_by_moving(&$parent_matching)
 	$vacated_seat = $a_table['seats'][$player_idx];
 
 	$a_seats[$player_idx] = clone $a_seats[$player_idx];
+	$a_seats[$player_idx]->dirty = TRUE;
 	$a_seats[$player_idx]->player = NULL;
 	$a_table['players'] = $a_seats;
 	$assignments[$rmtable_idx] = $a_table;
@@ -590,6 +610,7 @@ function mutate_matching_by_moving(&$parent_matching)
 	}
 
 	$b_seats[$player_idx] = clone $b_seats[$player_idx];
+	$b_seats[$player_idx]->dirty = TRUE;
 	$b_seats[$player_idx]->player = $vacated_seat->player;
 	$b_table['players'] = $b_seats;
 	$assignments[$intable_idx] = $b_table;
@@ -703,7 +724,7 @@ function order_by_round_and_board($a, $b)
 	}
 }
 
-function save_matching(&$matching)
+function save_matching($matching)
 {
 	$assignments = $matching['assignments'];
 
@@ -729,11 +750,13 @@ function save_matching(&$matching)
 
 		// update seat assignments
 		foreach ($game->seats as $seat) {
-			$sql = "UPDATE contest_participant
-				SET player=".db_quote($seat->player)."
-				WHERE id=".db_quote($seat->id);
-			mysqli_query($database, $sql)
-				or die("SQL error: ".db_error($database));
+			if ($seat->dirty) {
+				$sql = "UPDATE contest_participant
+					SET player=".db_quote($seat->player)."
+					WHERE id=".db_quote($seat->id);
+				mysqli_query($database, $sql)
+					or die("SQL error: ".db_error($database));
+			}
 		}
 	}
 }

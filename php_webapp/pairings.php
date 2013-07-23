@@ -40,9 +40,9 @@ function add_table_to_round($round, $new_table_id)
 
 	$contest_id = mysqli_insert_id($database);
 
-	$sql = "INSERT INTO contest_participant (contest)
-		VALUES (".db_quote($contest_id)."),
-		       (".db_quote($contest_id).")
+	$sql = "INSERT INTO contest_participant (contest,turn_order)
+		VALUES (".db_quote($contest_id).",1),
+		       (".db_quote($contest_id).",2)
 		";
 	mysqli_query($database, $sql)
 		or die("SQL error 3: ".db_error($database));
@@ -90,8 +90,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	if (isset($_REQUEST['action:add_seat'])) {
 		$contest_id = $_REQUEST['contest'];
 
+		$sql = "SELECT MAX(turn_order) FROM contest_participant
+			WHERE contest=".db_quote($contest_id);
+		$query = mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$row = mysqli_fetch_row($query);
+
+		$next_turn_order = ($row[0] ?: 0) + 1;
+
 		$sql = "INSERT INTO contest_participant
-			(contest) VALUES (".db_quote($contest_id).")";
+			(contest,turn_order) VALUES (
+				".db_quote($contest_id).",
+				".db_quote($next_turn_order).")";
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
@@ -248,12 +258,12 @@ usort($matching['assignments'], 'order_by_round_and_board');
 </tr>
 <?php
 foreach ($matching['assignments'] as $game) {
-	if ($game['locked']) { continue; }
+	if ($game->locked) { continue; }
 	?><tr>
-<td><?php h("Table $game[round]-$game[board]")?></td>
+<td><?php h("Table ".$game->round."-".$game->board)?></td>
 <td><ul class="player_inline_list"><?php
-	foreach ($game['players'] as $pid) {
-		$p = $players[$pid];
+	foreach ($game->seats as $seat) {
+		$p = $players[$seat->player];
 		?><li><span class="player_name" data-player-id="<?php h($pid)?>"><?php h($p['name'] ?: $pid)?></span></li>
 <?php
 	}
