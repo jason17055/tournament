@@ -41,23 +41,15 @@ while ($row = mysqli_fetch_row($query)) {
 	}
 }
 
-arsort($card_counts);
+asort($card_counts);
+
 	?>
-<table border="1">
-<tr>
-<th>Card</th>
-<th>Count</th>
-</tr>
-<?php
+<pre><?php
 
+$k = (isset($_REQUEST['scale']) ? $_REQUEST['scale'] : 1) * -0.25;
 foreach ($card_counts as $card_name => $count) {
-?>
-<tr>
-<td><?php h($card_name)?></td>
-<td><?php h($count)?></td>
-</tr>
-<?php
+	echo sprintf("%6.4f %s\n", exp($k * $count), $card_name);
 }
-
+echo "</pre>\n";
 
 end_page();
