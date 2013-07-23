@@ -170,8 +170,7 @@ $sql = "SELECT id,round,board,status,
 		) AS players
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
-	AND session_num=".db_quote($current_session)."
-	AND status<>'proposed'";
+	AND session_num=".db_quote($current_session);
 $query = mysqli_query($database, $sql);
 while ($row = mysqli_fetch_row($query))
 {
@@ -193,7 +192,7 @@ while ($row = mysqli_fetch_row($query))
 	$m = array(
 		'players' => &$players,
 		'history' => &$weights,
-		'assignments' => &$assignments
+		'assignments' => &$games
 		);
 	$m['fitness'] = sum_fitness($m);
 	return $m;

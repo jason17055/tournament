@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$contests_sql = "
 			tournament=".db_quote($tournament_id)."
 			AND status='proposed'
-			AND session_num=".db_quote($tournament_info['current_session']);
+			AND session_num=".db_quote($current_session);
 
 		$sql = "DELETE FROM contest_participant
 			WHERE contest IN (SELECT id FROM contest WHERE $contests_sql)";
@@ -233,7 +233,9 @@ foreach ($matching['assignments'] as $game) {
 
 if (isset($_REQUEST['action:generate_pairings'])) {
 
-$m = load_matching($tournament_id, $tournament_info['current_session']);
+$m = load_matching($tournament_id, $current_session);
+
+echo "(1)Number of games: ".count($m['assignments'])."<br>\n";
 
 for ($round_no = $_REQUEST['first_round']; $round_no <= $_REQUEST['last_round']; $round_no++) {
 	if (!matching_has_round($m, $round_no)) {
@@ -246,10 +248,13 @@ for ($round_no = $_REQUEST['first_round']; $round_no <= $_REQUEST['last_round'];
 	}
 }
 
+echo "(2)Number of games: ".count($m['assignments'])."<br>\n";
 $m = initialize_matching($m);
+echo "(3)Number of games: ".count($m['assignments'])."<br>\n";
 //$matching = optimize_matching($m);
 //show_matching($matching);
 save_matching($m);
+echo "(4)Number of games: ".count($m['assignments'])."<br>\n";
 
 } //endif action:generate_pairings
 
