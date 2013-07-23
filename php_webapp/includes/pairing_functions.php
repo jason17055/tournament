@@ -686,7 +686,7 @@ function order_by_round_and_board($a, $b)
 	}
 }
 
-function propose_matching(&$matching)
+function save_matching(&$matching)
 {
 	$assignments = $matching['assignments'];
 
