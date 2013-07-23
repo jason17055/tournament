@@ -41,7 +41,7 @@ $sql = "SELECT c.id,c.round,c.board,c.status
 	FROM contest c
 	JOIN tournament t ON t.id = c.tournament
 	WHERE t.id=".db_quote($tournament_id)."
-	AND c.status IN ('completed','started')
+	AND c.status IN ('completed','started','proposed')
 	AND (c.session_num IS NULL OR c.session_num=t.current_session)
 	ORDER BY c.id";
 $query = mysqli_query($database, $sql)
