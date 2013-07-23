@@ -9,7 +9,8 @@ $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,current_session,
 	(SELECT MAX(round) FROM contest
 		WHERE tournament=t.id
-		AND session_num=t.current_session)
+		AND session_num=t.current_session
+		AND status <> 'proposed')
 	FROM tournament t WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
@@ -56,8 +57,8 @@ Table: <span class="table"></span>
 </div>
 <ul class="players_list">
 </ul>
-</div>
-</div>
+</div><!-- /.match_container.template -->
+</div><!-- /.pairings_container -->
 
 <form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <div>First round to pair:
@@ -302,6 +303,7 @@ foreach ($matching['assignments'] as $game) {
 
 $matching = generate_optimal_matching($games, $players, $weights);
 show_matching($matching);
+propose_matching($matching);
 
 //$m = mutate_matching($matching);
 //show_matching($m);

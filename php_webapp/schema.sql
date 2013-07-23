@@ -45,6 +45,7 @@ CREATE TABLE person (
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
+--status is one of 'completed', 'proposed', etc.
 CREATE TABLE contest (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,

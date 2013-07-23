@@ -455,3 +455,66 @@ function order_by_round_and_board($a, $b)
 		return 0;
 	}
 }
+
+function propose_matching(&$matching)
+{
+	$assignments = $matching['assignments'];
+
+	global $database;
+	global $tournament_id;
+
+	$sql = "SELECT current_session FROM tournament
+		WHERE id=".db_quote($tournament_id);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query);
+	$tournament_info = array(
+		'id' => $tournament_id,
+		'current_session' => $row[0]
+		);
+
+	$contests_sql = "SELECT id FROM contest
+		WHERE tournament=".db_quote($tournament_id)."
+		AND status='proposed'
+		AND session_num=".db_quote($tournament_info['current_session']);
+
+	$sql = "DELETE FROM contest_participant
+		WHERE contest IN ($contests_sql)";
+	mysqli_query($database, $sql);
+
+	$sql = "DELETE FROM contest
+		WHERE id IN ($contests_sql)";
+	mysqli_query($database, $sql);
+
+	$gcount = 0;
+	foreach ($assignments as $game) {
+		// skip over the "locked" tables
+		if ($game['locked']) { continue; }
+
+		$gcount++;
+		$sql = "INSERT INTO contest (tournament,session_num,round,board,status) VALUES (
+			".db_quote($tournament_id).",
+			".db_quote($tournament_info['current_session']).",
+			".db_quote($game['round']).",
+			".db_quote($game['board']).",
+			'proposed')";
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		$contest_id = mysqli_insert_id($database);
+
+		$pcount=0;
+		foreach ($game['players'] as $pid) {
+			$pcount++;
+			$sql = "INSERT INTO contest_participant (
+					contest,player,turn_order)
+				VALUES (
+				".db_quote($contest_id).",
+				".db_quote($pid).",
+				".db_quote($pcount).")";
+			mysqli_query($database, $sql)
+				or die("SQL error: ".db_error($database));
+		}
+	}
+	die("got here! $gcount");
+}
+
