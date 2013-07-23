@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
-$page_title = "$tournament_info[name] - Generate Pairings";
+$page_title = "$tournament_info[name] - Pairings";
 begin_page($page_title);
 
 if (!isset($_REQUEST['first_round'])) {
@@ -165,6 +165,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 </div>
 <div class="pairings_container">
 <table class="pairings_grid">
+<tr class="sitout_row"></tr>
 </table>
 <div class="match_container template">
 <div class="caption">

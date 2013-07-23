@@ -123,12 +123,12 @@ td.performance_col {
 	border: 2px solid #fff;
 	}
 
-.match_container .players_list {
+.pairings_container .players_list {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
 }
-.match_container .players_list li {
+.pairings_container .players_list li {
 	border-bottom: 1px solid #ccc;
 	padding: 1pt 2pt 1pt 2pt;
 	-webkit-user-select: none;
@@ -136,6 +136,6 @@ td.performance_col {
 	cursor: default;
 }
 
-.match_container .players_list li:last-child {
+.pairings_container .players_list li:last-child {
 	border-bottom: none;
 }

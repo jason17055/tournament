@@ -15,7 +15,7 @@ if (!$row) {
 
 header("Content-Type: text/json");
 
-$sql = "SELECT id,name
+$sql = "SELECT id,name,status
 	FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	AND status IS NOT NULL
@@ -30,7 +30,8 @@ while ($row = mysqli_fetch_row($query)) {
 	if ($count++) { echo ",\n"; }
 	$p = array(
 		'pid' => $row[0],
-		'name' => $row[1]
+		'name' => $row[1],
+		'status' => $row[2]
 		);
 	echo json_encode($p);
 }

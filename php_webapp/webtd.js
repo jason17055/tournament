@@ -361,7 +361,7 @@ function load_pairings_into(pairings_data, container_el)
 			$tr.append($td);
 		}
 
-		$('.pairings_grid', container_el).append($tr);
+		$('.pairings_grid tr.sitout_row', container_el).before($tr);
 	}
 
 	function get_cell(round, table)
@@ -369,6 +369,7 @@ function load_pairings_into(pairings_data, container_el)
 		return $('.pairings_grid tr[data-webtd-table='+table+'] td[data-webtd-round='+round+']', container_el);
 	}
 
+	var SEAT_BOX_HTML = '<li class="seat_box" draggable="draggable"><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>';
 	for (var i in assignments) {
 		var a = assignments[i];
 		var $a = $('.match_container.template',container_el).clone();
@@ -380,7 +381,7 @@ function load_pairings_into(pairings_data, container_el)
 		for (var j in a.players) {
 			var pid = a.players[j].pid;
 			var p = players[pid];
-			var $p = $('<li class="seat_box" draggable="draggable"><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>');
+			var $p = $(SEAT_BOX_HTML);
 			$p.attr('data-webtd-person', pid);
 			$p.attr('data-webtd-seat', a.players[j].seat);
 			if (pid) {
@@ -395,6 +396,42 @@ function load_pairings_into(pairings_data, container_el)
 
 		var $td = get_cell(a.round, a.table);
 		$td.append($a);
+	}
+
+	$tr = $('.pairings_grid tr.sitout_row', container_el);
+	for (var j = 0; j < rounds_sorted.length; j++) {
+		var round_name = rounds_sorted[j];
+		var $td = $('<td><div class="sitout_box"><div class="caption">SITOUT</div><ul class="players_list"></ul></div></td>');
+		$td.attr('data-webtd-round', round_name);
+
+		var busy = {};
+		for (var k in assignments) {
+			var a = assignments[k];
+			if (a.round == round_name) {
+				for (var q = 0; q < a.players.length; q++) {
+					var pid = a.players[q].pid;
+					busy[pid] = true;
+				}
+			}
+		}
+
+		var any_found = false;
+		for (var pid in players) {
+			var p = players[pid];
+			if (p.status == 'ready' && !busy[pid]) {
+				var $p = $(SEAT_BOX_HTML);
+				$p.attr('data-webtd-person', pid);
+				$('.person_name',$p).text(p.name);
+				$('.players_list',$td).append($p);
+				any_found = true;
+			}
+		}
+
+		if (!any_found) {
+			$('.sitout_box', $td).hide();
+		}
+
+		$tr.append($td);
 	}
 }
 
