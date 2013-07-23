@@ -282,6 +282,17 @@ function mutate_matching_by_swapping(&$parent_matching)
 
 function mutate_matching(&$parent_matching)
 {
+	$new_matching = mutate_matching_by_moving($parent_matching);
+	if ($new_matching) {
+		return $new_matching;
+	}
+
+	$new_matching = mutate_matching_by_swapping($parent_matching);
+	return $new_matching;
+}
+
+function mutate_matching_by_moving(&$parent_matching)
+{
 	$assignments = $parent_matching['assignments'];
 	$min_game_size = $_REQUEST['min_game_size'];
 	$max_game_size = $_REQUEST['max_game_size'];
@@ -304,8 +315,7 @@ function mutate_matching(&$parent_matching)
 
 	$rmtable_idx = roulette($R);
 	if (is_null($rmtable_idx)) {
-		// try a different mutation method
-		return mutate_matching_by_swapping($parent_matching);
+		return NULL; //unsuccessful mutation
 	}
 
 	$table = $assignments[$rmtable_idx];
