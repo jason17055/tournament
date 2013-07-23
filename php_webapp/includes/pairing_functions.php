@@ -11,6 +11,191 @@ function check_common_surname($a_name, $b_name)
 	return strtolower($a_surname) == strtolower($b_surname);
 }
 
+function load_matching($tournament_id, $current_session)
+{
+	global $database;
+
+$players = array();
+
+$sql = "SELECT id,name,status,
+	(SELECT COUNT(*) FROM contest c
+		WHERE tournament=p.tournament
+		AND session_num<".db_quote($current_session)."
+		AND status='completed'
+		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+		AND 2=(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id)
+		) AS count2p,
+	(SELECT COUNT(*) FROM contest c
+		WHERE tournament=p.tournament
+		AND session_num<".db_quote($current_session)."
+		AND status='completed'
+		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+		AND 3=(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id)
+		) AS count3p,
+	(SELECT COUNT(*) FROM contest c
+		WHERE tournament=p.tournament
+		AND session_num<".db_quote($current_session)."
+		AND status='completed'
+		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+		AND 4=(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id)
+		) AS count4p,
+	(SELECT COUNT(*) FROM contest c
+		WHERE tournament=p.tournament
+		AND session_num<".db_quote($current_session)."
+		AND status='completed'
+		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+		AND 5<=(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id)
+		) AS count5p
+	FROM person p
+	WHERE tournament=".db_quote($tournament_id);
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+
+?>
+<div class="driller_container">
+<h2 class="driller_heading">Player Registration Data</h2>
+<div class="driller_content">
+<table border="1">
+<caption>As of the start of this tournament session</caption>
+<tr>
+<th>Player</th>
+<th>Rating</th>
+<th>2p Games</th>
+<th>3p Games</th>
+<th>4p Games</th>
+<th>5p+ Games</th>
+</tr>
+<?php
+
+while ($row = mysqli_fetch_row($query))
+{
+	$pid = $row[0];
+	$p = array(
+		'name' => $row[1],
+		'status' => $row[2],
+		'count2p' => $row[3],
+		'count3p' => $row[4],
+		'count4p' => $row[5],
+		'count5p' => $row[6]
+		);
+	$p['ready'] = ($row[2] == 'ready');
+	$players[$pid] = $p;
+
+	?><tr>
+<td><?php h($p['name'])?></td>
+<td><?php h($p['rating'])?></td>
+<td><?php h($p['count2p'])?></td>
+<td><?php h($p['count3p'])?></td>
+<td><?php h($p['count4p'])?></td>
+<td><?php h($p['count5p'])?></td>
+</tr>
+<?php
+}
+
+?></table>
+</div><!--/.driller_content-->
+</div><!--/.driller_container-->
+
+<?php
+
+$weights = array();
+
+?>
+<div class="driller_container">
+<h2 class="driller_heading">Previous Player Encounters</h2>
+<div class="driller_content">
+<table border="1">
+<tr>
+<th>Pairing</th>
+<th>Played Before</th>
+<th>Same Home Town?</th>
+<th>Same Family?</th>
+</tr>
+<?php
+
+$sql = "SELECT p.id, q.id,
+	p.name, q.name,
+	p.home_location, q.home_location,
+	(SELECT COUNT(*) FROM contest c
+		WHERE c.tournament=p.tournament
+		AND c.session_num<".db_quote($current_session)."
+		AND c.status='completed'
+		AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+		AND q.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+		) AS nplays
+	FROM person p
+	CROSS JOIN person q ON q.tournament = p.tournament
+		AND q.id>p.id
+	WHERE p.tournament=".db_quote($tournament_id)."
+	AND p.status='ready'
+	AND q.status='ready'";
+$query = mysqli_query($database, $sql);
+while ($row = mysqli_fetch_row($query)) {
+	$key = "$row[0],$row[1]";
+	$p_name = $row[2];
+	$q_name = $row[3];
+	$p_home = $row[4];
+	$q_home = $row[5];
+	$nplays = $row[6];
+
+	$same_home = $row[4] == $row[5];
+	$same_family = $same_home && check_common_surname($p_name, $q_name);
+
+	$weights[$key] = array(
+		nplays => $nplays,
+		same_home => $same_home,
+		same_family => $same_family
+		);
+
+	?><tr><td><?php h("$p_name vs $q_name")?></td>
+<td align="center"><?php h($nplays)?></td>
+<td align="center"><?php h($same_home ? 'YES' : 'NO')?></td>
+<td align="center"><?php h($same_family ? 'YES' : 'NO')?></td>
+</tr>
+<?php
+}
+
+?></table>
+</div><!--/.driller_content-->
+</div><!--/.driller_container-->
+<?php
+
+$games = array();
+$sql = "SELECT id,round,board,
+		(SELECT GROUP_CONCAT(
+			player ORDER BY player SEPARATOR ','
+			)
+		FROM contest_participant
+		WHERE contest=c.id
+		) AS players
+	FROM contest c
+	WHERE tournament=".db_quote($tournament_id)."
+	AND session_num=".db_quote($current_session)."
+	AND status<>'proposed'";
+$query = mysqli_query($database, $sql);
+while ($row = mysqli_fetch_row($query))
+{
+	$round = $row[1];
+	$board = $row[2];
+	$m_players = explode(',',$row[3]);
+	$game = array(
+		'round' => $round,
+		'board' => $board,
+		'players' => $m_players,
+		'locked' => TRUE
+		);
+	$games[] = $game;
+}
+
+	$m = array(
+		'players' => &$players,
+		'history' => &$weights,
+		'assignments' => &$assignments
+		);
+	$m['fitness'] = sum_fitness($m);
+	return $m;
+}
+
 function generate_random_matching(&$games, &$players, &$weights)
 {
 	$players_list = array();
