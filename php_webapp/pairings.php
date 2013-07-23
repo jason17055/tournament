@@ -235,10 +235,11 @@ Max game size:
 </div>
 -->
 <div>
-<button type="submit" name="action:generate_pairings">GO</button>
-<button type="submit" name="action:mutate_matching">Mutate</button>
+<button type="submit" name="action:generate_pairings">Initialize</button>
+<button type="submit" name="action:mutate_matching">Mutate (One Step)</button>
+<button type="submit" name="action:optimize_matching">Optimize</button>
 <button type="submit" name="action:reset_matching">Reset</button>
-<button type="submit" name="action:cancel">Cancel</button>
+<button type="submit" name="action:cancel">Go Back</button>
 </div>
 </form>
 
@@ -320,6 +321,14 @@ save_matching($m);
 echo "(4)Number of games: ".count($m['assignments'])."<br>\n";
 
 } //endif action:generate_pairings
+
+if (isset($_REQUEST['action:optimize_matching'])) {
+
+	$m = load_matching($tournament_id, $current_session);
+	$m = optimize_matching($m);
+	save_matching($m);
+}
+
 
 //$m = mutate_matching($matching);
 //show_matching($m);

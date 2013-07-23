@@ -655,21 +655,19 @@ function optimize_matching(&$original_matching)
 		?></div></div>
 
 		<?php
-	$POOL_SIZE = 15;
-	$GENERATIONS = 40;
+	$INITIAL_GEN_SIZE = 15;
+	$POOL_SIZE = 20;
+	$GENERATIONS = 50;
 
 	$sum_fitness = 0;
 	$pool = array();
-	for ($i = 0; $i < $POOL_SIZE; $i++) {
-		?><div class="driller_container" style="display:none">
-		<h2 class="driller_heading">Random Matching <?php echo($i+1)?></h2>
-		<div class="driller_content"><?php
+	$pool[] = $original_matching;
+	$sum_fitness += $original_matching['fitness'];
+
+	for ($i = 1; $i < $INITIAL_GEN_SIZE; $i++) {
 		$m = initialize_matching($original_matching);
 		$sum_fitness += $m['fitness'];
 		$pool[] = $m;
-		show_matching($m);
-		?></div></div>
-		<?php
 	}
 
 	for ($i = 0; $i < $GENERATIONS; $i++) {
@@ -677,13 +675,18 @@ function optimize_matching(&$original_matching)
 		<h2 class="driller_heading">Mutation <?php echo($i+1)?></h2>
 		<div class="driller_content"><?php
 		// first, pick a random solution from pool
-		$r = rand(1, $POOL_SIZE)-1;
+		$r = rand(1, count($pool))-1;
 
 		// clone it with mutations
 		$m = mutate_matching($pool[$r]);
 		?></div></div><?php
 
 		if (!$m) { continue; }
+		if (count($pool) < $POOL_SIZE) {
+			// just add it to the pool
+			$pool[] = $m;
+			continue;
+		}
 
 		// substitute the new entry for the weakest in pool
 		$worst_i = -1;
