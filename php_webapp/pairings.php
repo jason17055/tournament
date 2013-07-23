@@ -28,6 +28,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		header("Location: $next_url");
 		exit();
 	}
+
+	if (isset($_REQUEST['action:add_seat'])) {
+		$contest_id = $_REQUEST['contest'];
+
+		$sql = "INSERT INTO contest_participant
+			(contest) VALUES (".db_quote($contest_id).")";
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		echo '{"status":"success"}';
+		exit();
+	}
 }
 
 $page_title = "$tournament_info[name] - Generate Pairings";
@@ -47,6 +59,9 @@ if (!isset($_REQUEST['max_game_size'])) {
 }
 
 ?>
+<div class="popup_menu" id="contest_popup_menu">
+<ul><li><a href="#" onclick="add_seat_clicked()">add seat</a></li><li><a href="#" onclick="remove_seat_clicked()">remove seat</a></li></ul>
+</div>
 <div class="pairings_container">
 <table class="pairings_grid">
 </table>
@@ -54,6 +69,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 <div class="caption">
 Round: <span class="round"></span>
 Table: <span class="table"></span>
+<button type="button" style="margin: -2pt" class="popup_menu_btn" data-for="contest_popup_menu">...</button>
 </div>
 <ul class="players_list">
 </ul>

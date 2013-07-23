@@ -59,7 +59,6 @@ while ($row=mysqli_fetch_row($query)) {
 	$sql = "SELECT IFNULL(seat,turn_order),player
 		FROM contest_participant cp
 		WHERE contest=".db_quote($c['id'])."
-		AND player IS NOT NULL
 		ORDER BY IFNULL(seat,turn_order)";
 	$query2 = mysqli_query($database, $sql)
 		or die("SQL error: ".db_error($database));
@@ -68,8 +67,10 @@ while ($row=mysqli_fetch_row($query)) {
 	while ($row2 = mysqli_fetch_row($query2)) {
 		$p = array(
 			'seat' => $row2[0],
-			'pid' => $row2[1]
 			);
+		if (!is_null($row2[1])) {
+			$p['pid'] = $row2[1];
+		}
 		$pp[] = $p;
 	}
 
