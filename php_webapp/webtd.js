@@ -527,12 +527,25 @@ function add_seat_clicked()
 function remove_seat_clicked()
 {
 	var el = popup_menu_trigger_btn;
-	while (!el.hasAttribute('data-webtd-contest') && el.parent) {
-		el = el.parent;
+	while (el && !el.hasAttribute('data-webtd-contest')) {
+		el = el.parentElement;
 	}
-	if (!el.hasAttribute('data-webtd-contest')) { return; }
+	if (!el) { return false; }
 
 	var contest_id = el.getAttribute('data-webtd-contest');
+	var onSuccess = function(data) { location.reload(); };
+
+	$.ajax({
+		url: 'pairings.php?tournament='+escape(webtd_tournament_id),
+		type: 'POST',
+		data: {
+			'action:remove_seat': '1',
+			'contest': contest_id
+			},
+		dataType: 'json',
+		error: pairings_designer_onAjaxError,
+		success: onSuccess
+		});
 	return false;
 }
 

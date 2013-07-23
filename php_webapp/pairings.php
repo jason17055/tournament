@@ -90,6 +90,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
+	if (isset($_REQUEST['action:remove_seat'])) {
+		$contest_id = $_REQUEST['contest'];
+
+		$sql = "SELECT id FROM contest_participant
+			WHERE contest=".db_quote($contest_id)."
+			ORDER BY CASE WHEN player IS NULL THEN 0 ELSE 1 END ASC,
+			turn_order DESC,
+			id DESC
+			LIMIT 1";
+		$query = mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$row = mysqli_fetch_row($query);
+
+		if ($row) {
+			$sql = "DELETE FROM contest_participant
+				WHERE id=".db_quote($row[0]);
+			mysqli_query($database, $sql)
+				or die("SQL error: ".db_error($database));
+		}
+
+		echo '{"status":"success"}';
+		exit();
+	}
+
 	if (isset($_REQUEST['action:add_table'])) {
 		$round = $_REQUEST['first_round'];
 
