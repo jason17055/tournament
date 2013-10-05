@@ -29,6 +29,7 @@ php_scripts = \
 	config-sample.php \
 	contest.php \
 	contest_participant.php \
+	game_definition.php \
 	import_person.php \
 	index.php \
 	list_roster.inc.php \
