@@ -5,6 +5,7 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
 
+$tournament_info = array();
 if (isset($_GET['id'])) {
 
 	$sql = "SELECT
@@ -30,6 +31,19 @@ else if (isset($_GET['tournament'])) {
 	is_director($tournament_id)
 		or die("Not authorized");
 
+	// find out whether this tournament is multi-game,
+	//   and whether any games have been defined for it yet
+	$sql = "SELECT multi_game,
+		(SELECT MIN(id) FROM game_definition g WHERE g.tournament=t.id) AS game_id
+		FROM tournament t
+		WHERE id=".db_quote($tournament_id);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	$row = mysqli_fetch_row($query)
+		or die("Not Found");
+
+	$tournament_info['multi_game'] = $row[0];
+	$tournament_info['game0'] = $row[1];
 }
 else {
 	die("Invalid request");
@@ -60,6 +74,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			or die(db_error($database));
 		$game_id = mysqli_insert_id($database);
 
+		if ($tournament_info['multi_game'] == 'N' && !$tournament_info['game0'])
+		{
+			// change all contests on record to be using this
+			// new game definition
+			$sql = "UPDATE contest
+				SET game=".db_quote($game_id)."
+				WHERE tournament=".db_quote($tournament_id)."
+				AND game IS NULL";
+			mysqli_query($database, $sql)
+				or die("SQL error: ".db_error($database));
+		}
+
 		header("Location: $next_url");
 		exit();
 	}
@@ -80,6 +106,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		header("Location: $next_url");
 		exit();
 	}
+	else if (isset($_REQUEST['action:delete_game_definition'])) {
+
+		is_director($tournament_id)
+			or die("Not authorized");
+
+		$sql = "UPDATE contest
+			SET game=NULL
+			WHERE tournament=".db_quote($tournament_id)."
+			AND game=".db_quote($_GET['id']);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		$sql = "DELETE FROM game_definition
+			WHERE id=".db_quote($_GET['id'])."
+			AND tournament=".db_quote($tournament_id);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		header("Location: $next_url");
+		exit();
+	}
 	else {
 		die("Invalid POST");
 	}
@@ -87,21 +134,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_GET['id']))
 {
-	// find out whether this tournament is multi-game,
-	//   and whether any games have been defined for it yet
-	$sql = "SELECT multi_game,
-		(SELECT MIN(id) FROM game_definition g WHERE g.tournament=t.id) AS game_id
-		FROM tournament t
-		WHERE id=".db_quote($tournament_id);
-	$query = mysqli_query($database, $sql)
-		or die("SQL error: ".db_error($database));
-	$row = mysqli_fetch_row($query)
-		or die("Not Found");
 
-	if ($row[0] == 'N' && $row[1]) {
+	if ($tournament_info['multi_game'] == 'N' && $tournament_info['game0']) {
 
 		// let user edit the existing game definition
-		$new_url = $_SERVER['REQUEST_URI'] . '&id=' . urlencode($row[1]);
+		$new_url = $_SERVER['REQUEST_URI'] . '&id=' . urlencode($tournament_info['game0']);
 		header("Location: $new_url");
 		exit();
 	}
