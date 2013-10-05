@@ -49,7 +49,8 @@ echo '"games":[';
 
 $sql = "SELECT c.id,c.status,c.scenario
 	FROM contest c
-	WHERE c.tournament=".db_quote($tournament_id)."
+	JOIN tournament t ON t.id=c.tournament
+	WHERE t.id=".db_quote($tournament_id)."
 	AND c.status IN ('completed','started')
 	AND (c.session_num IS NULL OR c.session_num=t.current_session)
 	ORDER BY c.id";
