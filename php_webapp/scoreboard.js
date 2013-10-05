@@ -110,15 +110,15 @@ for (var i = 0; i < players.length; i++)
 		{
 			var play = games[k];
 			var result = null;
-			if (play.player1 == pr.pid && play.player2 == pc.pid)
+			if (play['player.W'] == pr.pid && play['player.B'] == pc.pid)
 			{
 				result = play.in_progress ? 'P' :
-					play.winner == '1' ? 'W' : 'L';
+					play.winner == 'W' ? 'W' : 'L';
 			}
-			else if (play.player1 == pc.pid && play.player2 == pr.pid)
+			else if (play['player.W'] == pc.pid && play['player.B'] == pr.pid)
 			{
 				result = play.in_progress ? 'P' :
-					play.winner == '2' ? 'W' : 'L';
+					play.winner == 'B' ? 'W' : 'L';
 			}
 			else
 			{
