@@ -15,14 +15,14 @@ if (isset($_GET['id'])) {
 	$row = mysqli_fetch_row($query)
 		or die("Not Found");
 
+	$tournament_id = $row[0];
+	is_director($tournament_id)
+		or die("Not authorized");
+
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-		$tournament_id = $row[0];
 		$_REQUEST['name'] = $row[1];
 		$_REQUEST['seat_names'] = $row[2];
 	}
-
-	is_director($tournament_id)
-		or die("Not authorized");
 }
 else if (isset($_GET['tournament'])) {
 
@@ -45,8 +45,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	//not implemented
-	if (false) {
+	if (isset($_REQUEST['action:create_game_definition'])) {
+
+		is_director($tournament_id)
+			or die("Not authorized");
+
+		$sql = "INSERT INTO game_definition (tournament,name,seat_names)
+			VALUES (
+			".db_quote($tournament_id).",
+			".db_quote($_REQUEST['name']).",
+			".db_quote($_REQUEST['seat_names'])."
+			)";
+		mysqli_query($database, $sql)
+			or die(db_error($database));
+		$game_id = mysqli_insert_id($database);
+
+		header("Location: $next_url");
+		exit();
+	}
+	else if (isset($_REQUEST['action:update_game_definition'])) {
+
+		is_director($tournament_id)
+			or die("Not authorized");
+
+		$sql = "UPDATE game_definition
+			SET name=".db_quote($_REQUEST['name']).",
+			seat_names=".db_quote($_REQUEST['seat_names'])."
+			WHERE id=".db_quote($_GET['id'])."
+			AND tournament=".db_quote($tournament_id);
+		mysqli_query($database, $sql)
+			or die(db_error($database));
+		$game_id = mysqli_insert_id($database);
+
+		header("Location: $next_url");
+		exit();
 	}
 	else {
 		die("Invalid POST");
