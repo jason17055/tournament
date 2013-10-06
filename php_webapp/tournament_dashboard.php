@@ -21,10 +21,33 @@ begin_page($page_title);
 
 $can_edit_players = is_director($tournament_id);
 
+function make_popup_list($popup_id, $column_name)
+{
+	global $database;
+
 ?>
-	<div class="popup_menu" id="status_popup_menu">
-	<ul><li><a href="#">ready</a></li><li><a href="#">absent</a></li></ul>
+	<div class="popup_menu" id="<?php h($popup_id)?>">
+	<ul><?php
+		$sql = "SELECT type_data FROM column_type
+			WHERE name=".db_quote($column_name);
+		$query = mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$r1 = mysqli_fetch_row($query)
+			or die("Error: Type data for $column_name not found");
+		$tmp = preg_replace('/^enum:/', '', $r1[0]);
+		$tmpa = explode(',', $tmp);
+		foreach ($tmpa as $status_val) {
+			?><li><a href="#"><?php h($status_val)?></a></li>
+		<?php
+		}
+?></ul>
 	</div>
+<?php
+}
+
+make_popup_list('status_popup_menu', 'PERSON.STATUS');
+
+?>
 <table border="1">
 <caption>Players</caption>
 <tr>
@@ -151,24 +174,12 @@ $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 | <a href="<?php h($import_persons_url)?>">Import Players</a>
 | <a href="<?php h($pairings_url)?>">Generate Pairings</a>
 </p>
-<?php } ?>
+<?php }
 
-	<div class="popup_menu" id="contest_status_popup_menu">
-	<ul><?php
-		$sql = "SELECT type_data FROM column_type
-			WHERE name='PLAY.STATUS'";
-		$query = mysqli_query($database, $sql)
-			or die("SQL error: ".db_error($database));
-		$r1 = mysqli_fetch_row($query)
-			or die("Error: Type data for PLAY.STATUS not found");
-		$tmp = preg_replace('/^enum:/', '', $r1[0]);
-		$tmpa = explode(',', $tmp);
-		foreach ($tmpa as $status_val) {
-			?><li><a href="#"><?php h($status_val)?></a></li>
-		<?php
-		}
-?></ul>
-	</div>
+
+make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
+ ?>
+
 <table border="1">
 <caption>Games</caption>
 <tr>

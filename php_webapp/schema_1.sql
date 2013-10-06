@@ -19,4 +19,8 @@ UPDATE contest c SET game=(SELECT id FROM game_definition g WHERE g.name=c.game_
 	WHERE game_name IS NOT NULL;
 ALTER TABLE contest DROP COLUMN game_name;
 
+INSERT INTO column_type (name, type_data) VALUES (
+	'PERSON.STATUS', 'enum:prereg,ready,absent'
+	);
+
 UPDATE master SET version=2;
