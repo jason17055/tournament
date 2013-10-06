@@ -153,6 +153,22 @@ $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 </p>
 <?php } ?>
 
+	<div class="popup_menu" id="contest_status_popup_menu">
+	<ul><?php
+		$sql = "SELECT type_data FROM column_type
+			WHERE name='PLAY.STATUS'";
+		$query = mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$r1 = mysqli_fetch_row($query)
+			or die("Error: Type data for PLAY.STATUS not found");
+		$tmp = preg_replace('/^enum:/', '', $r1[0]);
+		$tmpa = explode(',', $tmp);
+		foreach ($tmpa as $status_val) {
+			?><li><a href="#"><?php h($status_val)?></a></li>
+		<?php
+		}
+?></ul>
+	</div>
 <table border="1">
 <caption>Games</caption>
 <tr>
@@ -221,7 +237,9 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
-<td class="status_col"><?php h($status)?></td>
+<td class="status_col"><?php h($status)?>
+<button type="button" class="popup_menu_btn" data-for="contest_status_popup_menu">...</button>
+</td>
 <td class="participants_col"><?php h($participants)?></td>
 <td class="winner_col"><?php h($winner)?></td>
 </tr>
