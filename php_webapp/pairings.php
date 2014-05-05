@@ -10,7 +10,9 @@ $sql = "SELECT name,current_session,
 	(SELECT MAX(round) FROM contest
 		WHERE tournament=t.id
 		AND session_num=t.current_session
-		AND status <> 'proposed')
+		AND status <> 'proposed') AS last_round,
+	multi_game,
+	(SELECT MIN(id) FROM game_definition g WHERE g.tournament=t.id) AS default_game
 	FROM tournament t WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
@@ -19,33 +21,67 @@ $tournament_info = array(
 	'id' => $tournament_id,
 	'name' => $row[0],
 	'current_session' => $row[1],
-	'last_round' => ($row[2] ?: 0)
+	'last_round' => ($row[2] ?: 0),
+	'multi_game' => $row[3]=='Y',
+	'default_game' => $row[4]
 	);
+
+if ($tournament_info['multi_game']) {
+	die("Oops, this is a multi-game tournament and there is no way to pick which game to do pairings for.");
+}
+
+$game_definition_id = $tournament_info['default_game'];
+$sql = "SELECT seat_names FROM game_definition
+	WHERE id=".db_quote($game_definition_id)."
+	AND tournament=".db_quote($tournament_id);
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+$row = mysqli_fetch_row($query);
+$game_definition = array( 'id' => $game_definition_id);
+if ($row) {
+	$game_definition['seat_names'] = $row[0];
+}
 
 function add_table_to_round($round, $new_table_id)
 {
 	global $database;
 	global $tournament_id;
+	global $game_definition;
 	global $current_session;
 
-	$sql = "INSERT INTO contest (tournament,session_num,round,board,status)
+	$sql = "INSERT INTO contest (tournament,session_num,round,board,game,status)
 		VALUES (
 		".db_quote($tournament_id).",
 		".db_quote($current_session).",
 		".db_quote($round).",
 		".db_quote($new_table_id).",
+		".db_quote($game_definition['id']).",
 		'proposed')";
 	mysqli_query($database, $sql)
 		or die("SQL error 2: ".db_error($database));
 
 	$contest_id = mysqli_insert_id($database);
 
-	$sql = "INSERT INTO contest_participant (contest,turn_order)
-		VALUES (".db_quote($contest_id).",1),
-		       (".db_quote($contest_id).",2)
-		";
-	mysqli_query($database, $sql)
-		or die("SQL error 3: ".db_error($database));
+	if ($game_definition['seat_names']) {
+		foreach (explode(',', $game_definition['seat_names']) as $seat) {
+
+			$sql = "INSERT INTO contest_participant (contest,seat)
+				VALUES (
+				".db_quote($contest_id).",
+				".db_quote($seat)."
+				)";
+			mysqli_query($database, $sql)
+				or die("SQL error 3: ".db_error($database));
+		}
+	}
+	else {
+		$sql = "INSERT INTO contest_participant (contest,turn_order)
+			VALUES (".db_quote($contest_id).",1),
+		       	(".db_quote($contest_id).",2)
+			";
+		mysqli_query($database, $sql)
+			or die("SQL error 4: ".db_error($database));
+	}
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
