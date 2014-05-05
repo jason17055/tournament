@@ -68,7 +68,7 @@ var players = [];
 var games = [];
 var S = {
 	start: get_url_param('start'),
-	ROWS: 7,
+	ROWS: 8,
 	COLS: 12,
 	DELAY: 30 //seconds
 	};
