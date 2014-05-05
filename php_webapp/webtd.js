@@ -369,7 +369,7 @@ function load_pairings_into(pairings_data, container_el)
 		return $('.pairings_grid tr[data-webtd-table='+table+'] td[data-webtd-round='+round+']', container_el);
 	}
 
-	var SEAT_BOX_HTML = '<li class="seat_box" draggable="draggable"><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>';
+	var SEAT_BOX_HTML = '<li class="seat_box" draggable="draggable"><img src="" class="seat_icon" style="display:none"><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>';
 	for (var i in assignments) {
 		var a = assignments[i];
 		var $a = $('.match_container.template',container_el).clone();
@@ -388,7 +388,16 @@ function load_pairings_into(pairings_data, container_el)
 			var p = players[pid];
 			var $p = $(SEAT_BOX_HTML);
 			$p.attr('data-webtd-person', pid);
-			$p.attr('data-webtd-seat', a.players[j].seat);
+
+			var seat_name = a.players[j].seat;
+			$p.attr('data-webtd-seat', seat_name);
+			if (seat_name && !seat_name.match(/^\d+/)) {
+				$('img.seat_icon', $p).
+				attr('src', 'images/seat_'+seat_name+'_icon.png').
+				attr('alt', seat_name).
+				attr('title', seat_name).
+				show();
+			}
 			if (pid) {
 				$('.person_name',$p).text(p != null ? p.name : ("?"+pid));
 			} else {
