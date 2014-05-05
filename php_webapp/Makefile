@@ -20,7 +20,8 @@ data_files = \
 	images/win_icon.png \
 	images/lose_icon.png \
 	images/game_in_progress_icon.png \
-	images/person_icon.png
+	images/person_icon.png \
+	images/contest_proposed_icon.png
 
 php_scripts = \
 	assignments-data.js.php \

@@ -376,6 +376,11 @@ function load_pairings_into(pairings_data, container_el)
 		$a.attr('data-webtd-contest', a.id);
 		setup_contest_box_handlers($a.get(0));
 		$a.removeClass('template');
+		if (a.status) {
+			$('.contest_status_icon',$a).attr('src', 'images/contest_'+a.status+'_icon.png');
+			$('.contest_status_icon',$a).attr('alt', a.status);
+			$('.contest_status_icon',$a).attr('title', a.status);
+		}
 		$('.round',$a).text(a.round);
 		$('.table',$a).text(a.table);
 		for (var j in a.players) {

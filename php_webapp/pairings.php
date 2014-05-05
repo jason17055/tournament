@@ -212,6 +212,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 </table>
 <div class="match_container template">
 <div class="caption">
+<img src="" class="contest_status_icon">
 Round: <span class="round"></span>
 <span class="lbl_Table">Table</span>: <span class="table"></span>
 <button type="button" style="margin: -2pt" class="popup_menu_btn" data-for="contest_popup_menu">...</button>
