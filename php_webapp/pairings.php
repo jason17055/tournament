@@ -203,7 +203,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 <li><a href="#" onclick="edit_contest_clicked()">edit</a></li>
 <li><a href="#" onclick="add_seat_clicked()">add seat</a></li>
 <li><a href="#" onclick="remove_seat_clicked()">remove seat</a></li>
-<li><a href="#" onclick="add_table_clicked()">add table</a></li>
+<li><a href="#" onclick="add_table_clicked()">add <span class="lbl_table">table</span></a></li>
 </ul>
 </div>
 <div class="pairings_container">
@@ -213,7 +213,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 <div class="match_container template">
 <div class="caption">
 Round: <span class="round"></span>
-Table: <span class="table"></span>
+<span class="lbl_Table">Table</span>: <span class="table"></span>
 <button type="button" style="margin: -2pt" class="popup_menu_btn" data-for="contest_popup_menu">...</button>
 </div>
 <ul class="players_list">
@@ -254,7 +254,7 @@ usort($matching['assignments'], 'order_by_round_and_board');
 <table border="1" style="float:left; margin-right: 2em">
 <caption>Fitness : <?php h(sprintf('%.4f',$matching['fitness']))?></caption>
 <tr>
-<th>Table</th>
+<th><span class="lbl_Table">Table</span></th>
 <th>Players</th>
 </tr>
 <?php

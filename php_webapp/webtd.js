@@ -435,9 +435,20 @@ function load_pairings_into(pairings_data, container_el)
 	}
 }
 
+function handle_vocabulary(vocabulary)
+{
+	if (vocabulary.table == 'court') {
+		$('.lbl_table').text('court');
+		$('.lbl_Table').text('Court');
+	}
+}
+
 $(function() {
 	function onError(jqxhr, textStatus, errorThrown) { }
 	function onSuccess(data) {
+		if (data.vocabulary) {
+			handle_vocabulary(data.vocabulary);
+		}
 		$('.pairings_container').each(function(idx,el) {
 			load_pairings_into(data, el);
 		});

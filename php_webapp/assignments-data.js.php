@@ -4,7 +4,7 @@ require_once('config.php');
 require_once('includes/db.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT 1 FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT vocab_table FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 $row = mysqli_fetch_row($query);
@@ -12,6 +12,9 @@ if (!$row) {
 	header("HTTP/1.0 404 Not Found");
 	exit();
 }
+$tournament_info = array(
+	'vocab_table' => $row[0]
+	);
 
 header("Content-Type: text/json");
 
@@ -24,7 +27,13 @@ $sql = "SELECT id,name,status
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
-echo '{"players":['."\n";
+echo "{\n";
+echo '"vocabulary":';
+echo json_encode(array(
+	'table' => $tournament_info['vocab_table']
+	));
+echo ",\n";
+echo '"players":['."\n";
 $count = 0;
 while ($row = mysqli_fetch_row($query)) {
 	if ($count++) { echo ",\n"; }
