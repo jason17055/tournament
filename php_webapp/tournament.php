@@ -9,7 +9,8 @@ if (isset($_GET['id'])) {
 	$tournament_id = $_GET['id'];
 
 	$sql = "SELECT
-		name,location,start_time,multi_game,multi_session,multi_round,current_session
+		name,location,start_time,multi_game,multi_session,multi_round,multi_table,current_session,
+				vocab_table
 		FROM tournament
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
@@ -23,7 +24,9 @@ if (isset($_GET['id'])) {
 		$_REQUEST['multi_game'] = ($row[3]=='Y')?'1':null;
 		$_REQUEST['multi_session'] = ($row[4]=='Y')?'1':null;
 		$_REQUEST['multi_round'] = ($row[5]=='Y')?'1':null;
-		$_REQUEST['current_session'] = $row[6];
+		$_REQUEST['multi_table'] = ($row[6]=='Y')?'1':null;
+		$_REQUEST['current_session'] = $row[7];
+		$_REQUEST['vocab_table'] = $row[8];
 	}
 
 	is_director($tournament_id)
@@ -47,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_tournament'])) {
 		$sql = "INSERT INTO tournament (name,location,start_time,
-			multi_game,multi_session,multi_round,current_session)
+			multi_game,multi_session,multi_round,multi_table,vocab_table,current_session)
 			VALUES (
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['location']).",
@@ -55,6 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote(isset($_REQUEST['multi_game'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['multi_session'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['multi_round'])?'Y':'N').",
+			".db_quote(isset($_REQUEST['multi_table'])?'Y':'N').",
+			".db_quote($_REQUEST['vocab_table']).",
 			".db_quote($_REQUEST['current_session'])."
 			)";
 		mysqli_query($database, $sql)
@@ -74,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		multi_game=".db_quote($_REQUEST['multi_game']?'Y':'N').",
 		multi_session=".db_quote($_REQUEST['multi_session']?'Y':'N').",
 		multi_round=".db_quote($_REQUEST['multi_round']?'Y':'N').",
+		multi_table=".db_quote($_REQUEST['multi_table']?'Y':'N').",
+		vocab_table=".db_quote($_REQUEST['vocab_table']).",
 		current_session=".db_quote($_REQUEST['current_session'])."
 		WHERE id=".db_quote($tournament_id);
 		mysqli_query($database, $sql)
@@ -95,6 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_GET['id']))
 	$_REQUEST['location'] = '';
 	$_REQUEST['start_time'] = '';
 	$_REQUEST['multi_round'] = 1;
+	$_REQUEST['multi_table'] = 1;
+	$_REQUEST['vocab_table'] = 'table';
 	$_REQUEST['current_session'] = NULL;
 }
 
@@ -121,6 +130,19 @@ begin_page(isset($_GET['id']) ? "Edit Tournament" : "New Tournament");
 <div><label><input type="checkbox" name="multi_game"<?php echo(isset($_REQUEST['multi_game'])?' checked="checked"':'')?>>Multi Game Tournament</label></div>
 <div><label><input type="checkbox" name="multi_session"<?php echo(isset($_REQUEST['multi_session'])?' checked="checked"':'')?>>Multiple Sessions</label></div>
 <div><label><input type="checkbox" name="multi_round"<?php echo(isset($_REQUEST['multi_round'])?' checked="checked"':'')?>>Multiple Rounds</label></div>
+<div><label><input type="checkbox" name="multi_table"<?php echo(isset($_REQUEST['multi_table'])?' checked="checked"':'')?>>Multiple Tables</label>
+(called <?php
+	select_widget(array(
+		'name' => 'vocab_table',
+		'value' => $_REQUEST['vocab_table'],
+		'options' => array(
+			'table' => 'tables',
+			'court' => 'courts',
+			'field' => 'fields'
+			)
+		));
+		?>)
+</div>
 </td>
 </tr>
 <tr>
