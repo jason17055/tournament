@@ -1,3 +1,7 @@
+aga person import:
+ store each person's AGA membership expiration
+ indicate players whose membership is expired
+
 tournament:
  when unchecking 'multi_session', set all session_num values to NULL
 
