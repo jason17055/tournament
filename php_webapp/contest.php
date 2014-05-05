@@ -182,9 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		if ($tournament_info['multi_session']=='Y') {
 		$updates[] = "session_num=".db_quote($_REQUEST['session_num']);
 		}
-		if ($tournament_info['multi_game']=='Y') {
 		$updates[] = "game=".db_quote($_REQUEST['game']);
-		}
 		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		if ($tournament_info['multi_round']=='Y') {
@@ -263,12 +261,25 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 <label>Time: <input type="time" name="started_time" value="<?php h($_REQUEST['started_time'])?>"></label>
 </td>
 </tr>
-<?php if ($tournament_info['multi_game']=='Y'){?>
 <tr>
-<td><label for="game_entry">Game:</label></td>
-<td><input type="text" id="game_entry" name="game" value="<?php h($_REQUEST['game'])?>"></td>
+<td><label for="game_cb">Game:</label></td>
+<td><select id="game_cb" name="game">
+<option value=""<?php echo(!$_REQUEST['game']?' selected="selected"':'')?>>--unspecified--</option>
+<?php
+$sql = "SELECT id,name FROM game_definition g WHERE g.tournament=".db_quote($tournament_id)."
+	ORDER BY name";
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+while ($row = mysqli_fetch_row($query)) {
+	$game_id = $row[0];
+	$game_name = $row[1];
+	?><option value="<?php h($game_id)?>"<?php echo($_REQUEST['game']==$game_id?' selected="selected"':'')?>><?php h($game_name)?></option>
+<?php
+}
+?>
+</select>
+</td>
 </tr>
-<?php }//endif multi_game tournament?>
 <tr>
 <td><label for="scenario_entry">Scenario:</label></td>
 <td><input type="text" id="scenario_entry" name="scenario" value="<?php h($_REQUEST['scenario'])?>"></td>
@@ -317,7 +328,7 @@ if (isset($_GET['id'])) {
 		cp.status
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
-		JOIN person p ON p.id=cp.player
+		LEFT JOIN person p ON p.id=cp.player
 		LEFT JOIN player_rating r ON r.id=p.id
 			AND r.session_num=c.session_num
 		WHERE contest=".db_quote($_GET['id'])."
