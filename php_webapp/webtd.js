@@ -293,19 +293,37 @@ function load_pairings_into(pairings_data, container_el)
 	function setup_contest_box_handlers(contest_box_el)
 	{
 		var contest_id = contest_box_el.getAttribute('data-webtd-contest');
-		function onDragEnter(evt) {
-			this.classList.add('over');
-		}
-		function onDragOver(evt) {
-			evt.preventDefault();
-			evt.stopPropagation();
+		function isDropAllowed(evt) {
 			if (evt.dataTransfer.types.contains('application/webtd+person')) {
 				evt.dataTransfer.dropEffect = 'move';
+				return true;
 			}
 			else {
 				evt.dataTransfer.dropEffect = 'none';
+				return false;
 			}
-			return false;
+		};
+		function onDragEnter(evt) {
+			if (isDropAllowed(evt)) {
+				evt.preventDefault();
+				evt.stopPropagation();
+
+				this.classList.add('over');
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+		function onDragOver(evt) {
+			if (isDropAllowed(evt)) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				return false;
+			}
+			else {
+				return true;
+			}
 		}
 		function onDragLeave(evt) {
 			this.classList.remove('over');
