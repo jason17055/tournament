@@ -592,6 +592,39 @@ function add_seat_clicked()
 	return false;
 }
 
+function vacate_seat_clicked()
+{
+	var person_id, seat_id;
+	var el = popup_menu_trigger_btn;
+	while (el && !el.hasAttribute('data-webtd-contest')) {
+		if (el.hasAttribute('data-webtd-person')) {
+			person_id = el.getAttribute('data-webtd-person');
+		}
+		if (el.hasAttribute('data-webtd-seat')) {
+			seat_id = el.getAttribute('data-webtd-seat');
+		}
+		el = el.parentElement;
+	}
+	if (!el) { return false; }
+
+	var contest_id = el.getAttribute('data-webtd-contest');
+	var onSuccess = function(data) { location.reload(); }
+
+	$.ajax({
+		url: 'pairings.php?tournament='+escape(webtd_tournament_id),
+		type: 'POST',
+		data: {
+			'action:vacate_seat': '1',
+			'contest': contest_id,
+			'seat': seat_id
+			},
+		dataType: 'json',
+		error: pairings_designer_onAjaxError,
+		success: onSuccess
+		});
+	return false;
+}
+
 function remove_seat_clicked()
 {
 	var el = popup_menu_trigger_btn;

@@ -169,6 +169,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
+	if (isset($_REQUEST['action:vacate_seat'])) {
+		$contest_id = $_REQUEST['contest'];
+		$seat_id = $_REQUEST['seat'];
+
+		$sql = "UPDATE contest_participant
+			SET player=NULL
+			WHERE contest=".db_quote($contest_id)."
+			AND seat=".db_quote($seat_id);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		echo '{"status":"success"}';
+		exit();
+	}
+
 	if (isset($_REQUEST['action:add_table'])) {
 		$round = $_REQUEST['first_round'];
 
