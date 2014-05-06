@@ -306,14 +306,16 @@ function load_pairings_into(pairings_data, container_el)
 		function onDrop(evt) {
 			evt.stopPropagation();
 
-			var data = evt.dataTransfer.getData('application/webtd+person');
+			var data;
 			var dataType = null;
-			if (data) {
+			if (data = evt.dataTransfer.getData('application/webtd+person')) {
 				dataType = 'person';
 			}
-			else {
-				data = evt.dataTransfer.getData('application/webtd+seat');
+			else if (data = evt.dataTransfer.getData('application/webtd+seat')) {
 				dataType = 'seat';
+			}
+			else {
+				dataType = 'unknown';
 			}
 
 			if (dataType == 'person') {
@@ -321,6 +323,7 @@ function load_pairings_into(pairings_data, container_el)
 			}
 			else {
 				alert('got '+dataType+' '+data);
+				return;
 			}
 		}
 		contest_box_el.addEventListener('dragenter', onDragEnter);
@@ -335,18 +338,20 @@ function load_pairings_into(pairings_data, container_el)
 
 	function setup_seat_box_handlers($p)
 	{
+		var el = $p.get(0);
+
 		function handleDragStart(evt) {
 			this.style.opacity = '0.4';
 			evt.dataTransfer.effectAllowed = 'move';
 
-			if (this.getAttribute('data-webtd-person')) {
-				evt.dataTransfer.setData('application/webtd+person', this.getAttribute('data-webtd-person'));
+			if (el.getAttribute('data-webtd-person')) {
+				evt.dataTransfer.setData('application/webtd+person', el.getAttribute('data-webtd-person'));
 			}
 			else {
-				evt.dataTransfer.setData('application/webtd+seat', this.getAttribute('data-webtd-seat'));
+				evt.dataTransfer.setData('application/webtd+seat', el.getAttribute('data-webtd-seat'));
 			}
 		}
-		$p.get(0).addEventListener('dragstart', handleDragStart, false);
+		el.addEventListener('dragstart', handleDragStart, false);
 	}
 
 	for (var i = 0; i < tables_sorted.length; i++) {
