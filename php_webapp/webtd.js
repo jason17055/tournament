@@ -382,6 +382,10 @@ function load_pairings_into(pairings_data, container_el)
 			}
 		}
 		el.addEventListener('dragstart', handleDragStart, false);
+
+		$('.popup_menu_btn', el).each(function(idx,el1) {
+			connect_popup_menu_btn(el1);
+			});
 	}
 
 	for (var i = 0; i < tables_sorted.length; i++) {

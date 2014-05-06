@@ -242,6 +242,11 @@ if (!isset($_REQUEST['max_game_size'])) {
 <li><a href="#" onclick="add_table_clicked()">add <span class="lbl_table">table</span></a></li>
 </ul>
 </div>
+<div class="popup_menu" id="seat_popup_menu">
+<ul>
+<li><a href="#" onclick="vacate_seat_clicked()">remove</a></li>
+</ul>
+</div>
 <div class="pairings_container">
 <table class="pairings_grid">
 <tr class="sitout_row"></tr>
@@ -250,6 +255,7 @@ if (!isset($_REQUEST['max_game_size'])) {
 <img src="" class="seat_icon" style="display:none">
 <img src="images/person_icon.png" class="person_icon" width="18" height="18">
 <span class="person_name"></span>
+<button type="button" style="margin: -2pt" class="popup_menu_btn" data-for="seat_popup_menu">...</button>
 </li>
 <div class="match_container template">
 <div class="caption">
