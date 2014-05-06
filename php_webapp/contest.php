@@ -7,7 +7,7 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
-	$sql = "SELECT multi_game,multi_session,multi_round,current_session
+	$sql = "SELECT multi_game,multi_session,multi_round,current_session,vocab_table
 		FROM tournament
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
@@ -17,7 +17,8 @@ if (isset($_GET['tournament'])) {
 		'multi_game' => $row[0],
 		'multi_session' => $row[1],
 		'multi_round' => $row[2],
-		'current_session' => $row[3]
+		'current_session' => $row[3],
+		'vocab_table' => $row[4]
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -36,7 +37,7 @@ else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,multi_game,multi_session,multi_round,
 		session_num,round,board,
 		game,scenario,status,
-		started,finished,notes
+		started,finished,notes,vocab_table
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
@@ -47,7 +48,8 @@ else if (isset($_GET['id'])) {
 	$tournament_info = array(
 		'multi_game' => $row[1],
 		'multi_session' => $row[2],
-		'multi_round' => $row[3]
+		'multi_round' => $row[3],
+		'vocab_table' => $row[13]
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -244,7 +246,9 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 </tr>
 <?php }//endif multi_round tournament?>
 <tr>
-<td><label for="board_entry">Board/Table No.:</label></td>
+<td><label for="board_entry"><?php echo(
+	$tournament_info['vocab_table'] == 'court' ? 'Court' :
+	'Table')?> No.:</label></td>
 <td><input type="text" id="board_entry" name="board" value="<?php h($_REQUEST['board'])?>"></td>
 </tr>
 <tr>
