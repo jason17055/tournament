@@ -278,6 +278,10 @@ Max game size:
 <button type="submit" name="action:reset_matching">Reset</button>
 <button type="submit" name="action:cancel">Go Back</button>
 </div>
+<div>
+<a href="<?php h("assignments-data.js.php?tournament=".urlencode($tournament_id))?>">JSON data (debug)</a>
+</div>
+
 </form>
 
 <?php
