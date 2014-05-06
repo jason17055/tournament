@@ -298,12 +298,20 @@ function load_pairings_into(pairings_data, container_el)
 		}
 		function onDragOver(evt) {
 			evt.preventDefault();
-			evt.dataTransfer.dropEffect = 'move';
+			evt.stopPropagation();
+			if (evt.dataTransfer.types.contains('application/webtd+person')) {
+				evt.dataTransfer.dropEffect = 'move';
+			}
+			else {
+				evt.dataTransfer.dropEffect = 'none';
+			}
+			return false;
 		}
 		function onDragLeave(evt) {
 			this.classList.remove('over');
 		}
 		function onDrop(evt) {
+			evt.preventDefault();
 			evt.stopPropagation();
 
 			var data;
