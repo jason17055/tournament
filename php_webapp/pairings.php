@@ -220,12 +220,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		// TODO-unassign from any other contest that is during same
 		// round 
 
-		$sql = "INSERT INTO contest_participant
-			(contest,player) VALUES (
-			".db_quote($contest_id).",
-			".db_quote($person_id).")";
-		mysqli_query($database, $sql)
+		// look for an empty seat in the target contest
+		$sql = "SELECT id FROM contest_participant
+			WHERE contest=".db_quote($contest_id)."
+			AND player IS NULL
+			ORDER BY seat ASC, turn_order ASC, id ASC
+			LIMIT 1";
+		$query = mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
+		$row = mysqli_fetch_row($query);
+		if ($row) {
+
+			// put the person in the empty seat we found
+			$cpid = $row[0];
+			$sql = "UPDATE contest_participant
+				SET player=".db_quote($person_id)."
+				WHERE id=".db_quote($cpid);
+			mysqli_query($database, $sql);
+		}
+		else {
+
+			$sql = "INSERT INTO contest_participant
+				(contest,player) VALUES (
+				".db_quote($contest_id).",
+				".db_quote($person_id).")";
+			mysqli_query($database, $sql)
+				or die("SQL error: ".db_error($database));
+		}
 
 		echo '{"status":"success"}';
 		exit();
