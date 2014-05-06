@@ -294,7 +294,7 @@ function load_pairings_into(pairings_data, container_el)
 	{
 		var contest_id = contest_box_el.getAttribute('data-webtd-contest');
 		function isDropAllowed(evt) {
-			if (evt.dataTransfer.types.contains('application/webtd+person')) {
+			if (evt.dataTransfer.types.indexOf('application/webtd+person')!=-1) {
 				evt.dataTransfer.dropEffect = 'move';
 				return true;
 			}
@@ -367,14 +367,18 @@ function load_pairings_into(pairings_data, container_el)
 		var el = $p.get(0);
 
 		function handleDragStart(evt) {
-			this.style.opacity = '0.4';
+			el.style.opacity = '0.4';
 			evt.dataTransfer.effectAllowed = 'move';
 
-			if (el.getAttribute('data-webtd-person')) {
-				evt.dataTransfer.setData('application/webtd+person', el.getAttribute('data-webtd-person'));
+			var tmp;
+			if (tmp = el.getAttribute('data-webtd-person')) {
+				evt.dataTransfer.setData('application/webtd+person', tmp);
+			}
+			else if (tmp = el.getAttribute('data-webtd-seat')) {
+				evt.dataTransfer.setData('application/webtd+seat', tmp);
 			}
 			else {
-				evt.dataTransfer.setData('application/webtd+seat', el.getAttribute('data-webtd-seat'));
+				evt.dataTransfer.effectAllowed = 'none';
 			}
 		}
 		el.addEventListener('dragstart', handleDragStart, false);
@@ -400,7 +404,7 @@ function load_pairings_into(pairings_data, container_el)
 		return $('.pairings_grid tr[data-webtd-table='+table+'] td[data-webtd-round='+round+']', container_el);
 	}
 
-	var SEAT_BOX_HTML = '<li class="seat_box" draggable="draggable"><img src="" class="seat_icon" style="display:none"><img src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>';
+	var SEAT_BOX_HTML = '<li class="seat_box" draggable="draggable"><img src="" class="seat_icon" style="display:none"><img class="person_icon" src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>';
 	for (var i in assignments) {
 		var a = assignments[i];
 		var $a = $('.match_container.template',container_el).clone();
@@ -433,6 +437,7 @@ function load_pairings_into(pairings_data, container_el)
 				$('.person_name',$p).text(p != null ? p.name : ("?"+pid));
 			} else {
 				$('.person_name',$p).text('(empty)');
+				$('.person_icon',$p).hide();
 			}
 			$('.players_list',$a).append($p);
 
@@ -469,6 +474,8 @@ function load_pairings_into(pairings_data, container_el)
 				$('.person_name',$p).text(p.name);
 				$('.players_list',$td).append($p);
 				any_found = true;
+
+				setup_seat_box_handlers($p);
 			}
 		}
 
