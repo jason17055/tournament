@@ -426,6 +426,7 @@ function load_pairings_into(pairings_data, container_el)
 			var p = players[pid];
 			var $p = $('#seat_box_template').clone();
 			$p.removeClass('template');
+			$p.removeAttr('id');
 			$p.attr('data-webtd-person', pid);
 
 			var seat_name = a.players[j].seat;
@@ -442,6 +443,7 @@ function load_pairings_into(pairings_data, container_el)
 			} else {
 				$('.person_name',$p).text('(empty)');
 				$('.person_icon',$p).hide();
+				$('.popup_menu_btn',$p).hide();
 			}
 			$('.players_list',$a).append($p);
 
@@ -475,9 +477,11 @@ function load_pairings_into(pairings_data, container_el)
 			if (p.status == 'ready' && !busy[pid]) {
 				var $p = $('#seat_box_template').clone();
 				$p.removeClass('template');
+				$p.removeAttr('id');
 				$p.attr('data-webtd-person', pid);
 				$('.person_name',$p).text(p.name);
 				$('.players_list',$td).append($p);
+				$('.popup_menu_btn',$p).hide();
 				any_found = true;
 
 				setup_seat_box_handlers($p);
