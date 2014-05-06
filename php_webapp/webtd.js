@@ -404,7 +404,6 @@ function load_pairings_into(pairings_data, container_el)
 		return $('.pairings_grid tr[data-webtd-table='+table+'] td[data-webtd-round='+round+']', container_el);
 	}
 
-	var SEAT_BOX_HTML = '<li class="seat_box" draggable="draggable"><img src="" class="seat_icon" style="display:none"><img class="person_icon" src="images/person_icon.png" width="18" height="18"><span class="person_name"></span></li>';
 	for (var i in assignments) {
 		var a = assignments[i];
 		var $a = $('.match_container.template',container_el).clone();
@@ -421,7 +420,8 @@ function load_pairings_into(pairings_data, container_el)
 		for (var j in a.players) {
 			var pid = a.players[j].pid;
 			var p = players[pid];
-			var $p = $(SEAT_BOX_HTML);
+			var $p = $('#seat_box_template').clone();
+			$p.removeClass('template');
 			$p.attr('data-webtd-person', pid);
 
 			var seat_name = a.players[j].seat;
@@ -469,7 +469,8 @@ function load_pairings_into(pairings_data, container_el)
 		for (var pid in players) {
 			var p = players[pid];
 			if (p.status == 'ready' && !busy[pid]) {
-				var $p = $(SEAT_BOX_HTML);
+				var $p = $('#seat_box_template').clone();
+				$p.removeClass('template');
 				$p.attr('data-webtd-person', pid);
 				$('.person_name',$p).text(p.name);
 				$('.players_list',$td).append($p);

@@ -246,6 +246,11 @@ if (!isset($_REQUEST['max_game_size'])) {
 <table class="pairings_grid">
 <tr class="sitout_row"></tr>
 </table>
+<li id="seat_box_template" class="seat_box template" draggable="draggable">
+<img src="" class="seat_icon" style="display:none">
+<img src="images/person_icon.png" class="person_icon" width="18" height="18">
+<span class="person_name"></span>
+</li>
 <div class="match_container template">
 <div class="caption">
 <img src="" class="contest_status_icon">
