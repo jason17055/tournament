@@ -34,10 +34,8 @@ $(function() {
 	});
 
 var nextUniqueRowId = 1;
-function on_add_participant_clicked(evt)
+function add_participant_row()
 {
-	evt.preventDefault();
-
 	var name_prefix = 'participant__'+(nextUniqueRowId++);
 
 	var $r = $('#new_participant_row').clone();
@@ -63,6 +61,14 @@ function on_add_participant_clicked(evt)
 		$r.remove();
 		});
 
+	return $r;
+}
+
+function on_add_participant_clicked(evt)
+{
+	evt.preventDefault();
+
+	add_participant_row();
 	return false;
 }
 
@@ -672,3 +678,49 @@ function move_person_to(person_id, contest_id)
 		});
 	return false;
 }
+
+function init_participants_table()
+{
+	var cb_el = document.getElementById('game_cb');
+	if (cb_el) {
+		var game_id = cb_el.value;
+		return init_participants_table_for_game(game_id);
+	}
+	else {
+		// don't know what game is selected
+	}
+}
+
+function init_participants_table_for_game(game_id)
+{
+	var game_def = game_definitions[game_id];
+	if (!game_def) {
+		return;
+	}
+
+	if (game_def.seat_names) {
+		$('#add_participant_link').hide();
+
+		// add seats if any are missing
+		var seen = {};
+		$('#participants_table tr[data-rowid]').each(function(idx,el) {
+			var seat_name = $('td.seat_col input',el).attr('value');
+			seen[seat_name] = true;
+			});
+
+		var seat_names_list = game_def.seat_names.split(/,/);
+		for (var i = 0; i < seat_names_list.length; i++) {
+			var n = seat_names_list[i];
+			if (!seen[n]) {
+				var $r = add_participant_row();
+				$('td.seat_col input', $r).attr('value', n);
+			}
+		}
+
+	}
+}
+
+$(function() {
+	if (document.getElementById('participants_table') && game_definitions) {
+		init_participants_table();
+	}});

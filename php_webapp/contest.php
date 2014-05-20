@@ -449,6 +449,7 @@ if (isset($_GET['id'])) {
 </table>
 <?php
 	include('list_roster.inc.php');
+	include('game_definition.inc.php');
 	?>
 
 <?php if ($can_edit) { ?>

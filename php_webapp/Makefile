@@ -33,6 +33,7 @@ php_scripts = \
 	contest.php \
 	contest_participant.php \
 	game_definition.php \
+	game_definition.inc.php \
 	import_person.php \
 	index.php \
 	list_roster.inc.php \
