@@ -5,7 +5,7 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT name,multi_game,multi_session,current_session FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,multi_game,multi_session,current_session,vocab_table FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
@@ -13,7 +13,8 @@ $tournament_info = array(
 	'name' => $row[0],
 	'multi_game' => $row[1],
 	'multi_session' => $row[2],
-	'current_session' => $row[3]
+	'current_session' => $row[3],
+	'vocab_table' => $row[4]
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";
@@ -187,7 +188,8 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <th>Session</th>
 <?php } ?>
 <th>Started</th>
-<th>Round-Board</th>
+<th>Round-<?php
+	echo($tournament_info['vocab_table']=='court'?'Court':'Table')?></th>
 <?php if ($tournament_info['multi_game']=='Y') { ?>
 <th>Game</th>
 <?php } ?>
