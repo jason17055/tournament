@@ -74,9 +74,22 @@ function update_contest_participants($contest_id)
 {
 	global $database;
 
+	// get game definition, if available
+	$game_definition = array();
+	$sql = "SELECT seat_names
+		FROM contest c
+		JOIN game_definition gd
+			ON gd.id=c.game
+		WHERE c.id=".db_quote($contest_id);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query);
+	if ($row) {
+		$game_definition['seat_names'] = $row[0];
+	}
+
 	$p_updates = array();
 	foreach ($_POST as $k => $v) {
-		if (preg_match('/^participant_(_?\d+)_(.*)$/', $k, $m)) {
+		if (preg_match('/^participant_([_m]?\d+)_(.*)$/', $k, $m)) {
 			$cpid = $m[1];
 			$field = $m[2];
 			if (!isset($p_updates[$cpid])) {
@@ -85,6 +98,8 @@ function update_contest_participants($contest_id)
 			$p_updates[$cpid][$field] = $v;
 		}
 	}
+
+	$seen_seats = array();
 	foreach ($p_updates as $cpid => $cp_post) {
 
 		if (isset($cp_post['delete'])) {
@@ -94,6 +109,10 @@ function update_contest_participants($contest_id)
 			mysqli_query($database, $sql)
 				or die("SQL error: ".db_error($database));
 			continue;
+		}
+
+		if ($cp_post['seat']) {
+			$seen_seats[$cp_post['seat']] = $cpid;
 		}
 
 		$updates = array();
@@ -135,6 +154,8 @@ function update_contest_participants($contest_id)
 				or die("SQL error: ".db_error($database));
 		}
 	}
+
+	// TODO- delete empty, invalid seats...
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
@@ -352,6 +373,40 @@ while ($row = mysqli_fetch_row($query)) {
 <th class="placement_col">Placement</th>
 </tr>
 <?php
+function participant_row($pre, $pdata)
+{
+	global $game_definition;
+
+?>
+<tr<?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
+<td class="commit_col">
+<input type="checkbox" name="<?php h($pre."_commit")?>"<?php echo($pdata['commit'] ? ' checked="checked"':'')?>>
+</td>
+<td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($pdata['player_name'])?>" data-player_id="<?php h($pdata['player_id'])?>" class="player_sel"></td>
+<td class="seat_col">
+<?php if ($game_definition['can_add_seats']) {
+	// seat name is editable ?>
+<input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>">
+<?php } else {
+	// seat name is NOT editable ?>
+<input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>"><?php h($pdata['seat'])?>
+<?php } ?>
+</td>
+<td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($pdata['turn_order'])?>"></td>
+<td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($pdata['score'])?>"></td>
+<td class="placement_col"><input type="text" size="4" name="<?php h($pre.'_placement')?>" value="<?php h($pdata['placement'])?>"></td>
+<td class="actions_col">
+<?php if ($game_definition['can_remove_seats']) { ?>
+<button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button>
+<?php } else { ?>
+<button type="button" class="clear_row_btn" title="Clear this seat"><img src="images/red_cross.png" alt="Clear"></button>
+<?php } //end if can_remove_seats ?>
+</td>
+</tr>
+<?php
+} //end participant_row()
+
+$seen_seats = array();
 if (isset($_GET['id'])) {
 	$sql = "SELECT cp.id AS id,
 		p.id AS player_id,
@@ -379,36 +434,35 @@ if (isset($_GET['id'])) {
 		$placement = $row[7];
 		$status = $row[8];
 		$commit = ($status == 'C');
-		$pre = 'participant_'.$cpid;
-		?>
-<tr data-rowid="<?php h($cpid)?>">
-<td class="commit_col">
-<input type="checkbox" name="<?php h($pre."_commit")?>"<?php echo($commit ? ' checked="checked"':'')?>>
-</td>
-<td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>" data-player_id="<?php h($player_id)?>" class="player_sel"></td>
-<td class="seat_col">
-<?php if ($game_definition['can_add_seats']) {
-	// seat name is editable ?>
-<input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>">
-<?php } else {
-	// seat name is NOT editable ?>
-<input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"><?php h($seat)?>
-<?php } ?>
-</td>
-<td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($turn_order)?>"></td>
-<td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($score)?>"></td>
-<td class="placement_col"><input type="text" size="4" name="<?php h($pre.'_placement')?>" value="<?php h($placement)?>"></td>
-<td class="actions_col">
-<?php if ($game_definition['can_remove_seats']) { ?>
-<button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button>
-<?php } else { ?>
-<button type="button" class="clear_row_btn" title="Clear this seat"><img src="images/red_cross.png" alt="Clear"></button>
-<?php } //end if can_remove_seats ?>
-</td>
-</tr>
-<?php
+
+		$seen_seats[$seat] = TRUE;
+		participant_row('participant_'.$cpid,
+			array(
+			'id' => $cpid,
+			'commit' => $commit,
+			'player_id' => $player_id,
+			'player_name' => $player_name,
+			'seat' => $seat,
+			'turn_order' => $turn_order,
+			'score' => $score,
+			'placement' => $placement
+			)
+			);
 	} // end foreach participant
 } //end if existing contest
+
+if ($can_edit && $game_definition['seat_names']) {
+	$mandatory_seats = explode(',', $game_definition['seat_names']);
+	$mcount = 0;
+	foreach ($mandatory_seats as $seat) {
+		if ($seen_seats[$seat]) { continue; }
+		participant_row('participant_m'.(++$mcount),
+			array(
+			'seat' => $seat
+			)
+			);
+	}
+}
 	?>
 <tr id="new_participant_row" class="template">
 <td class="commit_col">
