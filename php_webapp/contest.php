@@ -155,6 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 	if (isset($_REQUEST['action:create_contest'])) {
 
+		mysqli_autocommit($database, FALSE);
+
 		$sql = "INSERT INTO contest (tournament,session_num,round,board,game,scenario,status,started,finished,notes)
 			VALUES (
 			".db_quote($tournament_id).",
@@ -173,12 +175,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$contest_id = mysqli_insert_id($database);
 
 		update_contest_participants($contest_id);
+		mysqli_commit($database);
 
 		header("Location: $next_url");
 		exit();
 	}
 
 	else if (isset($_REQUEST['action:update_contest'])) {
+
+		mysqli_autocommit($database, FALSE);
 
 		$updates = array();
 		if ($tournament_info['multi_session']=='Y') {
@@ -202,12 +207,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			or die("SQL error: ".db_error($database));
 
 		update_contest_participants($_GET['id']);
+		mysqli_commit($database);
 
 		header("Location: $next_url");
 		exit();
 	}
 
 	else if (isset($_REQUEST['action:delete_contest'])) {
+
+		mysqli_autocommit($database, FALSE);
+
 		$sql = "DELETE FROM contest_participant
 			WHERE contest=".db_quote($_GET['id']);
 		mysqli_query($database, $sql)
@@ -215,6 +224,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$sql = "DELETE FROM contest WHERE id=".db_quote($_GET['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
+
+		mysqli_commit($database);
 
 		header("Location: $next_url");
 		exit();
