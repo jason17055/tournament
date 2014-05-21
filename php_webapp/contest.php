@@ -228,6 +228,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 split_datetime($_REQUEST['started'], $_REQUEST['started_date'], $_REQUEST['started_time']);
 split_datetime($_REQUEST['finished'], $_REQUEST['finished_date'], $_REQUEST['finished_time']);
 
+$game_definition = array();
+if ($_REQUEST['game']) {
+	$sql = "SELECT seat_names FROM game_definition
+	WHERE id=".db_quote($_REQUEST['game'])."
+	AND tournament=".db_quote($tournament_id);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query)
+		or die("Game definition $_REQUEST[game] not found.");
+	$game_definition['seat_names'] = $row[0];
+	$game_definition['can_add_seats'] = !$row[0];
+	$game_definition['can_remove_seats'] = !$row[0];
+}
+else {
+	// if no game is specified, then user is allowed to add/remove seats
+	$game_definition['can_add_seats'] = TRUE;
+	$game_definition['can_remove_seats'] = TRUE;
+}
+
 begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 
 ?>
@@ -357,11 +375,25 @@ if (isset($_GET['id'])) {
 <input type="checkbox" name="<?php h($pre."_commit")?>"<?php echo($commit ? ' checked="checked"':'')?>>
 </td>
 <td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($player_name)?>" data-player_id="<?php h($player_id)?>" class="player_sel"></td>
-<td class="seat_col"><input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"></td>
+<td class="seat_col">
+<?php if ($game_definition['can_add_seats']) {
+	// seat name is editable ?>
+<input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>">
+<?php } else {
+	// seat name is NOT editable ?>
+<input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($seat)?>"><?php h($seat)?>
+<?php } ?>
+</td>
 <td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($turn_order)?>"></td>
 <td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($score)?>"></td>
 <td class="placement_col"><input type="text" size="4" name="<?php h($pre.'_placement')?>" value="<?php h($placement)?>"></td>
-<td class="actions_col"><button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button></td>
+<td class="actions_col">
+<?php if ($game_definition['can_remove_seats']) { ?>
+<button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button>
+<?php } else { ?>
+<button type="button" class="clear_row_btn" title="Clear this seat"><img src="images/red_cross.png" alt="Clear"></button>
+<?php } //end if can_remove_seats ?>
+</td>
 </tr>
 <?php
 	} // end foreach participant
@@ -380,7 +412,7 @@ if (isset($_GET['id'])) {
 </tr>
 </table>
 <?php
-	if ($can_edit) {
+	if ($can_edit && $game_definition['can_add_seats']) {
 		if (isset($_GET['id'])) {
 			$add_participant_url = "contest_participant.php?contest=".urlencode($_GET['id'])
 		."&next_url=".urlencode($_SERVER['REQUEST_URI']);
@@ -449,7 +481,6 @@ if (isset($_GET['id'])) {
 </table>
 <?php
 	include('list_roster.inc.php');
-	include('game_definition.inc.php');
 	?>
 
 <?php if ($can_edit) { ?>
