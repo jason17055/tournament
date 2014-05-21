@@ -381,8 +381,9 @@ function participant_row($pre, $pdata)
 	global $game_definition;
 	global $participant_columns;
 
+	$tr_class = 'participant_row' . ($pre?'':' template');
 ?>
-<tr class="participant_row" <?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
+<tr class="<?php h($tr_class)?>" <?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
 <?php
 foreach ($participant_columns as $col) {
 	if ($col == 'commit') { ?>
@@ -474,18 +475,9 @@ if ($can_edit && $game_definition['seat_names']) {
 			);
 	}
 }
+
+participant_row('', array());
 	?>
-<tr id="new_participant_row" class="template participant_row">
-<td class="commit_col">
-<input type="checkbox" name="_commit" checked="checked">
-</td>
-<td class="player_col"><input type="text" name="_player" class="player_sel"></td>
-<td class="seat_col"><input type="text" size="4" name="_seat"></td>
-<td class="turn_order_col"><input type="text" size="4" name="_turn_order"></td>
-<td class="score_col"><input type="text" size="4" name="_score"></td>
-<td class="placement_col"><input type="text" size="4" name="_placement"></td>
-<td class="actions_col"><button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button></td>
-</tr>
 </table>
 <?php
 	if ($can_edit && $game_definition['can_add_seats']) {

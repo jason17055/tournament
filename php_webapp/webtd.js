@@ -38,9 +38,8 @@ function add_participant_row()
 {
 	var name_prefix = 'participant__'+(nextUniqueRowId++);
 
-	var $r = $('#new_participant_row').clone();
+	var $r = $('.participant_row.template').clone();
 	$r.removeClass('template');
-	$r.removeAttr('id');
 
 	$('input', $r).each(function(idx,el) {
 		var n = $(el).attr('name');
