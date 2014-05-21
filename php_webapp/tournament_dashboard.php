@@ -18,12 +18,12 @@ $tournament_info = array(
 	'multi_session' => $row[2],
 	'current_session' => $row[3],
 	'vocab_table' => $row[4],
-	'ratings' => $row[5],
-	'use_person_member_number' => $row[6],
-	'use_person_entry_rank' => $row[7],
-	'use_person_home_location' => $row[8],
-	'use_person_mail' => $row[9],
-	'use_person_phone' => $row[10],
+	'ratings' => $row[5]=='Y',
+	'use_person_member_number' => $row[6]=='Y',
+	'use_person_entry_rank' => $row[7]=='Y',
+	'use_person_home_location' => $row[8]=='Y',
+	'use_person_mail' => $row[9]=='Y',
+	'use_person_phone' => $row[10]=='Y'
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";
@@ -57,8 +57,13 @@ function make_popup_list($popup_id, $column_name)
 
 make_popup_list('status_popup_menu', 'PERSON.STATUS');
 
-$person_columns = array('ordinal','name','member_number','entry_rank',
-	'home_location','mail','phone');
+$person_columns = array('ordinal','name');
+if ($tournament_info['use_player_member_number']) { $person_columns[]='member_number';}
+if ($tournament_info['use_player_entry_rank'])    { $person_columns[]='entry_rank';}
+if ($tournament_info['use_player_home_location']) { $person_columns[]='home_location';}
+if ($tournament_info['use_player_mail'])          { $person_columns[]='mail';}
+if ($tournament_info['use_player_phone'])         { $person_columns[]='phone';}
+
 $person_column_names = array(
 	'ordinal' => 'Ordinal',
 	'name' => 'Player Name',
