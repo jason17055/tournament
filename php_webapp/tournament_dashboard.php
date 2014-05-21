@@ -15,7 +15,7 @@ $tournament_info = array(
 	'id' => $tournament_id,
 	'name' => $row[0],
 	'multi_game' => $row[1],
-	'multi_session' => $row[2],
+	'multi_session' => $row[2]=='Y',
 	'current_session' => $row[3],
 	'vocab_table' => $row[4],
 	'ratings' => $row[5]=='Y',
@@ -181,8 +181,8 @@ while ($row = mysqli_fetch_row($query)) {
 	<button type="button" class="popup_menu_btn" data-for="status_popup_menu">...</button>
 	</td>
 <td class="game_count_col"><?php h($games_played)?></td>
-<td class="game_count_col"><?php h("$games_won (+$games_won_this_session)")?></td>
-<td class="w_points_col"><?php h("$w_points (+$w_points_this_session)")?></td>
+<td class="game_count_col"><?php h($tournament_info['multi_session']?"$games_won (+$games_won_this_session)":"$games_won")?></td>
+<td class="w_points_col"><?php h($tournament_info['multi_session']?"$w_points (+$w_points_this_session)":"$w_points")?></td>
 <?php if ($tournament_info['ratings']) { ?>
 <td class="rating_col"><?php
 	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
@@ -225,7 +225,7 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <table border="1">
 <caption>Games</caption>
 <tr>
-<?php if ($tournament_info['multi_session']=='Y') { ?>
+<?php if ($tournament_info['multi_session']) { ?>
 <th>Session</th>
 <?php } ?>
 <th>Started</th>
@@ -282,7 +282,7 @@ while ($row = mysqli_fetch_row($query)) {
 	$url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
-<?php if ($tournament_info['multi_session']=='Y') { ?>
+<?php if ($tournament_info['multi_session']) { ?>
 <td class="session_num_col"><?php h($session_num)?></td>
 <?php } ?>
 <td class="started_date_col"><a href="<?php h($url)?>"><?php h($started_date)?></a></td>
