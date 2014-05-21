@@ -47,6 +47,22 @@ else {
 	die("Invalid query string");
 }
 
+$sql = "SELECT ratings,use_person_member_number,use_person_entry_rank,
+	use_person_home_location,use_person_mail,use_person_phone
+	FROM tournament t
+	WHERE id=".db_quote($tournament_id);
+$query = mysqli_query($database, $sql);
+$row = mysqli_fetch_row($query)
+	or die("Tournament $tournament_id Not Found");
+$tournament_info = array(
+	'ratings' => $row[0]=='Y',
+	'use_person_member_number' => $row[1]=='Y',
+	'use_person_entry_rank' => $row[2]=='Y',
+	'use_person_home_location' => $row[3]=='Y',
+	'use_person_mail' => $row[4]=='Y',
+	'use_person_phone' => $row[5]=='Y'
+	);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
 	$next_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
@@ -127,30 +143,42 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <td><label for="ordinal_entry">Ordinal:</label></td>
 <td><input type="text" id="ordinal_entry" name="ordinal" value="<?php h($_REQUEST['ordinal'])?>"></td>
 </tr>
+<?php if ($tournament_info['use_person_member_number']) { ?>
 <tr>
 <td><label for="member_number_entry">Member Number:</label></td>
 <td><input type="text" id="member_number_entry" name="member_number" value="<?php h($_REQUEST['member_number'])?>"></td>
 </tr>
+<?php } ?>
+<?php if ($tournament_info['use_person_entry_rank']) { ?>
 <tr>
 <td><label for="entry_rank_entry">Entry Rank:</label></td>
 <td><input type="text" id="entry_rank_entry" name="entry_rank" value="<?php h($_REQUEST['entry_rank'])?>"></td>
 </tr>
+<?php } ?>
+<?php if ($tournament_info['ratings']) { ?>
 <tr>
 <td><label for="rating_entry">Current Rating:</label></td>
 <td><input type="text" id="rating_entry" name="rating" value="<?php h($_REQUEST['rating'])?>"></td>
 </tr>
+<?php } ?>
+<?php if ($tournament_info['use_person_home_location']) { ?>
 <tr>
 <td><label for="home_location_entry">Home Location:</label></td>
 <td><input type="text" id="home_location_entry" name="home_location" value="<?php h($_REQUEST['home_location'])?>"></td>
 </tr>
+<?php } ?>
+<?php if ($tournament_info['use_person_mail']) { ?>
 <tr>
 <td><label for="mail_entry">Email Address:</label></td>
 <td><input type="text" id="mail_entry" name="mail" value="<?php h($_REQUEST['mail'])?>"></td>
 </tr>
+<?php } ?>
+<?php if ($tournament_info['use_person_phone']) { ?>
 <tr>
 <td><label for="phone_entry">Telephone Number:</label></td>
 <td><input type="text" id="phone_entry" name="phone" value="<?php h($_REQUEST['phone'])?>"></td>
 </tr>
+<?php } ?>
 <tr>
 <td><label for="status_cb">Status:</label></td>
 <td><?php select_widget(array(
