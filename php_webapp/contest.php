@@ -391,7 +391,7 @@ function participant_row($pre, $pdata)
 <input type="text" size="4" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>">
 <?php } else {
 	// seat name is NOT editable ?>
-<input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>"><?php h($pdata['seat'])?>
+<input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>"><?php format_seat_name($pdata['seat'])?>
 <?php } ?>
 </td>
 <td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($pdata['turn_order'])?>"></td>

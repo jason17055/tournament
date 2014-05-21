@@ -62,6 +62,16 @@ function select_option($value, $name, $is_selected)
 <?php
 }
 
+function format_seat_name($seat)
+{
+	if ($seat == 'gb' || $seat == 'yb') {
+	?>
+<img src="images/seat_<?php h($seat)?>_icon.png" alt="<?php h($seat)?>" title="<?php h($seat)?>">
+<?php } else {
+	h($seat);
+	}
+}
+
 function format_scenario($raw_text)
 {
 	if (substr($raw_text,0,1)=='{') {
