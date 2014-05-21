@@ -15,12 +15,13 @@ if (isset($_GET['tournament'])) {
 		$_REQUEST['rating'] = "";
 		$_REQUEST['home_location'] = "";
 		$_REQUEST['mail'] = "";
+		$_REQUEST['phone'] = "";
 		$_REQUEST['status'] = "ready";
 	}
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
-		name,member_number,entry_rank,rating,home_location,mail,status
+		name,member_number,entry_rank,rating,home_location,mail,phone,status
 		FROM person WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -34,7 +35,8 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['rating'] = $row[4];
 		$_REQUEST['home_location'] = $row[5];
 		$_REQUEST['mail'] = $row[6];
-		$_REQUEST['status'] = $row[7];
+		$_REQUEST['phone'] = $row[7];
+		$_REQUEST['status'] = $row[8];
 	}
 }
 else {
@@ -60,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			die("Status must be set.");
 		}
 
-		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,rating,home_location,mail,status)
+		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,rating,home_location,mail,phone,status)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
@@ -69,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['rating']).",
 			".db_quote($_REQUEST['home_location']).",
 			".db_quote($_REQUEST['mail']).",
+			".db_quote($_REQUEST['phone']).",
 			".db_quote($_REQUEST['status'])."
 			)";
 		mysqli_query($database, $sql)
@@ -87,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			rating=".db_quote($_REQUEST['rating']).",
 			home_location=".db_quote($_REQUEST['home_location']).",
 			mail=".db_quote($_REQUEST['mail']).",
+			phone=".db_quote($_REQUEST['phone']).",
 			status=".db_quote($_REQUEST['status'])."
 			WHERE id=".db_quote($_REQUEST['id']);
 		mysqli_query($database, $sql)
@@ -132,6 +136,10 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <tr>
 <td><label for="mail_entry">Email Address:</label></td>
 <td><input type="text" id="mail_entry" name="mail" value="<?php h($_REQUEST['mail'])?>"></td>
+</tr>
+<tr>
+<td><label for="phone_entry">Telephone Number:</label></td>
+<td><input type="text" id="phone_entry" name="phone" value="<?php h($_REQUEST['phone'])?>"></td>
 </tr>
 <tr>
 <td><label for="status_cb">Status:</label></td>
