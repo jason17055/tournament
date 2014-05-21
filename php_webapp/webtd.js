@@ -60,6 +60,7 @@ function add_participant_row()
 		$r.remove();
 		});
 	$('.clear_row_btn', $r).click(on_clear_participant_clicked);
+	$('.mark_winner_btn', $r).click(on_mark_winner_clicked);
 
 	return $r;
 }
@@ -72,19 +73,32 @@ function on_add_participant_clicked(evt)
 	return false;
 }
 
-function on_clear_participant_clicked(evt)
+function get_participant_row_from_btn(el)
 {
-	var el = this;
-	var row_el = null;
-
-	while (el && !row_el) {
+	while (el) {
 		if (el.tagName.toLowerCase() == 'tr' && $(el).hasClass('participant_row')) {
-			row_el = el;
-			break;
+			return el;
 		}
 		el = el.parentNode;
 	}
+	return null;
+}
 
+function on_mark_winner_clicked(evt)
+{
+	var row_el = get_participant_row_from_btn(this);
+	if (!row_el) { return; }
+
+	$('.placement_col input').each(function(idx,el) {
+			el.value = '2';
+			});
+	$('.placement_col input', row_el).get(0).value = '1';
+	document.edit_contest_form.status.value = 'completed';
+}
+
+function on_clear_participant_clicked(evt)
+{
+	var row_el = get_participant_row_from_btn(this);
 	if (!row_el) { return; }
 
 	$("input[type=text]", row_el).attr('value', '');
@@ -118,6 +132,7 @@ $(function() {
 	$('#add_participant_link').click(on_add_participant_clicked);
 	$('.delete_row_btn').click(on_delete_participant_clicked);
 	$('.clear_row_btn').click(on_clear_participant_clicked);
+	$('.mark_winner_btn').click(on_mark_winner_clicked);
 });
 
 $(function() {

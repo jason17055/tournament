@@ -283,7 +283,7 @@ else {
 begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 
 ?>
-<form method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
+<form name="edit_contest_form" method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <table>
 <?php if ($tournament_info['multi_session']=='Y') {?>
 <tr>
@@ -408,6 +408,7 @@ foreach ($participant_columns as $col) {
 } //end each column
 ?>
 <td class="actions_col">
+<button type="button" class="mark_winner_btn" title="Mark this participant a winner">WIN</button>
 <?php if ($game_definition['can_remove_seats']) { ?>
 <button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button>
 <?php } else { ?>
