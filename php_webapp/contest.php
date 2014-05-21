@@ -7,8 +7,9 @@ require_once('includes/auth.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
-	$sql = "SELECT multi_game,multi_session,multi_round,current_session,vocab_table
-		FROM tournament
+	$sql = "SELECT multi_game,multi_session,multi_round,current_session,vocab_table,
+		(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS default_game
+		FROM tournament t
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
@@ -18,14 +19,15 @@ if (isset($_GET['tournament'])) {
 		'multi_session' => $row[1],
 		'multi_round' => $row[2],
 		'current_session' => $row[3],
-		'vocab_table' => $row[4]
+		'vocab_table' => $row[4],
+		'default_game' => $row[5]
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['session_num'] = $tournament_info['current_session'];
 		$_REQUEST['round'] = "";
 		$_REQUEST['board'] = "";
-		$_REQUEST['game'] = "";
+		$_REQUEST['game'] = $tournament_info['default_game'];
 		$_REQUEST['scenario'] = "";
 		$_REQUEST['status'] = "";
 		$_REQUEST['started'] = strftime('%Y-%m-%d', time());
