@@ -5,7 +5,10 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT name,multi_game,multi_session,current_session,vocab_table FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,multi_game,multi_session,current_session,vocab_table,
+	ratings,use_person_member_number,use_person_entry_rank,
+	use_person_home_location,use_person_mail,use_person_phone
+	FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
@@ -14,7 +17,13 @@ $tournament_info = array(
 	'multi_game' => $row[1],
 	'multi_session' => $row[2],
 	'current_session' => $row[3],
-	'vocab_table' => $row[4]
+	'vocab_table' => $row[4],
+	'ratings' => $row[5],
+	'use_person_member_number' => $row[6],
+	'use_person_entry_rank' => $row[7],
+	'use_person_home_location' => $row[8],
+	'use_person_mail' => $row[9],
+	'use_person_phone' => $row[10],
 	);
 
 $page_title = "$tournament_info[name] - Dashboard";
@@ -48,6 +57,18 @@ function make_popup_list($popup_id, $column_name)
 
 make_popup_list('status_popup_menu', 'PERSON.STATUS');
 
+$person_columns = array('ordinal','name','member_number','entry_rank',
+	'home_location','mail','phone');
+$person_column_names = array(
+	'ordinal' => 'Ordinal',
+	'name' => 'Player Name',
+	'member_number' => 'Member Number',
+	'entry_rank' => 'Entry Rank',
+	'home_location' => 'Home Location',
+	'mail' => 'Email Address',
+	'phone' => 'Telephone'
+	);
+
 ?>
 <table border="1">
 <caption>Players</caption>
@@ -55,19 +76,20 @@ make_popup_list('status_popup_menu', 'PERSON.STATUS');
 <?php if ($can_edit_players) { ?>
 <th></th>
 <?php } ?>
-<th>Player Name</th>
-<?php if ($can_edit_players) { ?>
-<th>Member Number</th>
-<th>Home Location</th>
-<?php } ?>
+<?php
+foreach ($person_columns as $col) { ?>
+<th><?php h($person_column_names[$col])?></th>
+<?php }//end foreach column ?>
 <th>Status</th>
 <th>Games Played</th>
 <th>Games Won</th>
 <th>Points</th>
+<?php if ($tournament_info['ratings']) { ?>
 <th>Current Rating</th>
+<?php } ?>
 </tr>
 <?php
-$sql = "SELECT p.id,p.name,p.member_number,p.home_location,p.status,
+$sql = "SELECT p.id,p.name,p.status,
 	(SELECT COUNT(DISTINCT contest) FROM contest_participant
 			WHERE player=p.id) AS games_played,
 	(SELECT COUNT(*) FROM contest c
@@ -94,7 +116,9 @@ $sql = "SELECT p.id,p.name,p.member_number,p.home_location,p.status,
 		WHERE player=p.id
 		AND contest IN (SELECT id FROM contest WHERE session_num=".db_quote($tournament_info['current_session']).")
 		) AS w_points_this_session,
-	IFNULL(r.post_rating,r.prior_rating) AS rating
+	IFNULL(r.post_rating,r.prior_rating) AS rating,
+	p.member_number,p.entry_rank,p.home_location,
+	p.mail,p.phone,p.ordinal
 	FROM person p
 	JOIN tournament t
 		ON t.id=p.tournament
@@ -110,28 +134,38 @@ while ($row = mysqli_fetch_row($query)) {
 
 	$person_id = $row[0];
 	$name = $row[1];
-	$member_number = $row[2];
-	$home_location = $row[3];
-	$status = $row[4];
-	$games_played = $row[5];
-	$games_won = $row[6];
-	$games_won_this_session = $row[7];
-	$w_points = $row[8] ?: 0;
-	$w_points_this_session = $row[9] ?: 0;
-	$cur_rating = $row[10];
+	$status = $row[2];
+	$games_played = $row[3];
+	$games_won = $row[4];
+	$games_won_this_session = $row[5];
+	$w_points = $row[6] ?: 0;
+	$w_points_this_session = $row[7] ?: 0;
+	$cur_rating = $row[8];
 
 	$edit_url = "person.php?id=".urlencode($person_id);
 	$url = 'player_scorecard.php?id='.urlencode($person_id);
 
+	$d = array(
+	'member_number' => $row[9],
+	'entry_rank' => $row[10],
+	'home_location' => $row[11],
+	'mail' => $row[12],
+	'phone' => $row[13],
+	'ordinal' => $row[14]
+	);
+
 	?><tr>
 <?php if ($can_edit_players) { ?>
 <td class="link_col"><a href="<?php h($edit_url)?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a></td>
-<?php } ?>
+<?php }
+	foreach ($person_columns as $col) {
+		if ($col == 'name') { ?>
 <td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
-<?php if ($can_edit_players) { ?>
-<td class="member_number_col"><?php h($member_number)?></td>
-<td class="home_location_col"><?php h($home_location)?></td>
-<?php } ?>
+<?php } else { ?>
+<td class="<?php h($col)?>_col"><?php h($d[$col])?></td>
+<?php } //end switch $col ?>
+<?php } //end each $col ?>
+
 <td class="status_col"><?php
 	if ($status == 'ready') {
 		?><img src="images/plus.png" width="14" height="14" alt=""><?php
@@ -144,9 +178,11 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="game_count_col"><?php h($games_played)?></td>
 <td class="game_count_col"><?php h("$games_won (+$games_won_this_session)")?></td>
 <td class="w_points_col"><?php h("$w_points (+$w_points_this_session)")?></td>
+<?php if ($tournament_info['ratings']) { ?>
 <td class="rating_col"><?php
 	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
 		}?></td>
+<?php } ?>
 </tr>
 <?php
 } //end foreach person
