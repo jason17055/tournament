@@ -89,6 +89,9 @@ function on_mark_winner_clicked(evt)
 	var row_el = get_participant_row_from_btn(this);
 	if (!row_el) { return; }
 
+	$('#participants_table .status_col select').each(function(idx,el) {
+			el.value = 'C';
+			});
 	$('.placement_col input').each(function(idx,el) {
 			el.value = '2';
 			});

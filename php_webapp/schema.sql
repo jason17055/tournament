@@ -62,6 +62,11 @@ CREATE TABLE contest (
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
+--status is one of
+--      P = proposed
+--      C = confirmed
+--     or NULL = unspecified
+--
 CREATE TABLE contest_participant (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	contest INTEGER NOT NULL,

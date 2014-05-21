@@ -122,7 +122,7 @@ function update_contest_participants($contest_id)
 		foreach ($cp_post as $k => $v) {
 			if ($k == 'player' || $k == 'seat' ||
 			$k == 'turn_order' || $k == 'score' ||
-			$k == 'placement')
+			$k == 'placement' || $k = 'status')
 			{
 				$updates[] = "$k=".db_quote($v);
 				if (strlen($v)) { $count_nonempty++; }
@@ -139,7 +139,8 @@ function update_contest_participants($contest_id)
 			continue;
 		}
 
-		$updates[] = "status=".db_quote($cp_post['commit']?'C':NULL);
+		// status is no longer represented by a checkbox
+		//$updates[] = "status=".db_quote($cp_post['commit']?'C':NULL);
 
 		if (preg_match('/^(\d+)$/', $cpid, $m)) {
 			$sql = "UPDATE contest_participant
@@ -401,6 +402,18 @@ foreach ($participant_columns as $col) {
 	// seat name is NOT editable ?>
 <input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>"><?php format_seat_name($pdata['seat'])?>
 <?php } ?>
+</td>
+<?php } else if ($col == 'status') { ?>
+<td class="status_col">
+<?php select_widget(array(
+	'name' => $pre.'_status',
+	'value' => $pdata['status'],
+	'options' => array(
+		'' => '--',
+		'C' => 'Confirmed',
+		'P' => 'Proposed'
+		)
+	)); ?>
 </td>
 <?php } else { ?>
 <td class="<?php h($col)?>_col"><input type="text" size="4" name="<?php h($pre.'_'.$col)?>" value="<?php h($pdata[$col])?>"></td>
