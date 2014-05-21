@@ -10,6 +10,9 @@
 .player_count_col {
 	text-align: center;
 }
+td.ordinal_col {
+	text-align: center;
+}
 td.rating_col, td.score_col {
 	text-align: right;
 }
