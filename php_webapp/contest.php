@@ -420,7 +420,7 @@ if (isset($_GET['id'])) {
 		LEFT JOIN player_rating r ON r.id=p.id
 			AND r.session_num=c.session_num
 		WHERE contest=".db_quote($_GET['id'])."
-		ORDER BY turn_order,player_name,cp.id";
+		ORDER BY turn_order,cp.id";
 	$query = mysqli_query($database, $sql);
 	while ($row = mysqli_fetch_row($query)) {
 		$cpid = $row[0];
