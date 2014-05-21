@@ -10,6 +10,7 @@ if (isset($_GET['tournament'])) {
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['name'] = "";
+		$_REQUEST['ordinal'] = "";
 		$_REQUEST['member_number'] = "";
 		$_REQUEST['entry_rank'] = "";
 		$_REQUEST['rating'] = "";
@@ -21,9 +22,11 @@ if (isset($_GET['tournament'])) {
 }
 else if (isset($_GET['id'])) {
 	$sql = "SELECT tournament,
-		name,member_number,entry_rank,rating,home_location,mail,phone,status
+		name,member_number,entry_rank,rating,home_location,mail,phone,status,
+		ordinal
 		FROM person WHERE id=".db_quote($_GET['id']);
-	$query = mysqli_query($database, $sql);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
 	$row = mysqli_fetch_row($query)
 		or die("Invalid person id");
 	$tournament_id = $row[0];
@@ -37,6 +40,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['mail'] = $row[6];
 		$_REQUEST['phone'] = $row[7];
 		$_REQUEST['status'] = $row[8];
+		$_REQUEST['ordinal'] = $row[9];
 	}
 }
 else {
@@ -62,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			die("Status must be set.");
 		}
 
-		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,rating,home_location,mail,phone,status)
+		$sql = "INSERT INTO person (tournament,name,member_number,entry_rank,rating,home_location,mail,phone,status,ordinal)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
@@ -72,7 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['home_location']).",
 			".db_quote($_REQUEST['mail']).",
 			".db_quote($_REQUEST['phone']).",
-			".db_quote($_REQUEST['status'])."
+			".db_quote($_REQUEST['status']).",
+			".db_quote($_REQUEST['ordinal'])."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
@@ -91,7 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			home_location=".db_quote($_REQUEST['home_location']).",
 			mail=".db_quote($_REQUEST['mail']).",
 			phone=".db_quote($_REQUEST['phone']).",
-			status=".db_quote($_REQUEST['status'])."
+			status=".db_quote($_REQUEST['status']).",
+			ordinal=".db_quote($_REQUEST['ordinal'])."
 			WHERE id=".db_quote($_REQUEST['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -116,6 +122,10 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <tr>
 <td><label for="name_entry">Name:</label></td>
 <td><input type="text" id="name_entry" name="name" value="<?php h($_REQUEST['name'])?>"></td>
+</tr>
+<tr>
+<td><label for="ordinal_entry">Ordinal:</label></td>
+<td><input type="text" id="ordinal_entry" name="ordinal" value="<?php h($_REQUEST['ordinal'])?>"></td>
 </tr>
 <tr>
 <td><label for="member_number_entry">Member Number:</label></td>
