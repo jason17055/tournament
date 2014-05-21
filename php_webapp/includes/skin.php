@@ -72,6 +72,15 @@ function format_seat_name($seat)
 	}
 }
 
+function format_contest_status($status)
+{
+	if ($status == 'proposed' || $status == 'completed' || $status == 'started') {
+		$f = "images/contest_${status}_icon.png";
+		?><img src="<?php h($f)?>" width="14" height="14" alt=""><?php
+	}
+	h($status);
+}
+
 function format_scenario($raw_text)
 {
 	if (substr($raw_text,0,1)=='{') {

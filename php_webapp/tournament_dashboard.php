@@ -250,11 +250,7 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
-<td class="status_col"><?php
-	if ($status == 'proposed') {
-		?><img src="images/contest_proposed_icon.png" width="14" height="14" alt=""><?php
-	}
-	h($status)?>
+<td class="status_col"><?php format_contest_status($status)?>
 <button type="button" class="popup_menu_btn" data-for="contest_status_popup_menu">...</button>
 </td>
 <td class="participants_col"><?php h($participants)?></td>
