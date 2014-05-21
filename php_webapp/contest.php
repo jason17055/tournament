@@ -364,27 +364,34 @@ while ($row = mysqli_fetch_row($query)) {
 <tr>
 <td valign="top"><label>Participants:</label></td>
 <td>
-<?php if ($can_edit) { ?>
+<?php
+	$participant_columns = array('seat','player','status','placement');
+
+if ($can_edit) { ?>
 <table id="participants_table" class="tabular_form">
 <tr>
-<th class="commit_col">Commit</th>
-<th class="player_col">Player</th>
 <th class="seat_col">Seat</th>
-<th class="turn_order_col">Turn Order</th>
-<th class="score_col">Score</th>
+<th class="player_col">Player</th>
+<th class="status_col">Status</th>
 <th class="placement_col">Placement</th>
 </tr>
 <?php
 function participant_row($pre, $pdata)
 {
 	global $game_definition;
+	global $participant_columns;
 
 ?>
 <tr<?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
+<?php
+foreach ($participant_columns as $col) {
+	if ($col == 'commit') { ?>
 <td class="commit_col">
 <input type="checkbox" name="<?php h($pre."_commit")?>"<?php echo($pdata['commit'] ? ' checked="checked"':'')?>>
 </td>
+<?php } else if ($col == 'player') { ?>
 <td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($pdata['player_name'])?>" data-player_id="<?php h($pdata['player_id'])?>" class="player_sel"></td>
+<?php } else if ($col == 'seat') { ?>
 <td class="seat_col">
 <?php if ($game_definition['can_add_seats']) {
 	// seat name is editable ?>
@@ -394,9 +401,11 @@ function participant_row($pre, $pdata)
 <input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>"><?php format_seat_name($pdata['seat'])?>
 <?php } ?>
 </td>
-<td class="turn_order_col"><input type="text" size="4" name="<?php h($pre.'_turn_order')?>" value="<?php h($pdata['turn_order'])?>"></td>
-<td class="score_col"><input type="text" size="4" name="<?php h($pre.'_score')?>" value="<?php h($pdata['score'])?>"></td>
-<td class="placement_col"><input type="text" size="4" name="<?php h($pre.'_placement')?>" value="<?php h($pdata['placement'])?>"></td>
+<?php } else { ?>
+<td class="<?php h($col)?>_col"><input type="text" size="4" name="<?php h($pre.'_'.$col)?>" value="<?php h($pdata[$col])?>"></td>
+<?php } // end col switch
+} //end each column
+?>
 <td class="actions_col">
 <?php if ($game_definition['can_remove_seats']) { ?>
 <button type="button" class="delete_row_btn" title="Delete this participant"><img src="images/red_cross.png" alt="Delete"></button>
