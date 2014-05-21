@@ -60,6 +60,7 @@ function add_participant_row()
 	$('.delete_row_btn', $r).click(function(evt) {
 		$r.remove();
 		});
+	$('.clear_row_btn', $r).click(on_clear_participant_clicked);
 
 	return $r;
 }
@@ -70,6 +71,26 @@ function on_add_participant_clicked(evt)
 
 	add_participant_row();
 	return false;
+}
+
+function on_clear_participant_clicked(evt)
+{
+	var el = this;
+	var row_el = null;
+
+	while (el && !row_el) {
+		if (el.tagName.toLowerCase() == 'tr' && $(el).hasClass('participant_row')) {
+			row_el = el;
+			break;
+		}
+		el = el.parentNode;
+	}
+
+	if (!row_el) { return; }
+
+	$("input[type=text]", row_el).attr('value', '');
+	$('.player_col input[type=hidden]', row_el).attr('value','');
+	$('.player_col input.player_sel', row_el).removeAttr('data-player_id');
 }
 
 function on_delete_participant_clicked(evt)
@@ -97,6 +118,7 @@ function on_delete_participant_clicked(evt)
 $(function() {
 	$('#add_participant_link').click(on_add_participant_clicked);
 	$('.delete_row_btn').click(on_delete_participant_clicked);
+	$('.clear_row_btn').click(on_clear_participant_clicked);
 });
 
 $(function() {

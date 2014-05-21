@@ -382,7 +382,7 @@ function participant_row($pre, $pdata)
 	global $participant_columns;
 
 ?>
-<tr<?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
+<tr class="participant_row" <?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
 <?php
 foreach ($participant_columns as $col) {
 	if ($col == 'commit') { ?>
@@ -475,7 +475,7 @@ if ($can_edit && $game_definition['seat_names']) {
 	}
 }
 	?>
-<tr id="new_participant_row" class="template">
+<tr id="new_participant_row" class="template participant_row">
 <td class="commit_col">
 <input type="checkbox" name="_commit" checked="checked">
 </td>
