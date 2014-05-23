@@ -27,4 +27,6 @@ CREATE TABLE reservation (
 	PRIMARY KEY (contest, venue, starts)
 	);
 
+ALTER TABLE game_definition ADD COLUMN use_scenario CHAR(1) NOT NULL DEFAULT 'Y';
+
 UPDATE master SET version=4;

@@ -9,7 +9,7 @@ $tournament_info = array();
 if (isset($_GET['id'])) {
 
 	$sql = "SELECT
-		tournament,name,seat_names
+		tournament,name,seat_names,use_scenario
 		FROM game_definition
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
@@ -23,6 +23,7 @@ if (isset($_GET['id'])) {
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['name'] = $row[1];
 		$_REQUEST['seat_names'] = $row[2];
+		$_REQUEST['use_scenario'] = $row[3]=='Y';
 	}
 }
 else if (isset($_GET['tournament'])) {
@@ -64,11 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		is_director($tournament_id)
 			or die("Not authorized");
 
-		$sql = "INSERT INTO game_definition (tournament,name,seat_names)
+		$sql = "INSERT INTO game_definition (tournament,name,seat_names,use_scenario)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['name']).",
-			".db_quote($_REQUEST['seat_names'])."
+			".db_quote($_REQUEST['seat_names']).",
+			".db_quote(isset($_REQUEST['use_scenario'])?'Y':'N')."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
@@ -96,7 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		$sql = "UPDATE game_definition
 			SET name=".db_quote($_REQUEST['name']).",
-			seat_names=".db_quote($_REQUEST['seat_names'])."
+			seat_names=".db_quote($_REQUEST['seat_names']).",
+			use_scenario=".db_quote(isset($_REQUEST['use_scenario'])?'Y':'N')."
 			WHERE id=".db_quote($_GET['id'])."
 			AND tournament=".db_quote($tournament_id);
 		mysqli_query($database, $sql)
@@ -160,6 +163,12 @@ begin_page(isset($_GET['id']) ? "Edit Game Definition" : "New Game Definition");
 <tr>
 <td><label for="seat_names_entry">Seat names:</label></td>
 <td><input type="text" id="seat_names_entry" name="seat_names" value="<?php h($_REQUEST['seat_names'])?>"></td>
+</tr>
+<tr>
+<td valign="top">Options:</td>
+<td valign="top">
+<div><label><input type="checkbox" name="use_scenario"<?php echo($_REQUEST['use_scenario']?' checked="checked"':'')?>>Use scenario</label></div>
+</td>
 </tr>
 </table>
 
