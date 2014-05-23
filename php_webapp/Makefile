@@ -48,6 +48,8 @@ php_scripts = \
 	scoreboard-data.js.php \
 	tournament.php \
 	tournament_dashboard.php \
+	venue.php \
+	venues.php \
 	includes/auth.php \
 	includes/db.php \
 	includes/pairing_functions.php \
