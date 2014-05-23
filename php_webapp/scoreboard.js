@@ -71,8 +71,20 @@ var S = {
 	ROWS: 8,
 	COLS: 12,
 	DELAY: 30, //seconds
-	ROUND_ROBIN: false
+	ROUND_ROBIN: true
 	};
+
+function in_game(play, pid)
+{
+	var seats_array = play.seats.split(/,/);
+	for (var i = 0; i < seats_array.length; i++) {
+		var s = seats_array[i];
+		if (play['player.'+s] == pid) {
+			return true;
+		}
+	}
+	return false;
+}
 
 function on_players_fetched(data)
 {
@@ -117,15 +129,12 @@ for (var i = 0; i < players.length; i++)
 		{
 			var play = games[k];
 			var result = null;
-			if (play['player.W'] == pr.pid && play['player.B'] == pc.pid)
+			if (pr.pid != pc.pid &&
+				in_game(play, pr.pid) && in_game(play, pc.pid))
 			{
 				result = play.in_progress ? 'P' :
-					play.winner == 'W' ? 'W' : 'L';
-			}
-			else if (play['player.W'] == pc.pid && play['player.B'] == pr.pid)
-			{
-				result = play.in_progress ? 'P' :
-					play.winner == 'B' ? 'W' : 'L';
+					(play.winner && play['player.'+play.winner] == pr.pid) ? 'W' :
+					'L';
 			}
 			else
 			{
@@ -158,6 +167,7 @@ for (var i = 0; i < players.length; i++)
 	}
 	$('.wins_cell', $row).text(count_wins);
 	$('.plays_cell', $row).text(count_plays);
+	$('.score_col', $row).text(count_wins+'-'+(count_plays-count_wins));
 	$('#scoreboard_table').append($row);
 	if (i < S.start || i >= S.start + S.ROWS)
 	{

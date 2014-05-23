@@ -78,16 +78,19 @@ while ($row=mysqli_fetch_row($query)) {
 	$query1 = mysqli_query($database, $sql)
 		or die("SQL error: ".db_error($database));
 	$seat_count=0;
+	$all_seats = array();
 	while ($row1 = mysqli_fetch_row($query1))
 	{
 		$a_seat = $row1[2] ?: (++$seat_count);
 		$g['player.'.$a_seat] = $row1[0];
+		$all_seats[] = $a_seat;
 
 		if ($row1[1] == 1) {
 			$g['winner'] = $a_seat;
 		}
 	}
 
+	$g['seats'] = implode(',', $all_seats);
 	if ($count++) { echo ",\n"; }
 	echo json_encode($g);
 }

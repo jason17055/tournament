@@ -13,3 +13,4 @@ tr.oddrow { background-color: #d0d8e8; color: black; height: 4em; }
 	width: 30px;
 	display: none;
 	}
+.wins_cell, .plays_cell { display: none; }
