@@ -9,3 +9,7 @@ tr.oddrow { background-color: #d0d8e8; color: black; height: 4em; }
 #wongamesth { width: 55pt; }
 #playedth { width: 55pt; }
 .template { display: none; }
+.round_robin_buffer_col {
+	width: 30px;
+	display: none;
+	}

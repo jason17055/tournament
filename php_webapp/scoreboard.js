@@ -70,7 +70,8 @@ var S = {
 	start: get_url_param('start'),
 	ROWS: 8,
 	COLS: 12,
-	DELAY: 30 //seconds
+	DELAY: 30, //seconds
+	ROUND_ROBIN: false
 	};
 
 function on_players_fetched(data)
@@ -81,14 +82,18 @@ function on_players_fetched(data)
 	players = players.sort(cmp_rank);
 	do_short_names(players);
 
-for (var i in players)
-{
-	var pc = players[i];
-	var $cell = $('<th width="35"></th>');
-	$cell.text(pc.initials);
-	$cell.attr('class', 'opponent'+pc.pid+'_col');
-	$('#th_row').append($cell);
-}
+	if (S.ROUND_ROBIN) {
+		$('.round_robin_buffer_col').show();
+		for (var i in players)
+		{
+			var pc = players[i];
+			var $cell = $('<th width="35"></th>');
+			$cell.text(pc.initials);
+			$cell.attr('class', 'opponent'+pc.pid+'_col');
+			$('#th_row').append($cell);
+		}
+	}
+
 if (S.start == null) { S.start = 0; }
 S.min_opp_by_pid = new Array();
 S.max_opp_by_pid = new Array();
@@ -146,7 +151,10 @@ for (var i = 0; i < players.length; i++)
 				result == "W" ? 'images/win_icon.png' : 'images/lose_icon.png');
 			$cell.append($img);
 		}
-		$row.append($cell);
+
+		if (S.ROUND_ROBIN) {
+			$row.append($cell);
+		}
 	}
 	$('.wins_cell', $row).text(count_wins);
 	$('.plays_cell', $row).text(count_plays);
