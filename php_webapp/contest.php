@@ -475,7 +475,8 @@ if (isset($_GET['id'])) {
 			'seat' => $seat,
 			'turn_order' => $turn_order,
 			'score' => $score,
-			'placement' => $placement
+			'placement' => $placement,
+			'status' => $status
 			)
 			);
 	} // end foreach participant
