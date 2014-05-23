@@ -11,6 +11,7 @@ if (isset($_GET['id'])) {
 	$sql = "SELECT
 		name,location,start_time,multi_game,multi_session,multi_round,multi_table,current_session,
 				vocab_table,ratings,
+				use_person_ordinal,
 				use_person_member_number,use_person_entry_rank,
 				use_person_home_location,use_person_mail,use_person_phone
 		FROM tournament
@@ -30,11 +31,12 @@ if (isset($_GET['id'])) {
 		$_REQUEST['current_session'] = $row[7];
 		$_REQUEST['vocab_table'] = $row[8];
 		$_REQUEST['ratings'] = $row[9]=='Y'?'1':null;
-		$_REQUEST['use_person_member_number'] = $row[10]=='Y'?'1':null;
-		$_REQUEST['use_person_entry_rank'] = $row[11]=='Y'?'1':null;
-		$_REQUEST['use_person_home_location'] = $row[12]=='Y'?'1':null;
-		$_REQUEST['use_person_mail'] = $row[13]=='Y'?'1':null;
-		$_REQUEST['use_person_phone'] = $row[14]=='Y'?'1':null;
+		$_REQUEST['use_person_ordinal'] = $row[10]=='Y'?1:null;
+		$_REQUEST['use_person_member_number'] = $row[11]=='Y'?'1':null;
+		$_REQUEST['use_person_entry_rank'] = $row[12]=='Y'?'1':null;
+		$_REQUEST['use_person_home_location'] = $row[13]=='Y'?'1':null;
+		$_REQUEST['use_person_mail'] = $row[14]=='Y'?'1':null;
+		$_REQUEST['use_person_phone'] = $row[15]=='Y'?'1':null;
 	}
 
 	is_director($tournament_id)
@@ -59,7 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	if (isset($_REQUEST['action:create_tournament'])) {
 		$sql = "INSERT INTO tournament (name,location,start_time,
 			multi_game,multi_session,multi_round,multi_table,vocab_table,current_session,
-			ratings,use_person_member_number,use_person_entry_rank,
+			ratings,use_person_ordinal,
+			use_person_member_number,use_person_entry_rank,
 			use_person_home_location,use_person_mail,use_person_phone)
 			VALUES (
 			".db_quote($_REQUEST['name']).",
@@ -72,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['vocab_table']).",
 			".db_quote($_REQUEST['current_session']).",
 			".db_quote(isset($_REQUEST['ratings'])?'Y':'N').",
+			".db_quote(isset($_REQUEST['use_person_ordinal'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['use_person_member_number'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['use_person_entry_rank'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['use_person_home_location'])?'Y':'N').",
@@ -99,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		vocab_table=".db_quote($_REQUEST['vocab_table']).",
 		current_session=".db_quote($_REQUEST['current_session']).",
 		ratings=".db_quote($_REQUEST['ratings']?'Y':'N').",
+		use_person_ordinal=".db_quote($_REQUEST['use_person_ordinal']?'Y':'N').",
 		use_person_member_number=".db_quote($_REQUEST['use_person_member_number']?'Y':'N').",
 		use_person_entry_rank=".db_quote($_REQUEST['use_person_entry_rank']?'Y':'N').",
 		use_person_home_location=".db_quote($_REQUEST['use_person_home_location']?'Y':'N').",
@@ -128,6 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_GET['id']))
 	$_REQUEST['vocab_table'] = 'table';
 	$_REQUEST['current_session'] = NULL;
 	$_REQUEST['ratings'] = 1;
+	$_REQUEST['use_person_ordinal'] = 1;
 	$_REQUEST['use_person_member_number'] = 1;
 	$_REQUEST['use_person_entry_rank'] = 1;
 	$_REQUEST['use_person_home_location'] = 1;
@@ -181,6 +187,7 @@ begin_page(isset($_GET['id']) ? "Edit Tournament" : "New Tournament");
 <tr>
 <td valign="top">Person Attributes:</td>
 <td>
+<div><label><input type="checkbox" name="use_person_ordinal"<?php echo(isset($_REQUEST['use_person_ordinal'])?' checked="checked"':'')?>>Ordinal</label></div>
 <div><label><input type="checkbox" name="use_person_member_number"<?php echo(isset($_REQUEST['use_person_member_number'])?' checked="checked"':'')?>>Member Number</label></div>
 <div><label><input type="checkbox" name="use_person_entry_rank"<?php echo(isset($_REQUEST['use_person_entry_rank'])?' checked="checked"':'')?>>Entry Rank</label></div>
 <div><label><input type="checkbox" name="use_person_home_location"<?php echo(isset($_REQUEST['use_person_home_location'])?' checked="checked"':'')?>>Home Location</label></div>
