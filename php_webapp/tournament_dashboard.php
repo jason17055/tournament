@@ -261,7 +261,7 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 $sql = "SELECT id,
 	session_num,
 	IFNULL(started,'(unknown)') AS started,
-	CONCAT(round,'-',board) AS contest_name,
+	CONCAT(round,'-',venue) AS contest_name,
 	game,scenario,status,
 	(SELECT GROUP_CONCAT(
 		p.name ORDER BY name SEPARATOR ', '
@@ -282,8 +282,9 @@ $sql = "SELECT id,
 	) AS winner
 	FROM contest c
 	WHERE tournament=".db_quote($tournament_id)."
-	ORDER BY session_num,round,started,board,id";
-$query = mysqli_query($database, $sql);
+	ORDER BY session_num,round,started,venue,id";
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
 
 while ($row = mysqli_fetch_row($query)) {
 

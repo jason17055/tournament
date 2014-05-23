@@ -20,16 +20,10 @@ CREATE TABLE venue (
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
-CREATE TABLE reservation (
-	contest INTEGER NOT NULL,
-	venue INTEGER NOT NULL,
-	starts DATETIME NOT NULL,
-	ends DATETIME NOT NULL,
-	FOREIGN KEY (contest) REFERENCES contest(id),
-	FOREIGN KEY (venue) REFERENCES venue(id),
-	PRIMARY KEY (contest, venue, starts)
-	);
-
 ALTER TABLE game_definition ADD COLUMN use_scenario CHAR(1) NOT NULL DEFAULT 'Y';
+ALTER TABLE contest ADD COLUMN venue INTEGER;
+--FOREIGN KEY contest (venue) REFERENCES venue (id)
+ALTER TABLE contest ADD COLUMN starts DATETIME;
+ALTER TABLE contest DROP COLUMN board;
 
 UPDATE master SET version=4;

@@ -8,7 +8,8 @@ require_once('includes/auth.php');
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
 	$sql = "SELECT multi_game,multi_session,multi_round,current_session,vocab_table,
-		(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS default_game
+		(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS default_game,
+		multi_venue
 		FROM tournament t
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
@@ -20,13 +21,14 @@ if (isset($_GET['tournament'])) {
 		'multi_round' => $row[2],
 		'current_session' => $row[3],
 		'vocab_table' => $row[4],
-		'default_game' => $row[5]
+		'default_game' => $row[5],
+		'multi_venue' => $row[6]=='Y'
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['session_num'] = $tournament_info['current_session'];
 		$_REQUEST['round'] = "";
-		$_REQUEST['board'] = "";
+		$_REQUEST['venue'] = "";
 		$_REQUEST['game'] = $tournament_info['default_game'];
 		$_REQUEST['scenario'] = "";
 		$_REQUEST['status'] = "";
@@ -36,14 +38,16 @@ if (isset($_GET['tournament'])) {
 	}
 }
 else if (isset($_GET['id'])) {
-	$sql = "SELECT tournament,multi_game,multi_session,multi_round,
-		session_num,round,board,
+	$sql = "SELECT c.tournament,multi_game,multi_session,multi_round,
+		session_num,round,venue,
 		game,scenario,status,
-		started,finished,notes,vocab_table
+		started,finished,notes,vocab_table,
+		multi_venue
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
-	$query = mysqli_query($database, $sql);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
 	$row = mysqli_fetch_row($query)
 		or die("Invalid contest id");
 	$tournament_id = $row[0];
@@ -51,13 +55,14 @@ else if (isset($_GET['id'])) {
 		'multi_game' => $row[1],
 		'multi_session' => $row[2],
 		'multi_round' => $row[3],
-		'vocab_table' => $row[13]
+		'vocab_table' => $row[13],
+		'multi_venue' => $row[14]=='Y'
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$_REQUEST['session_num'] = $row[4];
 		$_REQUEST['round'] = $row[5];
-		$_REQUEST['board'] = $row[6];
+		$_REQUEST['venue'] = $row[6];
 		$_REQUEST['game'] = $row[7];
 		$_REQUEST['scenario'] = $row[8];
 		$_REQUEST['status'] = $row[9];
@@ -181,18 +186,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		mysqli_autocommit($database, FALSE);
 
-		$sql = "INSERT INTO contest (tournament,session_num,round,board,game,scenario,status,started,finished,notes)
+		$sql = "INSERT INTO contest (tournament,session_num,round,game,scenario,status,started,finished,notes,venue)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['session_num']).",
 			".db_quote($_REQUEST['round']).",
-			".db_quote($_REQUEST['board']).",
 			".db_quote($_REQUEST['game']).",
 			".db_quote($_REQUEST['scenario']).",
 			".db_quote($_REQUEST['status']).",
 			".db_quote($_REQUEST['started']).",
 			".db_quote($_REQUEST['finished']).",
-			".db_quote($_REQUEST['notes'])."
+			".db_quote($_REQUEST['notes']).",
+			".db_quote($_REQUEST['venue'])."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
@@ -214,7 +219,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$updates[] = "session_num=".db_quote($_REQUEST['session_num']);
 		}
 		$updates[] = "game=".db_quote($_REQUEST['game']);
-		$updates[] = "board=".db_quote($_REQUEST['board']);
 		$updates[] = "status=".db_quote($_REQUEST['status']);
 		if ($tournament_info['multi_round']=='Y') {
 		$updates[] = "round=".db_quote($_REQUEST['round']);
@@ -223,6 +227,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
 		$updates[] = "started=".db_quote($_REQUEST['started']);
 		$updates[] = "finished=".db_quote($_REQUEST['finished']);
+		if (isset($_REQUEST['venue'])) {
+		$updates[] = "venue=".db_quote($_REQUEST['venue']);
+		}
 
 		$sql = "UPDATE contest
 		SET ".implode(',',$updates)."
@@ -300,12 +307,35 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 <td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
 </tr>
 <?php }//endif multi_round tournament?>
+<?php if ($tournament_info['multi_venue']) {?>
 <tr>
-<td><label for="board_entry"><?php echo(
-	$tournament_info['vocab_table'] == 'court' ? 'Court' :
-	'Table')?> No.:</label></td>
-<td><input type="text" id="board_entry" name="board" value="<?php h($_REQUEST['board'])?>"></td>
+<td><label for="venue_cb">Venue:</label></td>
+<td><?php
+function select_venue_widget($args)
+{
+	global $database;
+	global $tournament_id;
+	$sql = "SELECT id,venue_name
+		FROM venue
+		WHERE tournament=".db_quote($tournament_id)."
+		AND venue_status='enabled'
+		ORDER BY venue_name";
+	$query = mysqli_query($database, $sql);
+	$options = array('' => '--unspecified--');
+	while ($row = mysqli_fetch_row($query)) {
+		$options[$row[0]] = $row[1];
+	}
+	$args['options'] = $options;
+	select_widget($args);
+}
+	select_venue_widget(array(
+		'name' => 'venue',
+		'id' => 'venue_cb',
+		'value' => $_REQUEST['venue']
+		));
+		?></td>
 </tr>
+<?php }//endif multi_venue ?>
 <tr>
 <td><label for="started_date_entry">Start Date/Time:</label></td>
 <td>
