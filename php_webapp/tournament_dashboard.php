@@ -7,14 +7,17 @@ require_once('includes/skin.php');
 $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,multi_game,multi_session,current_session,vocab_table,
 	ratings,use_person_member_number,use_person_entry_rank,
-	use_person_home_location,use_person_mail,use_person_phone
-	FROM tournament WHERE id=".db_quote($tournament_id);
-$query = mysqli_query($database, $sql);
+	use_person_home_location,use_person_mail,use_person_phone,
+	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0
+	FROM tournament t
+	WHERE id=".db_quote($tournament_id);
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
 $row = mysqli_fetch_row($query);
 $tournament_info = array(
 	'id' => $tournament_id,
 	'name' => $row[0],
-	'multi_game' => $row[1],
+	'multi_game' => $row[1]=='Y',
 	'multi_session' => $row[2]=='Y',
 	'current_session' => $row[3],
 	'vocab_table' => $row[4],
@@ -23,8 +26,20 @@ $tournament_info = array(
 	'use_person_entry_rank' => $row[7]=='Y',
 	'use_person_home_location' => $row[8]=='Y',
 	'use_person_mail' => $row[9]=='Y',
-	'use_person_phone' => $row[10]=='Y'
+	'use_person_phone' => $row[10]=='Y',
+	'game0' => $row[11]
 	);
+
+$game_definition = array();
+if (!$tournament_info['multi_game'] && $tournament_info['game0']) {
+	$sql = "SELECT use_scenario
+		FROM game_definition
+		WHERE id=".db_quote($tournament_info['game0']);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query);
+	$game_definition['use_scenario'] = $row[0] == 'Y';
+	$tournament_info['use_scenario'] = $game_definition['use_scenario'];
+}
 
 $page_title = "$tournament_info[name] - Dashboard";
 begin_page($page_title);
@@ -220,6 +235,7 @@ $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 
 
 make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
+
  ?>
 
 <table border="1">
@@ -231,10 +247,12 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <th>Started</th>
 <th>Round-<?php
 	echo($tournament_info['vocab_table']=='court'?'Court':'Table')?></th>
-<?php if ($tournament_info['multi_game']=='Y') { ?>
+<?php if ($tournament_info['multi_game']) { ?>
 <th>Game</th>
 <?php } ?>
+<?php if ($tournament_info['use_scenario']) { ?>
 <th>Scenario</th>
+<?php } ?>
 <th>Status</th>
 <th>Participants</th>
 <th>Winner</th>
@@ -287,10 +305,12 @@ while ($row = mysqli_fetch_row($query)) {
 <?php } ?>
 <td class="started_date_col"><a href="<?php h($url)?>"><?php h($started_date)?></a></td>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
-<?php if ($tournament_info['multi_game'] == 'Y') { ?>
+<?php if ($tournament_info['multi_game']) { ?>
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
+<?php if ($tournament_info['use_scenario']) { ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
+<?php } ?>
 <td class="status_col"><?php format_contest_status($status)?>
 <button type="button" class="popup_menu_btn" data-for="contest_status_popup_menu">...</button>
 </td>
