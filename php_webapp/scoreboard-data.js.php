@@ -23,7 +23,7 @@ header("Content-Type: text/json");
 echo "{\n";
 echo '"tournament":'.json_encode($tournament_info).",\n";
 
-$sql = "SELECT id,name,entry_rank,member_number
+$sql = "SELECT id,name,entry_rank,member_number,ordinal
 	FROM person
 	WHERE tournament=".db_quote($tournament_id)."
 	AND status IS NOT NULL
@@ -40,7 +40,8 @@ while ($row = mysqli_fetch_row($query)) {
 		'pid' => $row[0],
 		'name' => $row[1],
 		'entryRank' => $row[2],
-		'member_number' => $row[3]
+		'member_number' => $row[3],
+		'ordinal' => $row[4]
 		);
 	echo json_encode($p);
 }
