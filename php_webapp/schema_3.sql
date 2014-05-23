@@ -9,6 +9,8 @@ ALTER TABLE tournament ADD COLUMN use_person_home_location CHAR(1) NOT NULL DEFA
 ALTER TABLE tournament ADD COLUMN use_person_mail CHAR(1) NOT NULL DEFAULT 'Y';
 ALTER TABLE tournament ADD COLUMN use_person_phone CHAR(1) NOT NULL DEFAULT 'Y';
 
+ALTER TABLE tournament CHANGE COLUMN multi_table multi_venue CHAR(1) NOT NULL DEFAULT 'Y';
+
 --status one of 'enabled','disabled'
 CREATE TABLE venue (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
