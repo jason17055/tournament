@@ -8,3 +8,4 @@ tr.oddrow { background-color: #d0d8e8; color: black; height: 4em; }
 #playerth { width: 150pt; }
 #wongamesth { width: 55pt; }
 #playedth { width: 55pt; }
+.template { display: none; }

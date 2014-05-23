@@ -95,7 +95,8 @@ S.max_opp_by_pid = new Array();
 for (var i = 0; i < players.length; i++)
 {
 	var pr = players[i];
-	var $row = $('<tr><td class="fullname_cell"></td><td class="wins_cell"></td><td class="plays_cell"></td><td></td></tr>');
+	var $row = $('#scoreboard_row').clone();
+	$row.removeClass('template');
 	$row.attr('class', (i % 2 == 0) ? 'oddrow' : 'evenrow');
 	$row.attr('id', "scoreboard_row"+i);
 	$('.fullname_cell', $row).text(pr.name + (pr.entryRank != null ? (' ' + pr.entryRank) : ""));
