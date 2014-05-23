@@ -8,4 +8,23 @@ ALTER TABLE tournament ADD COLUMN use_person_home_location CHAR(1) NOT NULL DEFA
 ALTER TABLE tournament ADD COLUMN use_person_mail CHAR(1) NOT NULL DEFAULT 'Y';
 ALTER TABLE tournament ADD COLUMN use_person_phone CHAR(1) NOT NULL DEFAULT 'Y';
 
+--status one of 'enabled','disabled'
+CREATE TABLE venue (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	tournament INTEGER NOT NULL,
+	venue_name VARCHAR(200),
+	status VARCHAR(20),
+	FOREIGN KEY (tournament) REFERENCES tournament (id)
+	);
+
+CREATE TABLE reservation (
+	contest INTEGER NOT NULL,
+	venue INTEGER NOT NULL,
+	starts DATETIME NOT NULL,
+	ends DATETIME NOT NULL,
+	FOREIGN KEY (contest) REFERENCES contest(id),
+	FOREIGN KEY (venue) REFERENCES venue(id),
+	PRIMARY KEY (contest, venue, starts)
+	);
+
 UPDATE master SET version=4;
