@@ -24,6 +24,15 @@ ALTER TABLE game_definition ADD COLUMN use_scenario CHAR(1) NOT NULL DEFAULT 'Y'
 ALTER TABLE contest ADD COLUMN venue INTEGER;
 --FOREIGN KEY contest (venue) REFERENCES venue (id)
 ALTER TABLE contest ADD COLUMN starts DATETIME;
+
+--transfer contest 'board' information into 'venue' table
+INSERT INTO venue (tournament,venue_name)
+SELECT DISTINCT tournament,board
+	FROM contest;
+
+UPDATE contest c SET venue=(
+	SELECT id FROM venue WHERE tournament=c.tournament AND venue_name=c.board
+	) WHERE board IS NOT NULL;
 ALTER TABLE contest DROP COLUMN board;
 
 UPDATE master SET version=4;
