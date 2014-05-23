@@ -265,18 +265,20 @@ split_datetime($_REQUEST['finished'], $_REQUEST['finished_date'], $_REQUEST['fin
 
 $game_definition = array();
 if ($_REQUEST['game']) {
-	$sql = "SELECT seat_names FROM game_definition
+	$sql = "SELECT seat_names,use_scenario FROM game_definition
 	WHERE id=".db_quote($_REQUEST['game'])."
 	AND tournament=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
 	$row = mysqli_fetch_row($query)
 		or die("Game definition $_REQUEST[game] not found.");
 	$game_definition['seat_names'] = $row[0];
+	$game_definition['use_scenario'] = $row[1]=='Y';
 	$game_definition['can_add_seats'] = !$row[0];
 	$game_definition['can_remove_seats'] = !$row[0];
 }
 else {
-	// if no game is specified, then user is allowed to add/remove seats
+	// if no game is specified, then user is allowed all features
+	$game_definition['use_scenario'] = TRUE;
 	$game_definition['can_add_seats'] = TRUE;
 	$game_definition['can_remove_seats'] = TRUE;
 }
@@ -337,10 +339,12 @@ while ($row = mysqli_fetch_row($query)) {
 </select>
 </td>
 </tr>
+<?php if ($game_definition['use_scenario']) { ?>
 <tr>
 <td><label for="scenario_entry">Scenario:</label></td>
 <td><input type="text" id="scenario_entry" name="scenario" value="<?php h($_REQUEST['scenario'])?>"></td>
 </tr>
+<?php } //endif use_scenario ?>
 <tr>
 <td><label for="status_cb">Status:</label></td>
 <td><?php select_widget(array(
