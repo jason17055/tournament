@@ -23,12 +23,20 @@ header("Content-Type: text/json");
 echo "{\n";
 echo '"tournament":'.json_encode($tournament_info).",\n";
 
-$sql = "SELECT id,name,entry_rank,member_number,ordinal
-	FROM person
-	WHERE tournament=".db_quote($tournament_id)."
-	AND status IS NOT NULL
-	AND status NOT IN ('prereg')
-	ORDER BY entry_rank DESC, name ASC";
+$sql = "SELECT p.id,p.name,p.entry_rank,p.member_number,p.ordinal,last_g.id AS last_contest
+	FROM person p
+	LEFT JOIN contest last_g
+		ON last_g.id=(SELECT id FROM contest c
+			WHERE tournament=p.tournament
+			AND status IN ('completed')
+			AND EXISTS (SELECT 1 FROM contest_participant WHERE contest=c.id AND player=p.id)
+			ORDER BY started DESC, id DESC
+			LIMIT 1
+			)
+	WHERE p.tournament=".db_quote($tournament_id)."
+	AND p.status IS NOT NULL
+	AND p.status NOT IN ('prereg')
+	ORDER BY p.entry_rank DESC, p.name ASC";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
@@ -43,6 +51,35 @@ while ($row = mysqli_fetch_row($query)) {
 		'member_number' => $row[3],
 		'ordinal' => $row[4]
 		);
+	$last_contest_id = $row[5];
+	if ($last_contest_id) {
+		$sql = "SELECT s.placement,
+			(SELECT GROUP_CONCAT(player)
+				FROM contest_participant
+				WHERE contest=s.contest
+				AND NOT (player=s.player)
+				) AS opponents,
+			(SELECT COUNT(*)
+				FROM contest_participant
+				WHERE contest=s.contest
+				AND NOT (player=s.player)
+				AND placement=s.placement) AS tie_count
+			FROM contest_participant s
+			WHERE contest=".db_quote($last_contest_id)."
+			AND player=".db_quote($p['pid']);
+		$q2 = mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$r2 = mysqli_fetch_row($q2);
+
+		$placement = $r2[0];
+		$opponents = $r2[1];
+		$tie_count = $r2[2];
+
+		$p['lastResult']= $placement==1 && $tie_count!=0 ? 'TIE' :
+			($placement==1 ? 'WIN' : 'LOSS');
+		$p['lastOpponents']=$r2[1];
+	}
+
 	echo json_encode($p);
 }
 echo "],\n";

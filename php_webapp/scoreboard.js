@@ -94,6 +94,11 @@ function on_players_fetched(data)
 	players = players.sort(cmp_rank);
 	do_short_names(players);
 
+	var player_by_pid = {};
+	for (var i = 0; i < players.length; i++) {
+		player_by_pid[players[i].pid] = players[i];
+	}
+
 	if (S.ROUND_ROBIN) {
 		$('.round_robin_buffer_col').show();
 		for (var i in players)
@@ -168,6 +173,26 @@ for (var i = 0; i < players.length; i++)
 	$('.wins_cell', $row).text(count_wins);
 	$('.plays_cell', $row).text(count_plays);
 	$('.score_col', $row).text(count_wins+'-'+(count_plays-count_wins));
+
+	// last result
+	if (pr.lastResult) {
+		var opps_arr = pr.lastOpponents.split(/,/);
+		var opps_str = '';
+		for (var k1 = 0; k1 < opps_arr.length; k1++) {
+			if (k1 > 0) { opps_str += ','; }
+			var k2 = opps_arr[k1];
+			opps_str += player_by_pid[k2].initials;
+		}
+		$('.last_result_col .opponent', $row).text(opps_str);
+		$('.last_result_col .result_icon', $row).
+			attr('src', pr.lastResult=='WIN' ? 'images/win_icon.png' :
+				pr.lastResult=='TIE' ? 'images/tie_icon.png' : 'images/lose_icon.png').
+			attr('alt', pr.lastResult);
+	}
+	else {
+		$('.last_result_col', $row).empty();
+	}
+
 	$('#scoreboard_table').append($row);
 	if (i < S.start || i >= S.start + S.ROWS)
 	{
