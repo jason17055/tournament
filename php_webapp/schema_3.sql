@@ -21,7 +21,7 @@ CREATE TABLE venue (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,
 	venue_name VARCHAR(200),
-	status VARCHAR(20),
+	venue_status VARCHAR(20),
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
