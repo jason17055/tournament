@@ -163,9 +163,6 @@ while ($row = mysqli_fetch_row($query)) {
 	$w_points_this_session = $row[7] ?: 0;
 	$cur_rating = $row[8];
 
-	$edit_url = "person.php?id=".urlencode($person_id);
-	$url = 'player_scorecard.php?id='.urlencode($person_id);
-
 	$d = array(
 	'member_number' => $row[9],
 	'entry_rank' => $row[10],
@@ -175,6 +172,11 @@ while ($row = mysqli_fetch_row($query)) {
 	'ordinal' => $row[14],
 	'is_team' => ($row[15]=='Y')
 	);
+
+	$edit_url = $d['is_team'] ? 
+		"team.php?id=".urlencode($person_id) :
+		"person.php?id=".urlencode($person_id);
+	$url = 'player_scorecard.php?id='.urlencode($person_id);
 
 	?><tr>
 <?php if ($can_edit_players) { ?>
@@ -227,11 +229,13 @@ if ($row[0]) {
 
 if ($can_edit_players) {
 $new_person_url = "person.php?tournament=".urlencode($tournament_id);
+$new_team_url = "team.php?tournament=".urlencode($tournament_id);
 $import_persons_url = "import_person.php?tournament=".urlencode($tournament_id);
 $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($new_person_url)?>">New Player</a>
+| <a href="<?php h($new_team_url)?>">New Team</a>
 | <a href="<?php h($import_persons_url)?>">Import Players</a>
 | <a href="<?php h($pairings_url)?>">Generate Pairings</a>
 </p>

@@ -48,6 +48,7 @@ php_scripts = \
 	rating_chart.inc.php \
 	run_ratings.php \
 	scoreboard-data.js.php \
+	team.php \
 	tournament.php \
 	tournament_dashboard.php \
 	venue.php \
