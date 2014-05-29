@@ -187,7 +187,7 @@ while ($row = mysqli_fetch_row($query)) {
 		if ($col == 'name') { ?>
 <td class="name_col"><img src="<?php
 	h($d['is_team']?'images/team_icon.png':'images/person_icon.png')?>">
-	<a href="<?php h($url)?>"><?php h($name)?></a></td>
+	<?php h($name)?></td>
 <?php } else { ?>
 <td class="<?php h($col)?>_col"><?php h($d[$col])?></td>
 <?php } //end switch $col ?>
