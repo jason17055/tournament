@@ -74,11 +74,11 @@ function make_popup_list($popup_id, $column_name)
 make_popup_list('status_popup_menu', 'PERSON.STATUS');
 
 $person_columns = array('ordinal','name');
-if ($tournament_info['use_player_member_number']) { $person_columns[]='member_number';}
-if ($tournament_info['use_player_entry_rank'])    { $person_columns[]='entry_rank';}
-if ($tournament_info['use_player_home_location']) { $person_columns[]='home_location';}
-if ($tournament_info['use_player_mail'])          { $person_columns[]='mail';}
-if ($tournament_info['use_player_phone'])         { $person_columns[]='phone';}
+if ($tournament_info['use_person_member_number']) { $person_columns[]='member_number';}
+if ($tournament_info['use_person_entry_rank'])    { $person_columns[]='entry_rank';}
+if ($tournament_info['use_person_home_location']) { $person_columns[]='home_location';}
+if ($tournament_info['use_person_mail'])          { $person_columns[]='mail';}
+if ($tournament_info['use_person_phone'])         { $person_columns[]='phone';}
 
 $person_column_names = array(
 	'ordinal' => 'Ordinal',
