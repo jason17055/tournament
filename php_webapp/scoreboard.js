@@ -20,7 +20,7 @@ function generate_short_name(p)
 		n = n.substring(i+1) + ' ' + n.substring(0,i);
 	}
 
-	var parts = n.split(/ /);
+	var parts = n.split(/[ -]/);
 
 	var x = "";
 	for (var i in parts) {
@@ -34,7 +34,12 @@ function do_short_names(players_arr)
 	{
 		var p = players_arr[i];
 		if (!p.initials) {
-			p.initials = generate_short_name(p);
+			if (p.ordinal) {
+				p.initials = ""+p.ordinal;
+			}
+			else {
+				p.initials = generate_short_name(p);
+			}
 		}
 	}
 }
