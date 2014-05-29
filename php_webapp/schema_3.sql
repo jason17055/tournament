@@ -23,7 +23,7 @@ CREATE TABLE venue (
 ALTER TABLE game_definition ADD COLUMN use_scenario CHAR(1) NOT NULL DEFAULT 'Y';
 ALTER TABLE contest ADD COLUMN venue INTEGER;
 --FOREIGN KEY contest (venue) REFERENCES venue (id)
-ALTER TABLE contest ADD COLUMN starts DATETIME;
+ALTER TABLE contest ADD COLUMN starts VARCHAR(20);
 
 --transfer contest 'board' information into 'venue' table
 INSERT INTO venue (tournament,venue_name)

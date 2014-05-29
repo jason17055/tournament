@@ -41,8 +41,9 @@ else if (isset($_GET['id'])) {
 	$sql = "SELECT c.tournament,multi_game,multi_session,multi_round,
 		session_num,round,venue,
 		game,scenario,status,
-		started,finished,notes,vocab_table,
-		multi_venue
+		starts,started,finished,
+		notes,
+		vocab_table,multi_venue
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
@@ -55,8 +56,8 @@ else if (isset($_GET['id'])) {
 		'multi_game' => $row[1],
 		'multi_session' => $row[2],
 		'multi_round' => $row[3],
-		'vocab_table' => $row[13],
-		'multi_venue' => $row[14]=='Y'
+		'vocab_table' => $row[14],
+		'multi_venue' => $row[15]=='Y'
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -66,9 +67,10 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['game'] = $row[7];
 		$_REQUEST['scenario'] = $row[8];
 		$_REQUEST['status'] = $row[9];
-		$_REQUEST['started'] = $row[10];
-		$_REQUEST['finished'] = $row[11];
-		$_REQUEST['notes'] = $row[12];
+		$_REQUEST['starts'] = $row[10];
+		$_REQUEST['started'] = $row[11];
+		$_REQUEST['finished'] = $row[12];
+		$_REQUEST['notes'] = $row[13];
 	}
 }
 else {
@@ -179,6 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		die("Not authorized.");
 	}
 
+	$_REQUEST['starts'] = parse_date_time($_REQUEST['starts_date'],$_REQUEST['starts_time']);
 	$_REQUEST['started'] = parse_date_time($_REQUEST['started_date'],$_REQUEST['started_time']);
 	$_REQUEST['finished'] = parse_date_time($_REQUEST['finished_date'],$_REQUEST['finished_time']);
 
@@ -186,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		mysqli_autocommit($database, FALSE);
 
-		$sql = "INSERT INTO contest (tournament,session_num,round,game,scenario,status,started,finished,notes,venue)
+		$sql = "INSERT INTO contest (tournament,session_num,round,game,scenario,status,starts,started,finished,notes,venue)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['session_num']).",
@@ -194,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['game']).",
 			".db_quote($_REQUEST['scenario']).",
 			".db_quote($_REQUEST['status']).",
+			".db_quote($_REQUEST['starts']).",
 			".db_quote($_REQUEST['started']).",
 			".db_quote($_REQUEST['finished']).",
 			".db_quote($_REQUEST['notes']).",
@@ -225,6 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		}
 		$updates[] = "scenario=".db_quote($_REQUEST['scenario']);
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
+		$updates[] = "starts=".db_quote($_REQUEST['starts']);
 		$updates[] = "started=".db_quote($_REQUEST['started']);
 		$updates[] = "finished=".db_quote($_REQUEST['finished']);
 		if (isset($_REQUEST['venue'])) {
@@ -267,6 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	}
 }
 
+split_datetime($_REQUEST['starts'], $_REQUEST['starts_date'], $_REQUEST['starts_time']);
 split_datetime($_REQUEST['started'], $_REQUEST['started_date'], $_REQUEST['started_time']);
 split_datetime($_REQUEST['finished'], $_REQUEST['finished_date'], $_REQUEST['finished_time']);
 
@@ -337,17 +343,24 @@ function select_venue_widget($args)
 </tr>
 <?php }//endif multi_venue ?>
 <tr>
-<td><label for="started_date_entry">Start Date/Time:</label></td>
+<td><label for="starts_date_entry">Scheduled Start:</label></td>
+<td>
+<label>Date: <input type="date" id="starts_date_entry" name="starts_date" value="<?php h($_REQUEST['starts_date'])?>"></label>
+<label>Time: <input type="time" name="starts_time" value="<?php h($_REQUEST['starts_time'])?>"></label>
+</td>
+</tr>
+<tr>
+<td><label for="started_date_entry">Actual Start:</label></td>
 <td>
 <label>Date: <input type="date" id="started_date_entry" name="started_date" value="<?php h($_REQUEST['started_date'])?>"></label>
 <label>Time: <input type="time" name="started_time" value="<?php h($_REQUEST['started_time'])?>"></label>
 </td>
 </tr>
 <tr>
-<td><label for="finished_date_entry">Finish Date/Time:</label></td>
+<td><label for="finished_date_entry">Finished:</label></td>
 <td>
 <label>Date: <input type="date" id="finished_date_entry" name="finished_date" value="<?php h($_REQUEST['finished_date'])?>"></label>
-<label>Time: <input type="time" name="started_time" value="<?php h($_REQUEST['started_time'])?>"></label>
+<label>Time: <input type="time" name="finished_time" value="<?php h($_REQUEST['finished_time'])?>"></label>
 </td>
 </tr>
 <tr>
