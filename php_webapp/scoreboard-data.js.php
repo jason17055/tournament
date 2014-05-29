@@ -142,7 +142,9 @@ while ($row = mysqli_fetch_row($query)) {
 echo "],\n";
 echo '"games":[';
 
-$sql = "SELECT c.id,c.status,c.scenario
+$sql = "SELECT c.id,c.status,c.scenario,
+	(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id
+		AND placement=1) AS nwinners
 	FROM contest c
 	JOIN tournament t ON t.id=c.tournament
 	WHERE t.id=".db_quote($tournament_id)."
@@ -157,6 +159,7 @@ while ($row=mysqli_fetch_row($query)) {
 	$contest_id = $row[0];
 	$game_status = $row[1];
 	$scenario = $row[2];
+	$nwinners = $row[3];
 
 	$g = array();
 	if ($game_status != 'completed') {
@@ -182,6 +185,10 @@ while ($row=mysqli_fetch_row($query)) {
 		if ($row1[1] == 1) {
 			$g['winner'] = $a_seat;
 		}
+	}
+
+	if ($g['winner'] && $nwinners > 1) {
+		$g['winner'] = 'TIE';
 	}
 
 	$g['seats'] = implode(',', $all_seats);

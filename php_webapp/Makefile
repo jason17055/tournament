@@ -18,6 +18,7 @@ data_files = \
 	images/very_bad_result.png \
 	images/very_good_result.png \
 	images/win_icon.png \
+	images/tie_icon.png \
 	images/lose_icon.png \
 	images/game_in_progress_icon.png \
 	images/person_icon.png \

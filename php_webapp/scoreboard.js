@@ -127,6 +127,7 @@ function on_players_fetched(data)
 			$cell.attr('class', 'opponent'+pc.pid+'_col');
 			$('#th_row').append($cell);
 		}
+		$('.current_opp_icon_key').show();
 	}
 
 if (S.start == null) { S.start = 0; }
@@ -156,6 +157,7 @@ for (var i = 0; i < players.length; i++)
 				in_game(play, pr.pid) && in_game(play, pc.pid))
 			{
 				result = play.in_progress ? 'P' :
+					play.winner == 'TIE' ? 'T' :
 					(play.winner && play['player.'+play.winner] == pr.pid) ? 'W' :
 					'L';
 			}
@@ -180,7 +182,9 @@ for (var i = 0; i < players.length; i++)
 			$('img',$img).attr('title', 'details');
 			$('img',$img).attr('src',
 				result == "P" ? 'images/game_in_progress_icon.png' :
-				result == "W" ? 'images/win_icon.png' : 'images/lose_icon.png');
+				result == "W" ? 'images/win_icon.png' :
+				result == 'T' ? 'images/tie_icon.png' :
+				'images/lose_icon.png');
 			$cell.append($img);
 		}
 
@@ -211,6 +215,10 @@ for (var i = 0; i < players.length; i++)
 				g.result=='TIE' ? 'images/tie_icon.png' :
 				g.result=='LOSS' ? 'images/lose_icon.png' : '').
 			attr('alt', g.result);
+
+		if (g.result=='TIE') {
+			$('.tie_icon_key').show();
+		}
 	}
 	else {
 		$('.last_result_col', $row).empty();
