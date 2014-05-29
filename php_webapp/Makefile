@@ -52,6 +52,7 @@ php_scripts = \
 	venues.php \
 	includes/auth.php \
 	includes/db.php \
+	includes/format.php \
 	includes/pairing_functions.php \
 	includes/ratings_functions.php \
 	includes/skin.php

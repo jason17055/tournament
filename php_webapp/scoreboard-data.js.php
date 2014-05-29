@@ -2,6 +2,7 @@
 
 require_once('config.php');
 require_once('includes/db.php');
+require_once('includes/format.php');
 
 $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,location,start_time FROM tournament WHERE id=".db_quote($tournament_id);
@@ -101,27 +102,32 @@ while ($row = mysqli_fetch_row($query)) {
 	}
 
 	if ($cur_contest_id) {
-		$sql = "SELECT c.venue,
+		$sql = "SELECT v.venue_name,
 			(SELECT GROUP_CONCAT(player)
 				FROM contest_participant
 				WHERE contest=s.contest
 				AND NOT (player=s.player)
-				) AS opponents
+				) AS opponents,
+			c.starts
 			FROM contest c
 			JOIN contest_participant s
 				ON s.contest=c.id
+			LEFT JOIN venue v
+				ON v.id=c.venue
 			WHERE c.id=".db_quote($cur_contest_id)."
 			AND s.player=".db_quote($p['pid']);
 		$q2 = mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 		$r2 = mysqli_fetch_row($q2);
 
-		$venue = $r2[0];
+		$venue_name = $r2[0];
 		$opponents = $r2[1];
+		$starts = $r2[2];
 
 		$p['curGame'] = array(
-			'venue' => $venue,
-			'opponents' => $opponents
+			'venue' => $venue_name,
+			'opponents' => $opponents,
+			'startTime' => format_time_s($starts)
 			);
 	}
 
