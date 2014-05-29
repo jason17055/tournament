@@ -215,7 +215,15 @@ for (var i = 0; i < players.length; i++)
 	if (pr.curGame) {
 		var g = pr.curGame;
 
-		$('.next_game_col .opponent', $row).text(format_opponents(g.opponents));
+		$('.next_game_col .round_ind', $row).text(
+			g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
+
+		if (g.opponents) {
+			$('.next_game_col .opponent', $row).text(format_opponents(g.opponents));
+		}
+		else {
+			$('.next_game_col .vs_ind', $row).hide();
+		}
 
 		if (g.startTime && g.status != 'started') {
 			$('.next_game_col .start_time', $row).text(g.startTime);

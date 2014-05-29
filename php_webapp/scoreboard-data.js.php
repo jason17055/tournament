@@ -108,7 +108,9 @@ while ($row = mysqli_fetch_row($query)) {
 				WHERE contest=s.contest
 				AND NOT (player=s.player)
 				) AS opponents,
-			c.starts
+			c.starts,
+			c.round,
+			c.status
 			FROM contest c
 			JOIN contest_participant s
 				ON s.contest=c.id
@@ -123,9 +125,13 @@ while ($row = mysqli_fetch_row($query)) {
 		$venue_name = $r2[0];
 		$opponents = $r2[1];
 		$starts = $r2[2];
+		$round = $r2[3];
+		$c_status = $r2[4];
 
 		$p['curGame'] = array(
 			'venue' => $venue_name,
+			'round' => $round,
+			'status' => $c_status,
 			'opponents' => $opponents,
 			'startTime' => format_time_s($starts)
 			);
