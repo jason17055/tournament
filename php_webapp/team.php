@@ -7,6 +7,15 @@ require_once('includes/auth.php');
 
 $NMEMBERS = 2;
 
+function default_member_properties()
+{
+	global $NMEMBERS;
+	for ($i = 1; $i <= $NMEMBERS; $i++) {
+		$_REQUEST['p'.$i.'_name'] = '';
+		$_REQUEST['p'.$i.'_phone'] = '';
+	}
+}
+
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
 
@@ -14,6 +23,7 @@ if (isset($_GET['tournament'])) {
 		$_REQUEST['name'] = "";
 		$_REQUEST['ordinal'] = "";
 		$_REQUEST['status'] = "ready";
+		default_member_properties();
 	}
 }
 else if (isset($_GET['id'])) {
@@ -32,6 +42,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['ordinal'] = $row[2];
 		$_REQUEST['status'] = $row[3];
 
+		default_member_properties();
 		$sql = "SELECT ordinal,name,phone FROM person
 			WHERE is_team='N'
 			AND member_of=".db_quote($_GET['id'])."
