@@ -2,7 +2,7 @@ CREATE TABLE master (
 	version INTEGER NOT NULL
 	);
 
-INSERT INTO master (version) VALUES (2);
+INSERT INTO master (version) VALUES (3);
 
 CREATE TABLE account (
 	username VARCHAR(20) NOT NULL PRIMARY KEY,
@@ -20,7 +20,9 @@ CREATE TABLE tournament (
 	multi_game CHAR(1) NOT NULL DEFAULT 'N',
 	multi_session CHAR(1) NOT NULL DEFAULT 'N',
 	multi_round CHAR(1) NOT NULL DEFAULT 'Y',
-	current_session INTEGER
+	current_session INTEGER,
+	multi_table CHAR(1) NOT NULL DEFAULT 'Y',
+	vocab_table VARCHAR(20) NOT NULL DEFAULT 'table'
 	);
 
 CREATE TABLE tournament_role (
