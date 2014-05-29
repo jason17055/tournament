@@ -33,12 +33,12 @@ function do_short_names(players_arr)
 	for (var i in players_arr)
 	{
 		var p = players_arr[i];
-		if (!p.initials) {
+		if (!p.shortName) {
 			if (p.ordinal) {
-				p.initials = ""+p.ordinal;
+				p.shortName = ""+p.ordinal;
 			}
 			else {
-				p.initials = generate_short_name(p);
+				p.shortName = generate_short_name(p);
 			}
 		}
 	}
@@ -110,7 +110,7 @@ function on_players_fetched(data)
 		{
 			var pc = players[i];
 			var $cell = $('<th width="35"></th>');
-			$cell.text(pc.initials);
+			$cell.text(pc.shortName);
 			$cell.attr('class', 'opponent'+pc.pid+'_col');
 			$('#th_row').append($cell);
 		}
@@ -186,7 +186,7 @@ for (var i = 0; i < players.length; i++)
 		for (var k1 = 0; k1 < opps_arr.length; k1++) {
 			if (k1 > 0) { opps_str += ','; }
 			var k2 = opps_arr[k1];
-			opps_str += player_by_pid[k2].initials;
+			opps_str += player_by_pid[k2].shortName;
 		}
 		$('.last_result_col .opponent', $row).text(opps_str);
 		$('.last_result_col .result_icon', $row).
