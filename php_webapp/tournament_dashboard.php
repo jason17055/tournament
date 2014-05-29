@@ -251,11 +251,13 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <table border="1">
 <caption>Games</caption>
 <tr>
+<th></th>
 <?php if ($tournament_info['multi_session']) { ?>
 <th>Session</th>
 <?php } ?>
+<th>Round</th>
 <th>Starts</th>
-<th>Round-<?php
+<th><?php
 	echo($tournament_info['vocab_table']=='court'?'Court':'Table')?></th>
 <?php if ($tournament_info['multi_game']) { ?>
 <th>Game</th>
@@ -264,14 +266,14 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <th>Scenario</th>
 <?php } ?>
 <th>Status</th>
-<th>Participants</th>
+<th>Competitors</th>
 <th>Winner</th>
 </tr>
 <?php
-$sql = "SELECT id,
+$sql = "SELECT c.id,
 	session_num,
 	starts,
-	CONCAT(round,'-',venue) AS contest_name,
+	round AS round,
 	game,scenario,status,
 	(SELECT GROUP_CONCAT(
 		p.name ORDER BY name SEPARATOR ', '
@@ -289,10 +291,12 @@ $sql = "SELECT id,
 			JOIN person p ON p.id=cp.player
 		WHERE cp.contest=c.id
 		AND cp.placement=1
-	) AS winner
+	) AS winner,
+	venue_name
 	FROM contest c
-	WHERE tournament=".db_quote($tournament_id)."
-	ORDER BY session_num,round,started,venue,id";
+	LEFT JOIN venue v ON v.id=c.venue
+	WHERE c.tournament=".db_quote($tournament_id)."
+	ORDER BY session_num,round,starts,venue_name,c.id";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
@@ -301,21 +305,24 @@ while ($row = mysqli_fetch_row($query)) {
 	$contest_id = $row[0];
 	$session_num = $row[1];
 	$starts = $row[2];
-	$contest_name = $row[3];
+	$round = $row[3];
 	$game = $row[4];
 	$scenario = $row[5];
 	$status = $row[6];
 	$participants = $row[7];
 	$winner = $row[8];
+	$venue_name = $row[9];
 
-	$url = "contest.php?id=".urlencode($contest_id);
+	$edit_url = "contest.php?id=".urlencode($contest_id);
 	?>
 <tr>
+<td class="link_col"><a href="<?php h($edit_url)?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a></td>
 <?php if ($tournament_info['multi_session']) { ?>
 <td class="session_num_col"><?php h($session_num)?></td>
 <?php } ?>
-<td class="started_date_col"><a href="<?php h($url)?>"><?php h(format_time_s($starts) ?: '(unknown)')?></a></td>
-<td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<td class="round_col"><?php h($round)?></td>
+<td class="started_date_col"><?php h(format_time_s($starts) ?: '(unknown)')?></td>
+<td class="venue_col"><?php h($venue_name)?></td>
 <?php if ($tournament_info['multi_game']) { ?>
 <td class="game_col"><?php h($game)?></td>
 <?php } ?>
