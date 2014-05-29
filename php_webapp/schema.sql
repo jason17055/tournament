@@ -34,7 +34,7 @@ CREATE TABLE tournament_role (
 	FOREIGN KEY (account) REFERENCES account (username)
 	);
 
---status: one of 'prereg', 'ready', 'absent'
+-- status: one of 'prereg', 'ready', 'absent'
 CREATE TABLE person (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE game_definition (
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
---status is one of 'completed', 'proposed', etc.
+-- status: one of 'completed', 'proposed', etc.
 CREATE TABLE contest (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE contest (
 	FOREIGN KEY (game) REFERENCES game_definition (id)
 	);
 
---status is one of
+-- status: one of
 --      P = proposed
 --      C = confirmed
 --     or NULL = unspecified
