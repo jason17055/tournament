@@ -196,8 +196,13 @@ for (var i = 0; i < players.length; i++)
 	if (pr.lastGame) {
 		var g = pr.lastGame;
 
-		$('.last_result_col .round_ind', $row).text(
-			g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
+		if (g.round) {
+			$('.last_result_col .round', $row).text(
+				g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
+		}
+		else {
+			$('.last_result_col .round_ind', $row).hide();
+		}
 
 		$('.last_result_col .opponent', $row).text(format_opponents(g.opponents));
 
@@ -215,8 +220,13 @@ for (var i = 0; i < players.length; i++)
 	if (pr.curGame) {
 		var g = pr.curGame;
 
-		$('.next_game_col .round_ind', $row).text(
-			g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
+		if (g.round) {
+			$('.next_game_col .round', $row).text(
+				g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
+		}
+		else {
+			$('.next_game_col .round_ind', $row).hide();
+		}
 
 		if (g.opponents) {
 			$('.next_game_col .opponent', $row).text(format_opponents(g.opponents));
@@ -225,7 +235,10 @@ for (var i = 0; i < players.length; i++)
 			$('.next_game_col .vs_ind', $row).hide();
 		}
 
-		if (g.startTime && g.status != 'started') {
+		if (g.status == 'started') {
+			$('.next_game_col .start_time', $row).text('In progress');
+		}
+		else if (g.startTime) {
 			$('.next_game_col .start_time', $row).text(g.startTime);
 		}
 		else {
@@ -234,6 +247,9 @@ for (var i = 0; i < players.length; i++)
 
 		if (g.venue) {
 			$('.next_game_col .venue', $row).text(g.venue);
+		}
+		else {
+			$('.next_game_col .venue_ind', $row).hide();
 		}
 	}
 	else {
