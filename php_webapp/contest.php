@@ -32,6 +32,7 @@ if (isset($_GET['tournament'])) {
 		$_REQUEST['game'] = $tournament_info['default_game'];
 		$_REQUEST['scenario'] = "";
 		$_REQUEST['status'] = "";
+		$_REQUEST['starts'] = "";
 		$_REQUEST['started'] = strftime('%Y-%m-%d', time());
 		$_REQUEST['finished'] = "";
 		$_REQUEST['notes'] = "";
@@ -531,7 +532,7 @@ if ($can_edit && $game_definition['seat_names']) {
 	$mandatory_seats = explode(',', $game_definition['seat_names']);
 	$mcount = 0;
 	foreach ($mandatory_seats as $seat) {
-		if ($seen_seats[$seat]) { continue; }
+		if (isset($seen_seats[$seat])) { continue; }
 		participant_row('participant_m'.(++$mcount),
 			array(
 			'seat' => $seat
