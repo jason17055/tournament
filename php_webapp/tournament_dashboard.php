@@ -138,7 +138,8 @@ $sql = "SELECT p.id,p.name,p.status,
 		) AS w_points_this_session,
 	IFNULL(r.post_rating,r.prior_rating) AS rating,
 	p.member_number,p.entry_rank,p.home_location,
-	p.mail,p.phone,p.ordinal
+	p.mail,p.phone,p.ordinal,
+	p.is_team
 	FROM person p
 	JOIN tournament t
 		ON t.id=p.tournament
@@ -171,7 +172,8 @@ while ($row = mysqli_fetch_row($query)) {
 	'home_location' => $row[11],
 	'mail' => $row[12],
 	'phone' => $row[13],
-	'ordinal' => $row[14]
+	'ordinal' => $row[14],
+	'is_team' => ($row[15]=='Y')
 	);
 
 	?><tr>
@@ -180,7 +182,9 @@ while ($row = mysqli_fetch_row($query)) {
 <?php }
 	foreach ($person_columns as $col) {
 		if ($col == 'name') { ?>
-<td class="name_col"><a href="<?php h($url)?>"><?php h($name)?></a></td>
+<td class="name_col"><img src="<?php
+	h($d['is_team']?'images/team_icon.png':'images/person_icon.png')?>">
+	<a href="<?php h($url)?>"><?php h($name)?></a></td>
 <?php } else { ?>
 <td class="<?php h($col)?>_col"><?php h($d[$col])?></td>
 <?php } //end switch $col ?>

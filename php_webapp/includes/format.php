@@ -10,7 +10,7 @@ function format_time_s($datetime_str)
 	$cur_time = time();
 
 	if (abs($time-$cur_time) < 2*3600) {
-		return strftime('%H:%M', $time);
+		return strftime('%l:%M', $time);
 	}
 	else if (strftime('%Y-%m-%d',$time) == strftime('%Y-%m-%d',$cur_time)) {
 		return strftime('%l:%M%P', $time);

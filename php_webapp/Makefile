@@ -22,6 +22,7 @@ data_files = \
 	images/lose_icon.png \
 	images/game_in_progress_icon.png \
 	images/person_icon.png \
+	images/team_icon.png \
 	images/contest_completed_icon.png \
 	images/contest_proposed_icon.png \
 	images/contest_started_icon.png \
