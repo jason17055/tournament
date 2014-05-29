@@ -486,7 +486,7 @@ if (isset($_GET['id'])) {
 		p.id AS player_id,
 		p.name AS player_name,
 		r.prior_rating AS prior_rating,
-		seat,turn_order,score,placement,
+		cp.seat,cp.turn_order,cp.score,cp.placement,
 		cp.status
 		FROM contest_participant cp
 		JOIN contest c ON c.id=cp.contest
