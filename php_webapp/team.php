@@ -5,6 +5,8 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
 
+$NMEMBERS = 2;
+
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
 
@@ -109,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		$new_team_id = mysqli_insert_id($database);
 
-		for ($member_num = 1; $member_num <= 2; $member_num++) {
+		for ($member_num = 1; $member_num <= $NMEMBERS; $member_num++) {
 			$sql = "INSERT INTO person (tournament,ordinal,name,phone,member_of)
 			VALUES (
 			".db_quote($tournament_id).",
@@ -128,21 +130,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
-	else if (isset($_REQUEST['action:update_person'])) {
+	else if (isset($_REQUEST['action:update_team'])) {
+
+		mysqli_autocommit($database, FALSE);
 
 		$sql = "UPDATE person
 			SET name=".db_quote($_REQUEST['name']).",
-			member_number=".db_quote($_REQUEST['member_number']).",
-			entry_rank=".db_quote($_REQUEST['entry_rank']).",
-			rating=".db_quote($_REQUEST['rating']).",
-			home_location=".db_quote($_REQUEST['home_location']).",
-			mail=".db_quote($_REQUEST['mail']).",
-			phone=".db_quote($_REQUEST['phone']).",
 			status=".db_quote($_REQUEST['status']).",
 			ordinal=".db_quote($_REQUEST['ordinal'])."
 			WHERE id=".db_quote($_REQUEST['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
+
+		for ($member_num = 1; $member_num <= $NMEMBERS; $member_num++) {
+			$sql = "UPDATE person
+				SET name=".db_quote($_REQUEST['p'.$member_num.'_name']).",
+				phone=".db_quote($_REQUEST['p'.$member_num.'_phone'])."
+				WHERE member_of=".db_quote($_GET['id'])."
+				AND ordinal=".db_quote($member_num)."
+				AND tournament=".db_quote($tournament_id);
+			mysqli_query($database, $sql)
+				or die("SQL error: ".db_error($database));
+		}
+
+		mysqli_commit($database);
 
 		header("Location: $next_url");
 		exit();
@@ -151,6 +162,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	else if (isset($_REQUEST['action:delete_team'])) {
 
 		mysqli_autocommit($database, FALSE);
+
+		$sql = "DELETE FROM contest_participant
+			WHERE player=".db_quote($_GET['id'])."
+			AND tournament=".db_quote($tournament_id);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
 
 		$sql = "DELETE FROM person WHERE member_of=".db_quote($_GET['id'])."
 			AND tournament=".db_quote($tournament_id);
@@ -225,7 +242,7 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <div class="form_buttons_bar">
 <?php if (isset($_GET['id'])) { ?>
 <button type="submit" name="action:update_team">Update Team</button>
-<button type="submit" name="action:delete_team">Delete Team</button>
+<button type="submit" name="action:delete_team" onclick="return confirm('Really delete this team?')">Delete Team</button>
 <?php } else { ?>
 <button type="submit" name="action:create_team">Create Team</button>
 <?php } ?>

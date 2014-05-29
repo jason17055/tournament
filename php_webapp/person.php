@@ -122,6 +122,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		exit();
 	}
 
+	else if (isset($_REQUEST['action:delete_person'])) {
+
+		mysqli_autocommit($database, FALSE);
+
+		$sql = "DELETE FROM contest_participant
+			WHERE player=".db_quote($_GET['id'])."
+			AND tournament=".db_quote($tournament_id);
+		mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+
+		$sql = "DELETE FROM person WHERE id=".db_quote($_GET['id'])."
+			AND tournament=".db_quote($tournament_id);
+		mysqli_query($database, $sql);
+
+		mysqli_commit($database);
+
+		header("Location: $next_url");
+		exit();
+	}
 	else {
 		die("Invalid POST");
 	}
@@ -197,7 +216,7 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 <div class="form_buttons_bar">
 <?php if (isset($_GET['id'])) { ?>
 <button type="submit" name="action:update_person">Update Player</button>
-<button type="submit" name="action:delete_person">Delete Player</button>
+<button type="submit" name="action:delete_person" onclick="return confirm('Really delete this person?')">Delete Player</button>
 <?php } else { ?>
 <button type="submit" name="action:create_person">Create Player</button>
 <?php } ?>
