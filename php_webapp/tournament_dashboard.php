@@ -218,6 +218,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 $sql = "SELECT COUNT(*) FROM person
 	WHERE tournament=".db_quote($tournament_id)."
+	AND member_of IS NULL
 	AND status IS NULL";
 $query = mysqli_query($database, $sql);
 $row = mysqli_fetch_row($query);
