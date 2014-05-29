@@ -2,7 +2,7 @@ CREATE TABLE master (
 	version INTEGER NOT NULL
 	);
 
-INSERT INTO master (version) VALUES (1);
+INSERT INTO master (version) VALUES (2);
 
 CREATE TABLE account (
 	username VARCHAR(20) NOT NULL PRIMARY KEY,
@@ -46,6 +46,14 @@ CREATE TABLE person (
 	FOREIGN KEY (tournament) REFERENCES tournament (id)
 	);
 
+CREATE TABLE game_definition (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	tournament INTEGER NOT NULL,
+	name VARCHAR(200) NOT NULL,
+	seat_names VARCHAR(200) NOT NULL,
+	FOREIGN KEY (tournament) REFERENCES tournament (id)
+	);
+
 --status is one of 'completed', 'proposed', etc.
 CREATE TABLE contest (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -53,13 +61,14 @@ CREATE TABLE contest (
 	session_num INTEGER,
 	round VARCHAR(200),
 	board VARCHAR(200),
-	game VARCHAR(200),
+	game INTEGER,
 	scenario VARCHAR(4000),
 	status VARCHAR(200),
 	started VARCHAR(20),
 	finished VARCHAR(20),
 	notes TEXT,
-	FOREIGN KEY (tournament) REFERENCES tournament (id)
+	FOREIGN KEY (tournament) REFERENCES tournament (id),
+	FOREIGN KEY (game) REFERENCES game_definition (id)
 	);
 
 --status is one of
@@ -91,6 +100,9 @@ CREATE TABLE column_type (
 
 INSERT INTO column_type (name, type_data) VALUES (
 	'PLAY.STATUS', 'enum:proposed,assigned,started,suspended,aborted,completed'
+	);
+INSERT INTO column_type (name, type_data) VALUES (
+	'PERSON.STATUS', 'enum:prereg,ready,absent'
 	);
 
 CREATE TABLE player_rating (
