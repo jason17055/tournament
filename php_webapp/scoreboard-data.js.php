@@ -5,7 +5,9 @@ require_once('includes/db.php');
 require_once('includes/format.php');
 
 $tournament_id = $_GET['tournament'];
-$sql = "SELECT name,location,start_time FROM tournament WHERE id=".db_quote($tournament_id);
+$sql = "SELECT name,location,start_time,
+	scoreboard_roundrobin_style
+	FROM tournament WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 $row = mysqli_fetch_row($query);
@@ -16,7 +18,8 @@ if (!$row) {
 $tournament_info = array(
 	'name' => $row[0],
 	'location' => $row[1],
-	'start_time' => $row[2]
+	'start_time' => $row[2],
+	'scoreboard_roundrobin_style' => ($row[3]=='Y')
 	);
 
 header("Content-Type: text/json");

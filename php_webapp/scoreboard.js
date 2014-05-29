@@ -93,6 +93,7 @@ function in_game(play, pid)
 
 function on_players_fetched(data)
 {
+	S.ROUND_ROBIN = data.tournament.scoreboard_roundrobin_style;
 	players = data.players;
 	games = data.games;
 

@@ -13,7 +13,8 @@ if (isset($_GET['id'])) {
 				vocab_table,ratings,
 				use_person_ordinal,
 				use_person_member_number,use_person_entry_rank,
-				use_person_home_location,use_person_mail,use_person_phone
+				use_person_home_location,use_person_mail,use_person_phone,
+				scoreboard_roundrobin_style
 		FROM tournament
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
@@ -37,6 +38,7 @@ if (isset($_GET['id'])) {
 		$_REQUEST['use_person_home_location'] = $row[13]=='Y'?'1':null;
 		$_REQUEST['use_person_mail'] = $row[14]=='Y'?'1':null;
 		$_REQUEST['use_person_phone'] = $row[15]=='Y'?'1':null;
+		$_REQUEST['scoreboard_roundrobin_style'] = $row[16]=='Y'?'1':null;
 	}
 
 	is_director($tournament_id)
@@ -63,7 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			multi_game,multi_session,multi_round,multi_venue,vocab_table,current_session,
 			ratings,use_person_ordinal,
 			use_person_member_number,use_person_entry_rank,
-			use_person_home_location,use_person_mail,use_person_phone)
+			use_person_home_location,use_person_mail,use_person_phone,
+			scoreboard_roundrobin_style)
 			VALUES (
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['location']).",
@@ -80,7 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote(isset($_REQUEST['use_person_entry_rank'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['use_person_home_location'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['use_person_mail'])?'Y':'N').",
-			".db_quote(isset($_REQUEST['use_person_phone'])?'Y':'N')."
+			".db_quote(isset($_REQUEST['use_person_phone'])?'Y':'N').",
+			".db_quote(isset($_REQUEST['scoreboard_roundrobin_style'])?'Y':'N')."
 			)";
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -108,7 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		use_person_entry_rank=".db_quote($_REQUEST['use_person_entry_rank']?'Y':'N').",
 		use_person_home_location=".db_quote($_REQUEST['use_person_home_location']?'Y':'N').",
 		use_person_mail=".db_quote($_REQUEST['use_person_mail']?'Y':'N').",
-		use_person_phone=".db_quote($_REQUEST['use_person_phone']?'Y':'N')."
+		use_person_phone=".db_quote($_REQUEST['use_person_phone']?'Y':'N').",
+		scoreboard_roundrobin_style=".db_quote($_REQUEST['scoreboard_roundrobin_style']?'Y':'N')."
 		WHERE id=".db_quote($tournament_id);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -139,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_GET['id']))
 	$_REQUEST['use_person_home_location'] = 1;
 	$_REQUEST['use_person_mail'] = 1;
 	$_REQUEST['use_person_phone'] = 1;
+	$_REQUEST['scoreboard_roundrobin_style'] = 1;
 }
 
 begin_page(isset($_GET['id']) ? "Edit Tournament" : "New Tournament");
@@ -178,6 +184,7 @@ begin_page(isset($_GET['id']) ? "Edit Tournament" : "New Tournament");
 		?>)
 </div>
 <div><label><input type="checkbox" name="ratings"<?php echo(isset($_REQUEST['ratings'])?' checked="checked"':'')?>>Track Ratings</label></div>
+<div><label><input type="checkbox" name="scoreboard_roundrobin_style"<?php echo(isset($_REQUEST['scoreboard_roundrobin_style'])?' checked="checked"':'')?>>Round-Robin Scoreboard</label></div>
 </td>
 </tr>
 <tr>
