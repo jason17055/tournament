@@ -235,7 +235,7 @@ $import_persons_url = "import_person.php?tournament=".urlencode($tournament_id);
 $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
-<a href="<?php h($new_person_url)?>">New Player</a>
+<a href="<?php h($new_person_url)?>">New Individual</a>
 | <a href="<?php h($new_team_url)?>">New Team</a>
 | <a href="<?php h($import_persons_url)?>">Import Players</a>
 | <a href="<?php h($pairings_url)?>">Generate Pairings</a>
