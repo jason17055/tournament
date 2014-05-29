@@ -274,7 +274,7 @@ $sql = "SELECT c.id,
 	session_num,
 	starts,
 	round AS round,
-	game,scenario,status,
+	c.game,c.scenario,c.status,
 	(SELECT GROUP_CONCAT(
 		p.name ORDER BY name SEPARATOR ', '
 		)
