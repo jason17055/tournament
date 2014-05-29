@@ -79,10 +79,13 @@ while ($row = mysqli_fetch_row($query)) {
 		$tie_count = $r2[2];
 		$round = $r2[3];
 
-		$p['lastResult']= $placement==1 && $tie_count!=0 ? 'TIE' :
-			($placement==1 ? 'WIN' : 'LOSS');
-		$p['lastRound'] = $round;
-		$p['lastOpponents']=$r2[1];
+		$p['lastGame'] = array(
+			'result' => ($placement==1 && $tie_count!=0 ? 'TIE' :
+					($placement==1 ? 'WIN' : 'LOSS')
+					),
+			'round' => $round,
+			'opponents' => $opponents
+			);
 	}
 
 	echo json_encode($p);

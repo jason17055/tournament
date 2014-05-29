@@ -180,11 +180,13 @@ for (var i = 0; i < players.length; i++)
 	$('.score_col', $row).text(count_wins+'-'+(count_plays-count_wins));
 
 	// last result
-	if (pr.lastResult) {
-		$('.last_result_col .round_ind', $row).text(
-			pr.lastRound.match(/^\d+/) ? ('R'+pr.lastRound) : pr.lastRound);
+	if (pr.lastGame) {
+		var g = pr.lastGame;
 
-		var opps_arr = pr.lastOpponents.split(/,/);
+		$('.last_result_col .round_ind', $row).text(
+			g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
+
+		var opps_arr = g.opponents.split(/,/);
 		var opps_str = '';
 		for (var k1 = 0; k1 < opps_arr.length; k1++) {
 			if (k1 > 0) { opps_str += ','; }
@@ -194,9 +196,10 @@ for (var i = 0; i < players.length; i++)
 		$('.last_result_col .opponent', $row).text(opps_str);
 
 		$('.last_result_col .result_icon', $row).
-			attr('src', pr.lastResult=='WIN' ? 'images/win_icon.png' :
-				pr.lastResult=='TIE' ? 'images/tie_icon.png' : 'images/lose_icon.png').
-			attr('alt', pr.lastResult);
+			attr('src', g.result=='WIN' ? 'images/win_icon.png' :
+				g.result=='TIE' ? 'images/tie_icon.png' :
+				g.result=='LOSS' ? 'images/lose_icon.png' : '').
+			attr('alt', g.result);
 	}
 	else {
 		$('.last_result_col', $row).empty();
