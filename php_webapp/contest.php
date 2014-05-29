@@ -326,7 +326,8 @@ function select_venue_widget($args)
 		WHERE tournament=".db_quote($tournament_id)."
 		AND venue_status='enabled'
 		ORDER BY venue_name";
-	$query = mysqli_query($database, $sql);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
 	$options = array('' => '--unspecified--');
 	while ($row = mysqli_fetch_row($query)) {
 		$options[$row[0]] = $row[1];
@@ -494,7 +495,8 @@ if (isset($_GET['id'])) {
 			AND r.session_num=c.session_num
 		WHERE contest=".db_quote($_GET['id'])."
 		ORDER BY turn_order,cp.id";
-	$query = mysqli_query($database, $sql);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
 	while ($row = mysqli_fetch_row($query)) {
 		$cpid = $row[0];
 		$url = "contest_participant.php?id=".urlencode($cpid)."&next_url=".urlencode($_SERVER['REQUEST_URI']);
