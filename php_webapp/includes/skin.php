@@ -44,7 +44,7 @@ function end_page()
 
 function select_widget($args)
 {
-	$id_html = $args['id'] ? ' id="'.htmlspecialchars($args['id']).'"':'';
+	$id_html = isset($args['id']) ? ' id="'.htmlspecialchars($args['id']).'"':'';
 	?><select name="<?php h($args['name'])?>"<?php echo($id_html)?>>
 <?php
 	foreach ($args['options'] as $k => $v) {
