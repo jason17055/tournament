@@ -63,10 +63,13 @@ while ($row = mysqli_fetch_row($query)) {
 				FROM contest_participant
 				WHERE contest=s.contest
 				AND NOT (player=s.player)
-				AND placement=s.placement) AS tie_count
-			FROM contest_participant s
-			WHERE contest=".db_quote($last_contest_id)."
-			AND player=".db_quote($p['pid']);
+				AND placement=s.placement) AS tie_count,
+			c.round
+			FROM contest c
+			JOIN contest_participant s
+				ON s.contest=c.id
+			WHERE c.id=".db_quote($last_contest_id)."
+			AND s.player=".db_quote($p['pid']);
 		$q2 = mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 		$r2 = mysqli_fetch_row($q2);
@@ -74,9 +77,11 @@ while ($row = mysqli_fetch_row($query)) {
 		$placement = $r2[0];
 		$opponents = $r2[1];
 		$tie_count = $r2[2];
+		$round = $r2[3];
 
 		$p['lastResult']= $placement==1 && $tie_count!=0 ? 'TIE' :
 			($placement==1 ? 'WIN' : 'LOSS');
+		$p['lastRound'] = $round;
 		$p['lastOpponents']=$r2[1];
 	}
 

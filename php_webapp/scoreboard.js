@@ -181,6 +181,9 @@ for (var i = 0; i < players.length; i++)
 
 	// last result
 	if (pr.lastResult) {
+		$('.last_result_col .round_ind', $row).text(
+			pr.lastRound.match(/^\d+/) ? ('R'+pr.lastRound) : pr.lastRound);
+
 		var opps_arr = pr.lastOpponents.split(/,/);
 		var opps_str = '';
 		for (var k1 = 0; k1 < opps_arr.length; k1++) {
@@ -189,6 +192,7 @@ for (var i = 0; i < players.length; i++)
 			opps_str += player_by_pid[k2].shortName;
 		}
 		$('.last_result_col .opponent', $row).text(opps_str);
+
 		$('.last_result_col .result_icon', $row).
 			attr('src', pr.lastResult=='WIN' ? 'images/win_icon.png' :
 				pr.lastResult=='TIE' ? 'images/tie_icon.png' : 'images/lose_icon.png').
