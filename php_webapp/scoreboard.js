@@ -104,6 +104,19 @@ function on_players_fetched(data)
 		player_by_pid[players[i].pid] = players[i];
 	}
 
+	var format_opponents = function(opps) {
+		if (opps==null) { return ''; }
+
+		var opps_arr = opps.split(/,/);
+		var opps_str = '';
+		for (var k1 = 0; k1 < opps_arr.length; k1++) {
+			if (k1 > 0) { opps_str += ','; }
+			var k2 = opps_arr[k1];
+			opps_str += player_by_pid[k2].shortName;
+		}
+		return opps_str;
+	};
+
 	if (S.ROUND_ROBIN) {
 		$('.round_robin_buffer_col').show();
 		for (var i in players)
@@ -186,14 +199,7 @@ for (var i = 0; i < players.length; i++)
 		$('.last_result_col .round_ind', $row).text(
 			g.round.match(/^\d+/) ? ('R'+g.round) : g.round);
 
-		var opps_arr = g.opponents.split(/,/);
-		var opps_str = '';
-		for (var k1 = 0; k1 < opps_arr.length; k1++) {
-			if (k1 > 0) { opps_str += ','; }
-			var k2 = opps_arr[k1];
-			opps_str += player_by_pid[k2].shortName;
-		}
-		$('.last_result_col .opponent', $row).text(opps_str);
+		$('.last_result_col .opponent', $row).text(format_opponents(g.opponents));
 
 		$('.last_result_col .result_icon', $row).
 			attr('src', g.result=='WIN' ? 'images/win_icon.png' :
@@ -203,6 +209,27 @@ for (var i = 0; i < players.length; i++)
 	}
 	else {
 		$('.last_result_col', $row).empty();
+	}
+
+	// current game
+	if (pr.curGame) {
+		var g = pr.curGame;
+
+		$('.next_game_col .opponent', $row).text(format_opponents(g.opponents));
+
+		if (g.startTime && g.status != 'started') {
+			$('.next_game_col .start_time', $row).text(g.startTime);
+		}
+		else {
+			$('.next_game_col .start_time_ind', $row).hide();
+		}
+
+		if (g.venue) {
+			$('.next_game_col .venue', $row).text(g.venue);
+		}
+	}
+	else {
+		$('.next_game_col', $row).empty();
 	}
 
 	$('#scoreboard_table').append($row);

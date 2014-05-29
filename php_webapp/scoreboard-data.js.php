@@ -23,7 +23,9 @@ header("Content-Type: text/json");
 echo "{\n";
 echo '"tournament":'.json_encode($tournament_info).",\n";
 
-$sql = "SELECT p.id,p.name,p.entry_rank,p.member_number,p.ordinal,last_g.id AS last_contest
+$sql = "SELECT p.id,p.name,p.entry_rank,p.member_number,p.ordinal,
+		last_g.id AS last_contest,
+		cur_g.id AS cur_contest
 	FROM person p
 	LEFT JOIN contest last_g
 		ON last_g.id=(SELECT id FROM contest c
@@ -31,6 +33,14 @@ $sql = "SELECT p.id,p.name,p.entry_rank,p.member_number,p.ordinal,last_g.id AS l
 			AND status IN ('completed')
 			AND EXISTS (SELECT 1 FROM contest_participant WHERE contest=c.id AND player=p.id)
 			ORDER BY started DESC, id DESC
+			LIMIT 1
+			)
+	LEFT JOIN contest cur_g
+		ON cur_g.id=(SELECT id FROM contest c
+			WHERE tournament=p.tournament
+			AND status IN ('scheduled','assigned','started')
+			AND p.id IN (SELECT player FROM contest_participant WHERE contest=c.id)
+			ORDER BY started ASC, id ASC
 			LIMIT 1
 			)
 	WHERE p.tournament=".db_quote($tournament_id)."
@@ -52,6 +62,8 @@ while ($row = mysqli_fetch_row($query)) {
 		'ordinal' => $row[4]
 		);
 	$last_contest_id = $row[5];
+	$cur_contest_id = $row[6];
+
 	if ($last_contest_id) {
 		$sql = "SELECT s.placement,
 			(SELECT GROUP_CONCAT(player)
@@ -84,6 +96,31 @@ while ($row = mysqli_fetch_row($query)) {
 					($placement==1 ? 'WIN' : 'LOSS')
 					),
 			'round' => $round,
+			'opponents' => $opponents
+			);
+	}
+
+	if ($cur_contest_id) {
+		$sql = "SELECT c.venue,
+			(SELECT GROUP_CONCAT(player)
+				FROM contest_participant
+				WHERE contest=s.contest
+				AND NOT (player=s.player)
+				) AS opponents
+			FROM contest c
+			JOIN contest_participant s
+				ON s.contest=c.id
+			WHERE c.id=".db_quote($cur_contest_id)."
+			AND s.player=".db_quote($p['pid']);
+		$q2 = mysqli_query($database, $sql)
+			or die("SQL error: ".db_error($database));
+		$r2 = mysqli_fetch_row($q2);
+
+		$venue = $r2[0];
+		$opponents = $r2[1];
+
+		$p['curGame'] = array(
+			'venue' => $venue,
 			'opponents' => $opponents
 			);
 	}
