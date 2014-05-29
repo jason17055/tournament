@@ -2,6 +2,8 @@
 
 function format_time_s($datetime_str)
 {
+	if (!$datetime_str) { return NULL; }
+
 	$parts = array_pad(explode('T', $datetime_str),2,NULL);
 	$date_str = $parts[0];
 	$time_str = $parts[1];

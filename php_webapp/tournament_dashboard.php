@@ -3,6 +3,7 @@
 require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
+require_once('includes/format.php');
 
 $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,multi_game,multi_session,current_session,vocab_table,
@@ -253,7 +254,7 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <?php if ($tournament_info['multi_session']) { ?>
 <th>Session</th>
 <?php } ?>
-<th>Started</th>
+<th>Starts</th>
 <th>Round-<?php
 	echo($tournament_info['vocab_table']=='court'?'Court':'Table')?></th>
 <?php if ($tournament_info['multi_game']) { ?>
@@ -269,7 +270,7 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <?php
 $sql = "SELECT id,
 	session_num,
-	IFNULL(started,'(unknown)') AS started,
+	starts,
 	CONCAT(round,'-',venue) AS contest_name,
 	game,scenario,status,
 	(SELECT GROUP_CONCAT(
@@ -299,7 +300,7 @@ while ($row = mysqli_fetch_row($query)) {
 
 	$contest_id = $row[0];
 	$session_num = $row[1];
-	$started_date = $row[2];
+	$starts = $row[2];
 	$contest_name = $row[3];
 	$game = $row[4];
 	$scenario = $row[5];
@@ -313,7 +314,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php if ($tournament_info['multi_session']) { ?>
 <td class="session_num_col"><?php h($session_num)?></td>
 <?php } ?>
-<td class="started_date_col"><a href="<?php h($url)?>"><?php h($started_date)?></a></td>
+<td class="started_date_col"><a href="<?php h($url)?>"><?php h(format_time_s($starts) ?: '(unknown)')?></a></td>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
 <?php if ($tournament_info['multi_game']) { ?>
 <td class="game_col"><?php h($game)?></td>
