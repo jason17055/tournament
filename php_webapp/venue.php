@@ -91,8 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		is_director($tournament_id)
 			or die("Not authorized");
 
-		$sql = "DELETE FROM reservation
-			WHERE venue=".db_quote($_GET['id']);
+		$sql = "UPDATE contest SET venue=NULL
+			WHERE tournament=".db_quote($tournament_id)."
+			AND venue=".db_quote($_GET['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
