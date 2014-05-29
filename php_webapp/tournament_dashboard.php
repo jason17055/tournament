@@ -253,19 +253,19 @@ make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 <tr>
 <th></th>
 <?php if ($tournament_info['multi_session']) { ?>
-<th>Session</th>
+<th class="session_col">Session</th>
 <?php } ?>
-<th>Round</th>
-<th>Starts</th>
-<th><?php
+<th class="round_col">Round</th>
+<th class="starts_col">Starts</th>
+<th class="venue_col"><?php
 	echo($tournament_info['vocab_table']=='court'?'Court':'Table')?></th>
 <?php if ($tournament_info['multi_game']) { ?>
-<th>Game</th>
+<th class="game_col">Game</th>
 <?php } ?>
 <?php if ($tournament_info['use_scenario']) { ?>
-<th>Scenario</th>
+<th class="scenario_col">Scenario</th>
 <?php } ?>
-<th>Status</th>
+<th class="contest_status_col">Status</th>
 <th>Competitors</th>
 <th>Winner</th>
 </tr>
@@ -318,10 +318,10 @@ while ($row = mysqli_fetch_row($query)) {
 <tr>
 <td class="link_col"><a href="<?php h($edit_url)?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a></td>
 <?php if ($tournament_info['multi_session']) { ?>
-<td class="session_num_col"><?php h($session_num)?></td>
+<td class="session_col"><?php h($session_num)?></td>
 <?php } ?>
 <td class="round_col"><?php h($round)?></td>
-<td class="started_date_col"><?php h(format_time_s($starts) ?: '(unknown)')?></td>
+<td class="starts_col"><?php h(format_time_s($starts))?></td>
 <td class="venue_col"><?php h($venue_name)?></td>
 <?php if ($tournament_info['multi_game']) { ?>
 <td class="game_col"><?php h($game)?></td>
@@ -329,7 +329,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php if ($tournament_info['use_scenario']) { ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
 <?php } ?>
-<td class="status_col"><?php format_contest_status($status)?>
+<td class="contest_status_col"><?php format_contest_status($status)?>
 <button type="button" class="popup_menu_btn" data-for="contest_status_popup_menu">...</button>
 </td>
 <td class="participants_col"><?php h($participants)?></td>

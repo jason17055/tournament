@@ -1,7 +1,4 @@
-.session_num_col {
-	text-align: center;
-}
-.round_col {
+.session_col, .round_col, .starts_col, .venue_col {
 	text-align: center;
 }
 .contest_count_col {
