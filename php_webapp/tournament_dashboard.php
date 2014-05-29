@@ -9,7 +9,8 @@ $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,multi_game,multi_session,current_session,vocab_table,
 	ratings,use_person_member_number,use_person_entry_rank,
 	use_person_home_location,use_person_mail,use_person_phone,
-	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0
+	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0,
+	use_teams
 	FROM tournament t
 	WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
@@ -28,7 +29,8 @@ $tournament_info = array(
 	'use_person_home_location' => $row[8]=='Y',
 	'use_person_mail' => $row[9]=='Y',
 	'use_person_phone' => $row[10]=='Y',
-	'game0' => $row[11]
+	'game0' => $row[11],
+	'use_teams' => $row[12]=='Y'
 	);
 
 $game_definition = array();
@@ -81,8 +83,8 @@ if ($tournament_info['use_person_mail'])          { $person_columns[]='mail';}
 if ($tournament_info['use_person_phone'])         { $person_columns[]='phone';}
 
 $person_column_names = array(
-	'ordinal' => 'Ordinal',
-	'name' => 'Player Name',
+	'ordinal' => ($tournament_info['use_teams'] ? 'Team Number' : 'Player Number'),
+	'name' => ($tournament_info['use_teams'] ? 'Team Name' : 'Player Name'),
 	'member_number' => 'Member Number',
 	'entry_rank' => 'Entry Rank',
 	'home_location' => 'Home Location',
@@ -92,7 +94,7 @@ $person_column_names = array(
 
 ?>
 <table border="1">
-<caption>Players</caption>
+<caption><?php h($tournament_info['use_teams'] ? 'Teams' : 'Players')?></caption>
 <tr>
 <?php if ($can_edit_players) { ?>
 <th></th>
@@ -236,8 +238,12 @@ $import_persons_url = "import_person.php?tournament=".urlencode($tournament_id);
 $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
+<?php if ($tournament_info['use_teams']) { ?>
 <a href="<?php h($new_person_url)?>">New Individual</a>
 | <a href="<?php h($new_team_url)?>">New Team</a>
+<?php } else { ?>
+<a href="<?php h($new_person_url)?>">New Player</a>
+<?php } ?>
 | <a href="<?php h($import_persons_url)?>">Import Players</a>
 | <a href="<?php h($pairings_url)?>">Generate Pairings</a>
 </p>
