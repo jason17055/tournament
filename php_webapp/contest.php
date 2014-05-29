@@ -432,7 +432,7 @@ function participant_row($pre, $pdata)
 
 	$tr_class = 'participant_row' . ($pre?'':' template');
 ?>
-<tr class="<?php h($tr_class)?>" <?php if ($pdata['id']) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
+<tr class="<?php h($tr_class)?>" <?php if (isset($pdata['id'])) { ?> data-rowid="<?php h($pdata['id'])?>"<?php } ?>>
 <?php
 foreach ($participant_columns as $col) {
 	if ($col == 'commit') { ?>
