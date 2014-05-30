@@ -4,6 +4,7 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
+require_once('includes/form.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
@@ -26,13 +27,13 @@ if (isset($_GET['tournament'])) {
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+		default_form_property('venue', '');
+		default_form_property('starts', '');
 		$_REQUEST['session_num'] = $tournament_info['current_session'];
 		$_REQUEST['round'] = "";
-		$_REQUEST['venue'] = "";
 		$_REQUEST['game'] = $tournament_info['default_game'];
 		$_REQUEST['scenario'] = "";
 		$_REQUEST['status'] = "";
-		$_REQUEST['starts'] = "";
 		$_REQUEST['started'] = strftime('%Y-%m-%d', time());
 		$_REQUEST['finished'] = "";
 		$_REQUEST['notes'] = "";
