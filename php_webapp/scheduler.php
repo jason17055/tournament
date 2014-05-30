@@ -27,8 +27,25 @@ if (!is_director($tournament_id)) {
 $page_title = "$tournament_info[name] - Scheduler";
 begin_page($page_title);
 
+$by_venue = array();
+$granularity = $tournament_info['schedule_granularity'] ?: 3600;
+$cur_row_time = time();
+$cur_row_time -= $cur_row_time % $granularity;
 ?>
 <table class="scheduler_table">
+<caption>
+	<div style="float:left">
+	<a href="<?php h($previous_day_url)?>">Previous Day</a>
+	|
+	<a href="<?php h($previous_url)?>">Earlier</a>
+	</div>
+	<div style="float:right">
+	<a href="<?php h($next_day_url)?>">Next Day</a>
+	|
+	<a href="<?php h($next_url)?>">Later</a>
+	</div>
+	<span class="scheduler_day"><?php h(strftime('%A, %h %e, %Y', $cur_row_time))?></span>
+</caption>
 <tr>
 <th class="time_hdr">Time</th>
 <?php
@@ -54,10 +71,6 @@ while ($row = mysqli_fetch_row($query)) {
 </tr>
 
 <?php
-$by_venue = array();
-$granularity = $tournament_info['schedule_granularity'] ?: 3600;
-$cur_row_time = time();
-$cur_row_time -= $cur_row_time % $granularity;
 $row_count = 0;
 
 function output_current_scheduler_row()
@@ -72,7 +85,7 @@ function output_current_scheduler_row()
 	$tr_class = $row_count % 2 == 0 ? 'even' : 'odd';
 	?>
 <tr class="<?php h($tr_class)?>">
-<td><?php h(strftime('%l:%M',$cur_row_time))?></td>
+<td class="time_col"><?php h(strftime('%l:%M%P',$cur_row_time))?></td>
 <?php
 	foreach ($venues_in_order as $venue_id) {
 

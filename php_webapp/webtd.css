@@ -142,7 +142,26 @@ td.performance_col {
 
 .scheduler_table {
 	border-collapse:collapse;
+	width: 100%;
 }
-table.scheduler_table, .scheduler_table th, .scheduler_table td {
+.scheduler_table caption .scheduler_day {
+	font-size: 16pt;
+	font-weight: bold;
+}
+.scheduler_table th {
+	background-color: #eb8;
 	border: 1px solid black;
+}
+.scheduler_table td.time_col {
+	background-color: #eb8;
+	border: 1px solid black;
+	width: 100px;
+}
+.scheduler_table tr.even td {
+	background-color: #fdc;
+}
+.scheduler_table td {
+	text-align: center;
+}
+.scheduler_table th, .scheduler_table td {
 }
