@@ -63,6 +63,25 @@ function select_option($value, $name, $is_selected)
 <?php
 }
 
+function select_venue_widget($args)
+{
+	global $database;
+	global $tournament_id;
+	$sql = "SELECT id,venue_name
+		FROM venue
+		WHERE tournament=".db_quote($tournament_id)."
+		AND venue_status='enabled'
+		ORDER BY venue_name";
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	$options = array('' => '--unspecified--');
+	while ($row = mysqli_fetch_row($query)) {
+		$options[$row[0]] = $row[1];
+	}
+	$args['options'] = $options;
+	select_widget($args);
+}
+
 function format_seat_name($seat)
 {
 	if ($seat == 'gb' || $seat == 'yb') {

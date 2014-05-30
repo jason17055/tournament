@@ -10,7 +10,7 @@ if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
 	$sql = "SELECT multi_game,multi_session,multi_round,current_session,vocab_table,
 		(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS default_game,
-		multi_venue
+		multi_venue,use_teams
 		FROM tournament t
 		WHERE id=".db_quote($tournament_id);
 	$query = mysqli_query($database, $sql);
@@ -23,7 +23,8 @@ if (isset($_GET['tournament'])) {
 		'current_session' => $row[3],
 		'vocab_table' => $row[4],
 		'default_game' => $row[5],
-		'multi_venue' => $row[6]=='Y'
+		'multi_venue' => $row[6]=='Y',
+		'use_teams' => $row[7]=='Y'
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -45,7 +46,7 @@ else if (isset($_GET['id'])) {
 		game,scenario,status,
 		starts,started,finished,
 		notes,
-		vocab_table,multi_venue
+		vocab_table,multi_venue,use_teams
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
 		WHERE c.id=".db_quote($_GET['id']);
@@ -59,7 +60,8 @@ else if (isset($_GET['id'])) {
 		'multi_session' => $row[2],
 		'multi_round' => $row[3],
 		'vocab_table' => $row[14],
-		'multi_venue' => $row[15]=='Y'
+		'multi_venue' => $row[15]=='Y',
+		'use_teams' => $row[16]=='Y'
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -316,24 +318,6 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 <tr>
 <td><label for="venue_cb">Venue:</label></td>
 <td><?php
-function select_venue_widget($args)
-{
-	global $database;
-	global $tournament_id;
-	$sql = "SELECT id,venue_name
-		FROM venue
-		WHERE tournament=".db_quote($tournament_id)."
-		AND venue_status='enabled'
-		ORDER BY venue_name";
-	$query = mysqli_query($database, $sql)
-		or die("SQL error: ".db_error($database));
-	$options = array('' => '--unspecified--');
-	while ($row = mysqli_fetch_row($query)) {
-		$options[$row[0]] = $row[1];
-	}
-	$args['options'] = $options;
-	select_widget($args);
-}
 	select_venue_widget(array(
 		'name' => 'venue',
 		'id' => 'venue_cb',
@@ -419,7 +403,7 @@ if ($can_edit) { ?>
 <table id="participants_table" class="tabular_form">
 <tr>
 <th class="seat_col">Seat</th>
-<th class="player_col">Player</th>
+<th class="player_col"><?php h($tournament_info['use_teams']?'Team':'Player')?></th>
 <th class="participant_status_col">Status</th>
 <th class="placement_col">Placement</th>
 </tr>
