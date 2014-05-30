@@ -154,7 +154,7 @@ $sql = "SELECT c.id,c.status,c.scenario,
 	WHERE t.id=".db_quote($tournament_id)."
 	AND c.status IN ('completed','started')
 	AND (c.session_num IS NULL OR c.session_num=t.current_session)
-	ORDER BY c.id";
+	ORDER BY c.round,c.starts,c.id";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
