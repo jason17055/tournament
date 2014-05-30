@@ -38,11 +38,11 @@ else {
 	$cur_row_time -= $cur_row_time % $granularity;
 }
 
-$num_rows = $_REQUEST['rows'] ?: 16;
+$num_rows = isset($_REQUEST['rows']) ? $_REQUEST['rows'] : 16;
 
 $ONE_DAY = 86400;
 $url_com = 'tournament='.urlencode($tournament_id).
-	($_REQUEST['rows'] ? '&rows='.urlencode($_REQUEST['rows']) : '');
+	(isset($_REQUEST['rows']) ? '&rows='.urlencode($_REQUEST['rows']) : '');
 $previous_day_url = 'scheduler.php?'.$url_com
 	.'&start='.urlencode(make_datetime($cur_row_time-$ONE_DAY));
 $earlier_url = 'scheduler.php?'.$url_com
