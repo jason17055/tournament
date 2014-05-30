@@ -82,6 +82,37 @@ function select_venue_widget($args)
 	select_widget($args);
 }
 
+function select_person_widget($args)
+{
+	global $database;
+	global $tournament_id;
+
+	$sql = "SELECT id,ordinal,name
+		FROM person
+		WHERE tournament=".db_quote($tournament_id)."
+		AND status IS NOT NULL
+		AND member_of IS NULL
+		ORDER BY ordinal,name";
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+
+	$id_html = isset($args['id']) ? ' id="'.htmlspecialchars($args['id']).'"':'';
+	?><select name="<?php h($args['name'])?>"<?php echo($id_html)?>>
+<?php
+	while ($row = mysqli_fetch_row($query)) {
+		$person_id = $row[0];
+		$ordinal = $row[1];
+		$name = $row[2];
+
+		select_option($person_id,
+			"$ordinal- $name",
+			$person_id == $args['value']
+			);
+	}
+?>
+</select><?php
+}
+
 function format_seat_name($seat)
 {
 	if ($seat == 'gb' || $seat == 'yb') {

@@ -423,7 +423,11 @@ foreach ($participant_columns as $col) {
 <input type="checkbox" name="<?php h($pre."_commit")?>"<?php echo($pdata['commit'] ? ' checked="checked"':'')?>>
 </td>
 <?php } else if ($col == 'player') { ?>
-<td class="player_col"><input type="text" name="<?php h($pre.'_player')?>" value="<?php h($pdata['player_name'])?>" data-player_id="<?php h($pdata['player_id'])?>" class="player_sel"></td>
+<td class="player_col"><?php
+	select_person_widget(array(
+	'name' => $pre.'_player',
+	'value' => $pdata['player_id']
+	))?></td>
 <?php } else if ($col == 'seat') { ?>
 <td class="seat_col">
 <?php if ($game_definition['can_add_seats']) {
