@@ -103,10 +103,13 @@ function output_contest_info($d)
 	}
 
 	?><div>
-	<span class="round"><?php h($round)?></span>
 	<?php
 	contest_status_icon($d['status']);
-	?><span class="participants"><?php
+	if ($round) {
+	?>
+	<span class="round"><?php h($round)?></span>: 
+	<?php }?>
+	<span class="participants"><?php
 	h($d['participant_ordinals']);
 	?></span>
 	<a href="<?php h($d['url'])?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a>
