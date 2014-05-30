@@ -289,7 +289,8 @@ $sql = "SELECT c.id,
 	round AS round,
 	c.game,c.scenario,c.status,
 	(SELECT GROUP_CONCAT(
-		p.name ORDER BY name SEPARATOR ', '
+		CONCAT(p.name,IF(IFNULL(cp.participant_status,'C')='C','',CONCAT('(',cp.participant_status,')')))
+		ORDER BY name SEPARATOR ', '
 		)
 		FROM contest_participant cp
 			JOIN person p ON p.id=cp.player
