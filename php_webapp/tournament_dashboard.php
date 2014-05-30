@@ -345,8 +345,10 @@ $run_ratings_url = "run_ratings.php?tournament=".urlencode($tournament_id);
 <p>
 <a href="<?php h($edit_tourney_url)?>">Tournament Definition</a> |
 <a href="<?php h($edit_game_url)?>">Game Definition</a> |
-<a href="<?php h($edit_venues_url)?>">Venue Definition</a> |
-<a href="<?php h($run_ratings_url)?>">Run Ratings</a>
+<a href="<?php h($edit_venues_url)?>">Venue Definition</a>
+<?php if ($tournament_info['ratings']) { ?>
+| <a href="<?php h($run_ratings_url)?>">Run Ratings</a>
+<?php }//endif tournament using ratings ?>
 </p>
 
 <?php
