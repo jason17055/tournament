@@ -76,6 +76,7 @@ CREATE TABLE contest (
 -- status: one of
 --      P = proposed
 --      C = confirmed
+--      M = mulligan
 --     or NULL = unspecified
 --
 CREATE TABLE contest_participant (

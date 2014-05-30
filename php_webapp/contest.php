@@ -460,7 +460,8 @@ foreach ($participant_columns as $col) {
 	'options' => array(
 		'' => '--',
 		'C' => 'Confirmed',
-		'P' => 'Proposed'
+		'P' => 'Proposed',
+		'M' => 'Mulligan'
 		)
 	)); ?>
 </td>
