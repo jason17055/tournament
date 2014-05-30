@@ -3,9 +3,10 @@
 require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
+require_once('includes/format.php');
 
 $sql = "SELECT t.id, t.multi_game, t.multi_session, p.name,
-	t.ratings,
+	t.ratings, t.multi_round,
 	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0
 	FROM person p
 	JOIN tournament t ON t.id=p.tournament
@@ -19,7 +20,8 @@ $tournament_info = array(
 	'multi_game' => $row[1]=='Y',
 	'multi_session' => $row[2]=='Y',
 	'ratings' => $row[4]=='Y',
-	'game0' => $row[5]
+	'multi_round' => $row[5]=='Y',
+	'game0' => $row[6]
 	);
 $person_id = $_GET['id'];
 $person_info = array(
@@ -61,7 +63,7 @@ if ($tournament_info['ratings']) {
 
 $sql = "SELECT c.id,
 	session_num,
-	started,
+	IFNULL(started,starts) AS started,
 	CONCAT(c.round,'-',c.venue) AS contest_name,
 	scenario,
 	(SELECT GROUP_CONCAT(p.name ORDER BY p.name SEPARATOR ', ')
@@ -74,9 +76,13 @@ $sql = "SELECT c.id,
 	cp1.w_points,
 	cp1.performance,
 	cp1.expected_performance,
-	(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id) AS nplayers
+	(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id) AS nplayers,
+	c.round,
+	venue_name,
+	participant_status
 	FROM contest_participant cp1
 		JOIN contest c ON c.id=cp1.contest
+		LEFT JOIN venue ON venue.id=c.venue
 	WHERE cp1.player=".db_quote($person_id)."
 	ORDER BY c.session_num,c.round,c.started,c.venue,c.id
 	";
@@ -86,18 +92,24 @@ $query = mysqli_query($database, $sql)
 ?>
 <table border="1">
 <tr>
+<th></th>
 <?php if ($tournament_info['multi_session']){?>
-<th>Session</th>
+<th class="session_col">Session</th>
 <?php }?>
-<th>Date</th>
-<th>Round-Board</th>
+<?php if ($tournament_info['multi_round']) {?>
+<th class="round_col">Round</th>
+<?php }?>
+<th class="starts_col">Date/Time</th>
+<th class="venue_col">Venue</th>
 <?php if ($tournament_info['use_scenario']){ ?>
 <th>Scenario</th>
 <?php } ?>
 <th>Against</th>
-<th>Placement</th>
+<th class="result_col">Result</th>
+<?php if ($tournament_info['ratings']) {?>
 <th>W Points</th>
 <th>P Points</th>
+<?php } //endif ratings enabled ?>
 </tr>
 <?php
 
@@ -105,7 +117,7 @@ while ($row = mysqli_fetch_row($query)) {
 	$url = "contest.php?id=".urlencode($row[0])
 		.'&next_url='.urlencode($_SERVER['REQUEST_URI']);
 	$session_num = $row[1];
-	$started_date = $row[2];
+	$starts = $row[2];
 	$contest_name = $row[3];
 	$scenario = $row[4];
 	$opponents = $row[5];
@@ -114,6 +126,10 @@ while ($row = mysqli_fetch_row($query)) {
 	$performance = $row[8];
 	$exp_perf = $row[9] ?: 0.5;
 	$nplayers = $row[10];
+	$round = $row[11];
+	$venue_name = $row[12];
+	$participant_status = $row[13];
+
 	if ($placement == 1) {
 		$placement = "1st";
 	}else if ($placement == 2) {
@@ -124,19 +140,26 @@ while ($row = mysqli_fetch_row($query)) {
 		$placement = $placement .= "th";
 	}
 	$placement .= " / $nplayers";
-
+	if ($participant_status == 'M') {
+		$placement .= " (M)";
+	}
 ?>
 <tr>
+<td class="link_col"><a href="<?php h($url)?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a></td>
 <?php if ($tournament_info['multi_session']){?>
 <td class="session_num_col"><?php h($session_num)?></td>
 <?php }?>
-<td class="started_date_col"><?php h($started_date)?></td>
-<td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<?php if ($tournament_info['multi_round']){ ?>
+<td class="round_col"><?php h($round)?></td>
+<?php }?>
+<td class="starts_col"><?php h(format_time_s($starts))?></td>
+<td class="venue_col"><?php h($venue_name)?></td>
 <?php if ($tournament_info['use_scenario']){ ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
 <?php } ?>
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>
+<?php if ($tournament_info['ratings']) { ?>
 <td class="w_points_col"><?php h($w_points)?></td>
 <td class="performance_col"><?php
 	if (!is_null($performance)) {
@@ -156,6 +179,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 	} //endif performance data available
 	?></td>
+<?php } //endif ratings enabled ?>
 </tr>
 <?php
 } // end foreach contest
