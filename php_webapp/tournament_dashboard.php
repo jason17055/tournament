@@ -49,32 +49,6 @@ begin_page($page_title);
 
 $can_edit_players = is_director($tournament_id);
 
-function make_popup_list($popup_id, $column_name)
-{
-	global $database;
-
-?>
-	<div class="popup_menu" id="<?php h($popup_id)?>">
-	<ul><?php
-		$sql = "SELECT type_data FROM column_type
-			WHERE name=".db_quote($column_name);
-		$query = mysqli_query($database, $sql)
-			or die("SQL error: ".db_error($database));
-		$r1 = mysqli_fetch_row($query)
-			or die("Error: Type data for $column_name not found");
-		$tmp = preg_replace('/^enum:/', '', $r1[0]);
-		$tmpa = explode(',', $tmp);
-		foreach ($tmpa as $status_val) {
-			?><li><a href="#"><?php h($status_val)?></a></li>
-		<?php
-		}
-?></ul>
-	</div>
-<?php
-}
-
-make_popup_list('status_popup_menu', 'PERSON.STATUS');
-
 $person_columns = array('ordinal','name');
 if ($tournament_info['use_person_member_number']) { $person_columns[]='member_number';}
 if ($tournament_info['use_person_entry_rank'])    { $person_columns[]='entry_rank';}
@@ -209,7 +183,6 @@ while ($row = mysqli_fetch_row($query)) {
 		?><img src="images/minus.png" width="14" height="14" alt=""><?php
 	}
 	h($status)?>
-	<button type="button" class="popup_menu_btn" data-for="status_popup_menu">...</button>
 	</td>
 <td class="game_count_col"><?php h($games_played)?></td>
 <td class="game_count_col"><?php h($tournament_info['multi_session']?"$games_won (+$games_won_this_session)":"$games_won")?></td>
@@ -256,8 +229,6 @@ $pairings_url = "pairings.php?tournament=".urlencode($tournament_id);
 </p>
 <?php }
 
-
-make_popup_list('contest_status_popup_menu', 'PLAY.STATUS');
 
  ?>
 
@@ -343,9 +314,7 @@ while ($row = mysqli_fetch_row($query)) {
 <?php if ($tournament_info['use_scenario']) { ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
 <?php } ?>
-<td class="contest_status_col"><?php format_contest_status($status)?>
-<button type="button" class="popup_menu_btn" data-for="contest_status_popup_menu">...</button>
-</td>
+<td class="contest_status_col"><?php format_contest_status($status)?></td>
 <td class="participants_col"><?php h($participants)?></td>
 <td class="winner_col"><?php h($winner)?></td>
 </tr>
