@@ -139,3 +139,10 @@ td.performance_col {
 .pairings_container .players_list li:last-child {
 	border-bottom: none;
 }
+
+.scheduler_table {
+	border-collapse:collapse;
+}
+table.scheduler_table, .scheduler_table th, .scheduler_table td {
+	border: 1px solid black;
+}

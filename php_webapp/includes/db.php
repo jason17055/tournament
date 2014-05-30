@@ -37,3 +37,8 @@ function split_datetime($datetime_str, &$date_str, &$time_str)
 	$date_str = $parts[0];
 	$time_str = $parts[1];
 }
+
+function make_datetime($php_time)
+{
+	return strftime('%Y-%m-%dT%H:%M:%S', $php_time);
+}

@@ -327,9 +327,12 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 if (is_director($tournament_id)) {
 $new_contest_url = "contest.php?tournament=".urlencode($tournament_id);
+$scheduler_url = "scheduler.php?tournament=".urlencode($tournament_id);
 ?>
 <p>
 <a href="<?php h($new_contest_url)?>">New Game</a>
+|
+<a href="<?php h($scheduler_url)?>">Scheduler</a>
 </p>
 
 <?php

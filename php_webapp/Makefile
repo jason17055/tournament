@@ -47,6 +47,7 @@ php_scripts = \
 	player_scorecard.php \
 	rating_chart.inc.php \
 	run_ratings.php \
+	scheduler.php \
 	scoreboard-data.js.php \
 	team.php \
 	tournament.php \
