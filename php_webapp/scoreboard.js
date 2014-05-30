@@ -76,7 +76,8 @@ var S = {
 	ROWS: 8,
 	COLS: 12,
 	DELAY: 30, //seconds
-	ROUND_ROBIN: true
+	ROUND_ROBIN: true,
+	MULTI_ROUND: true
 	};
 
 function in_game(play, pid)
@@ -90,10 +91,18 @@ function in_game(play, pid)
 	}
 	return false;
 }
+function result_from_game(play, my_pid)
+{
+	return play.in_progress ? 'P' :
+		play.winner == 'TIE' ? 'T' :
+		(play.winner && play['player.'+play.winner] == my_pid) ? 'W' :
+		'L';
+}
 
 function on_players_fetched(data)
 {
 	S.ROUND_ROBIN = data.tournament.scoreboard_roundrobin_style;
+	S.MULTI_ROUND = !S.ROUND_ROBIN;
 	players = data.players;
 	games = data.games;
 
@@ -131,6 +140,21 @@ function on_players_fetched(data)
 		$('.current_opp_icon_key').show();
 	}
 
+var seen_rounds = {};
+for (var k = 0; k < games.length; k++) {
+	var g = games[k];
+	if (S.MULTI_ROUND && g.round && !seen_rounds[g.round]) {
+		seen_rounds[g.round] = "round_"+k;
+		var $td = $('<td class="per_round_col"></td>');
+		$td.attr('data-round', seen_rounds[g.round]);
+		$('#scoreboard_row .score_col').after($td);
+
+		var $th = $('<th class="per_round_col"></th>');
+		$th.text(g.round);
+		$('#th_row .score_col').after($th);
+	}
+}
+
 if (S.start == null) { S.start = 0; }
 S.min_opp_by_pid = new Array();
 S.max_opp_by_pid = new Array();
@@ -143,6 +167,37 @@ for (var i = 0; i < players.length; i++)
 	$row.attr('id', "scoreboard_row"+i);
 	$('.fullname_cell', $row).text(pr.name + (pr.entryRank != null ? (' ' + pr.entryRank) : "") +
 		(pr.ordinal != null ? (' (' + pr.ordinal + ')') : ''));
+
+	if (S.MULTI_ROUND) {
+	for (var k = 0; k < games.length; k++) {
+		var g = games[k];
+		if (!(g.round && seen_rounds[g.round])) { continue; }
+		if (!in_game(g, pr.pid)) { continue; }
+
+		var result = result_from_game(g, pr.pid);
+		var opps_str = '';
+		var seats_a = g.seats.split(/,/);
+		for (var k1 = 0; k1 < seats_a.length; k1++) {
+			var pid = g['player.'+seats_a[k1]];
+			if (pid && pid != pr.pid) {
+				opps_str += (opps_str ? ',' : '') + pid;
+			}
+		}
+
+		var $cell = $('.per_round_col[data-round='+seen_rounds[g.round]+']', $row);
+		var $r = $('<div class="result"><span class="opponent"></span><img class="result_icon" width="28" height="28"></div>');
+		$('.opponent', $r).text(format_opponents(opps_str));
+		$('img',$r).attr('alt', result);
+		$('img',$r).attr('title', 'details');
+		$('img',$r).attr('src',
+			result == "P" ? 'images/game_in_progress_icon.png' :
+			result == "W" ? 'images/win_icon.png' :
+			result == 'T' ? 'images/tie_icon.png' :
+			'images/lose_icon.png');
+		$cell.append($r);
+	}
+	}//endif S.MULTI_ROUND
+
 	var count_wins = 0;
 	var count_plays = 0;
 	for (var j in players)
@@ -157,10 +212,7 @@ for (var i = 0; i < players.length; i++)
 			if (pr.pid != pc.pid &&
 				in_game(play, pr.pid) && in_game(play, pc.pid))
 			{
-				result = play.in_progress ? 'P' :
-					play.winner == 'TIE' ? 'T' :
-					(play.winner && play['player.'+play.winner] == pr.pid) ? 'W' :
-					'L';
+				result = result_from_game(play, pr.pid);
 			}
 			else
 			{

@@ -14,9 +14,18 @@ tr.oddrow { background-color: #d0d8e8; color: black; height: 4em; }
 	display: none;
 	}
 .wins_cell, .plays_cell { display: none; }
+.per_round_col {
+	min-width: 100px;
+	text-align: center;
+	}
 .last_result_col, .next_game_col {
 	min-width: 200px;
 	}
+.last_result_col { display: none; }
 
 .tie_icon_key { display: none; }
 .current_opp_icon_key { display: none; }
+
+img.result_icon {
+	vertical-align: middle;
+}

@@ -147,7 +147,8 @@ echo '"games":[';
 
 $sql = "SELECT c.id,c.status,c.scenario,
 	(SELECT COUNT(*) FROM contest_participant WHERE contest=c.id
-		AND placement=1) AS nwinners
+		AND placement=1) AS nwinners,
+	c.round
 	FROM contest c
 	JOIN tournament t ON t.id=c.tournament
 	WHERE t.id=".db_quote($tournament_id)."
@@ -163,13 +164,20 @@ while ($row=mysqli_fetch_row($query)) {
 	$game_status = $row[1];
 	$scenario = $row[2];
 	$nwinners = $row[3];
+	$round = $row[4];
+	if ($round && preg_match('/^\d+$/', $round)) {
+		$round = "R$round";
+	}
 
 	$g = array();
 	if ($game_status != 'completed') {
 		$g['in_progress'] = true;
 	}
-	if ($row[2]) {
-		$g['scenario'] = $row[2];
+	if ($scenario) {
+		$g['scenario'] = $scenario;
+	}
+	if ($round) {
+		$g['round'] = $round;
 	}
 
 	$sql = "SELECT a.player,a.placement,a.seat
