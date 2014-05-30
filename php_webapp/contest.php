@@ -535,13 +535,27 @@ if ($can_edit && $game_definition['seat_names']) {
 		if (isset($seen_seats[$seat])) { continue; }
 		participant_row('participant_m'.(++$mcount),
 			array(
-			'seat' => $seat
+			'seat' => $seat,
+			'player_id' => NULL,
+			'player_name' => NULL,
+			'turn_order' => '',
+			'score' => '',
+			'placement' => '',
+			'status' => ''
 			)
 			);
 	}
 }
 
-participant_row('', array());
+participant_row('', array(
+			'seat' => '',
+			'player_id' => NULL,
+			'player_name' => NULL,
+			'turn_order' => '',
+			'score' => '',
+			'placement' => '',
+			'status' => ''
+			));
 	?>
 </table>
 <?php
