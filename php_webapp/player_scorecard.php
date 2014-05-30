@@ -42,7 +42,7 @@ include('rating_chart.inc.php');
 $sql = "SELECT c.id,
 	session_num,
 	started,
-	CONCAT(c.round,'-',c.board) AS contest_name,
+	CONCAT(c.round,'-',c.venue) AS contest_name,
 	scenario,
 	(SELECT GROUP_CONCAT(p.name ORDER BY p.name SEPARATOR ', ')
 		FROM contest_participant cp
@@ -58,7 +58,7 @@ $sql = "SELECT c.id,
 	FROM contest_participant cp1
 		JOIN contest c ON c.id=cp1.contest
 	WHERE cp1.player=".db_quote($person_id)."
-	ORDER BY c.session_num,c.round,c.started,c.board,c.id
+	ORDER BY c.session_num,c.round,c.started,c.venue,c.id
 	";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
