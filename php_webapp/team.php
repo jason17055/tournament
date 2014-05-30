@@ -202,10 +202,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 begin_page(isset($_GET['id']) ? "Edit Team" : "New Team");
 
-$form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
+$form_id = isset($_GET['id']) ? 'edit_team_form' : 'new_team_form';
 
 ?>
-<form id="<?php h($form_id)?>"
+<form name="team_form" id="<?php h($form_id)?>"
 	method="post" action="<?php h($_SERVER['REQUEST_URI'])?>">
 <table>
 <tr>
@@ -226,7 +226,7 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 		?>
 <tr>
 <td><label for="<?php h($pre.'name_entry')?>"><?php h($cap)?> Name:</label></td>
-<td><input type="text" id="<?php h($pre.'name_entry')?>" name="<?php h($pre.'name')?>" value="<?php h($_REQUEST[$pre.'name'])?>"></td>
+<td><input type="text" class="team_member_name_entry" id="<?php h($pre.'name_entry')?>" name="<?php h($pre.'name')?>" value="<?php h($_REQUEST[$pre.'name'])?>"></td>
 </tr>
 <?php if ($tournament_info['use_person_phone']) { ?>
 <tr>

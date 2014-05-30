@@ -717,3 +717,47 @@ function move_person_to(person_id, contest_id)
 		});
 	return false;
 }
+
+function generate_team_name()
+{
+	var f = document.team_form;
+	var p1 = f.p1_name.value;
+	var m;
+	if (m = p1.match(/^(\S+) /)) {
+		p1 = m[1];
+	}
+	var p2 = f.p2_name.value;
+	if (m = p2.match(/^(\S+) /)) {
+		p2 = m[1];
+	}
+	return p1+'-'+p2;
+}
+var lastGeneratedTeamName = null;
+function maybe_generate_team_name()
+{
+	var f = document.team_form;
+	if (f.name.value == '' || f.name.value == lastGeneratedTeamName) {
+		lastGeneratedTeamName = generate_team_name();
+		f.name.value = lastGeneratedTeamName;
+	}
+}
+
+$(function() {
+	if (document.team_form) {
+		var t = null;
+
+		lastGeneratedTeamName = generate_team_name();
+		$('.team_member_name_entry').change(maybe_generate_team_name);
+		$('.team_member_name_entry').keyup(function() {
+			if (t) {
+				maybe_generate_team_name();
+				window.clearTimeout(t);
+				t = null;
+			}
+			t = window.setTimeout(function() {
+				t = null;
+				maybe_generate_team_name();
+				}, 200);
+			});
+	}
+	});
