@@ -122,7 +122,7 @@ while ($row = mysqli_fetch_row($query)) {
 	$d['url'] = 'contest.php?id='.urlencode($d['id'])
 		. '&next_url='.urlencode($_SERVER['REQUEST_URI']);
 
-	if ($d['starts'] >= make_datetime($cur_row_time+$granularity)) {
+	while ($d['starts'] >= make_datetime($cur_row_time+$granularity)) {
 		output_current_scheduler_row();
 		$cur_row_time += $granularity;
 		if ($row_count >= 10) {
@@ -139,6 +139,14 @@ while ($row_count < 10) {
 
 ?>
 </table>
+<?php
+
+$dashboard_url = 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
+?>
+<p>
+<a href="<?php h($dashboard_url)?>">Dashboard</a>
+</p>
+
 <?php
 
 end_page();
