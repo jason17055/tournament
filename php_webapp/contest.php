@@ -131,7 +131,7 @@ function update_contest_participants($contest_id)
 		foreach ($cp_post as $k => $v) {
 			if ($k == 'player' || $k == 'seat' ||
 			$k == 'turn_order' || $k == 'score' ||
-			$k == 'placement' || $k = 'status')
+			$k == 'placement' || $k = 'participant_status')
 			{
 				$updates[] = "$k=".db_quote($v);
 				if (strlen($v)) { $count_nonempty++; }
@@ -147,9 +147,6 @@ function update_contest_participants($contest_id)
 		if (count($updates) == 0) {
 			continue;
 		}
-
-		// status is no longer represented by a checkbox
-		//$updates[] = "status=".db_quote($cp_post['commit']?'C':NULL);
 
 		if (preg_match('/^(\d+)$/', $cpid, $m)) {
 			$sql = "UPDATE contest_participant
@@ -416,14 +413,14 @@ while ($row = mysqli_fetch_row($query)) {
 <td valign="top"><label>Participants:</label></td>
 <td>
 <?php
-	$participant_columns = array('seat','player','status','placement');
+	$participant_columns = array('seat','player','participant_status','placement');
 
 if ($can_edit) { ?>
 <table id="participants_table" class="tabular_form">
 <tr>
 <th class="seat_col">Seat</th>
 <th class="player_col">Player</th>
-<th class="status_col">Status</th>
+<th class="participant_status_col">Status</th>
 <th class="placement_col">Placement</th>
 </tr>
 <?php
@@ -453,11 +450,11 @@ foreach ($participant_columns as $col) {
 <input type="hidden" name="<?php h($pre.'_seat')?>" value="<?php h($pdata['seat'])?>"><?php format_seat_name($pdata['seat'])?>
 <?php } ?>
 </td>
-<?php } else if ($col == 'status') { ?>
-<td class="status_col">
+<?php } else if ($col == 'participant_status') { ?>
+<td class="participant_status_col">
 <?php select_widget(array(
-	'name' => $pre.'_status',
-	'value' => $pdata['status'],
+	'name' => $pre.'_participant_status',
+	'value' => $pdata['participant_status'],
 	'options' => array(
 		'' => '--',
 		'C' => 'Confirmed',
