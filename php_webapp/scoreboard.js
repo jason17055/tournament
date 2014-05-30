@@ -171,13 +171,24 @@ for (var i = 0; i < players.length; i++)
 	$('.fullname_cell', $row).text(pr.name + (pr.entryRank != null ? (' ' + pr.entryRank) : "") +
 		(pr.ordinal != null ? (' (' + pr.ordinal + ')') : ''));
 
-	if (S.MULTI_ROUND) {
+	var count_wins = 0;
+	var count_plays = 0;
+	var count_ties = 0;
 	for (var k = 0; k < games.length; k++) {
 		var g = games[k];
-		if (!(g.round && seen_rounds[g.round])) { continue; }
 		if (!in_game(g, pr.pid)) { continue; }
 
 		var result = result_from_game(g, pr.pid);
+		if (result != 'P') {
+			count_plays++;
+		}
+		if (result == 'W') {
+			count_wins++;
+		}
+		else if (result == 'T') {
+			count_ties++;
+		}
+
 		var opps_str = '';
 		var seats_a = g.seats.split(/,/);
 		for (var k1 = 0; k1 < seats_a.length; k1++) {
@@ -187,6 +198,8 @@ for (var i = 0; i < players.length; i++)
 			}
 		}
 
+	if (S.MULTI_ROUND) {
+		if (!(g.round && seen_rounds[g.round])) { continue; }
 		var $cell = $('.per_round_col[data-round='+seen_rounds[g.round]+']', $row);
 		var $r = $('<div class="result"><span class="opponent"></span><img class="result_icon" width="28" height="28"></div>');
 		$('.opponent', $r).text(format_opponents(opps_str));
@@ -198,11 +211,9 @@ for (var i = 0; i < players.length; i++)
 			result == 'T' ? 'images/tie_icon.png' :
 			'images/lose_icon.png');
 		$cell.append($r);
-	}
 	}//endif S.MULTI_ROUND
+	}//end loop through games
 
-	var count_wins = 0;
-	var count_plays = 0;
 	for (var j in players)
 	{
 		var pc = players[j];
@@ -222,12 +233,6 @@ for (var i = 0; i < players.length; i++)
 				continue;
 			}
 
-			if (result != 'P') {
-				count_plays++;
-			}
-			if (result == 'W') {
-				count_wins++;
-			}
 			if (S.min_opp_by_pid[pr.pid] == null) {
 				S.min_opp_by_pid[pr.pid] = j;
 			}
@@ -250,7 +255,8 @@ for (var i = 0; i < players.length; i++)
 	}
 	$('.wins_cell', $row).text(count_wins);
 	$('.plays_cell', $row).text(count_plays);
-	$('.score_col', $row).text(count_wins+'-'+(count_plays-count_wins));
+	$('.score_col', $row).text(count_wins+'-'+(count_plays-count_wins-count_ties)+
+		(count_ties != 0 ? '-'+count_ties : ''));
 
 	// last result
 	if (pr.lastGame) {
