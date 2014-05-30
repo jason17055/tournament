@@ -4,18 +4,20 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
+require_once('includes/format.php');
 
 if (isset($_GET['id'])) {
 	$tournament_id = $_GET['id'];
 
 	$sql = "SELECT
 		name,location,start_time,multi_game,multi_session,multi_round,multi_venue,current_session,
-				vocab_table,ratings,
-				use_person_ordinal,
-				use_person_member_number,use_person_entry_rank,
-				use_person_home_location,use_person_mail,use_person_phone,
-				scoreboard_roundrobin_style,
-				use_teams
+			vocab_table,ratings,
+			use_person_ordinal,
+			use_person_member_number,use_person_entry_rank,
+			use_person_home_location,use_person_mail,use_person_phone,
+			scoreboard_roundrobin_style,
+			use_teams,
+			schedule_granularity
 		FROM tournament
 		WHERE id=".db_quote($_GET['id']);
 	$query = mysqli_query($database, $sql);
@@ -41,6 +43,7 @@ if (isset($_GET['id'])) {
 		$_REQUEST['use_person_phone'] = $row[15]=='Y'?'1':null;
 		$_REQUEST['scoreboard_roundrobin_style'] = $row[16]=='Y'?'1':null;
 		$_REQUEST['use_teams'] = $row[17]=='Y'?'1':null;
+		$_REQUEST['schedule_granularity'] = $row[18];
 	}
 
 	is_director($tournament_id)
@@ -68,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			ratings,use_person_ordinal,
 			use_person_member_number,use_person_entry_rank,
 			use_person_home_location,use_person_mail,use_person_phone,
-			scoreboard_roundrobin_style,use_teams)
+			scoreboard_roundrobin_style,use_teams,schedule_granularity)
 			VALUES (
 			".db_quote($_REQUEST['name']).",
 			".db_quote($_REQUEST['location']).",
@@ -87,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote(isset($_REQUEST['use_person_mail'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['use_person_phone'])?'Y':'N').",
 			".db_quote(isset($_REQUEST['scoreboard_roundrobin_style'])?'Y':'N').",
-			".db_quote(isset($_REQUEST['use_teams'])?'Y':'N')."
+			".db_quote(isset($_REQUEST['use_teams'])?'Y':'N').",
+			".db_quote(parse_time_interval($_REQUEST['schedule_granularity']))."
 			)";
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
@@ -109,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		multi_venue=".db_quote($_REQUEST['multi_venue']?'Y':'N').",
 		vocab_table=".db_quote($_REQUEST['vocab_table']).",
 		current_session=".db_quote($_REQUEST['current_session']).",
+		schedule_granularity=".db_quote(parse_time_interval($_REQUEST['schedule_granularity'])).",
 		ratings=".db_quote($_REQUEST['ratings']?'Y':'N').",
 		use_person_ordinal=".db_quote($_REQUEST['use_person_ordinal']?'Y':'N').",
 		use_person_member_number=".db_quote($_REQUEST['use_person_member_number']?'Y':'N').",
@@ -141,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_GET['id']))
 	$_REQUEST['multi_venue'] = 1;
 	$_REQUEST['vocab_table'] = 'table';
 	$_REQUEST['current_session'] = NULL;
+	$_REQUEST['schedule_granularity'] = NULL;
 	$_REQUEST['ratings'] = 1;
 	$_REQUEST['use_person_ordinal'] = 1;
 	$_REQUEST['use_person_member_number'] = 1;
@@ -196,6 +202,11 @@ begin_page(isset($_GET['id']) ? "Edit Tournament" : "New Tournament");
 <tr>
 <td valign="top"><label for="current_session_entry">Current Session:</label></td>
 <td><input type="text" id="current_session_entry" name="current_session" value="<?php h($_REQUEST['current_session'])?>"></td>
+</tr>
+<tr>
+<tr>
+<td><label for="schedule_granularity_entry">Schedule Granularity:</label></td>
+<td><input type="text" id="schedule_granularity_entry" name="schedule_granularity" value="<?php h(stringify_time_interval($_REQUEST['schedule_granularity']))?>"></td>
 </tr>
 <tr>
 <td valign="top">Person Attributes:</td>
