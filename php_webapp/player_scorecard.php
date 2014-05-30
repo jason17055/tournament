@@ -4,7 +4,9 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 
-$sql = "SELECT t.id, t.multi_game, t.multi_session, p.name
+$sql = "SELECT t.id, t.multi_game, t.multi_session, p.name,
+	t.ratings,
+	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0
 	FROM person p
 	JOIN tournament t ON t.id=p.tournament
 	WHERE p.id=".db_quote($_GET['id']);
@@ -14,14 +16,30 @@ $row = mysqli_fetch_row($query)
 $tournament_id = $row[0];
 $tournament_info = array(
 	'id' => $tournament_id,
-	'multi_game' => $row[1],
-	'multi_session' => $row[2]
+	'multi_game' => $row[1]=='Y',
+	'multi_session' => $row[2]=='Y',
+	'ratings' => $row[4]=='Y',
+	'game0' => $row[5]
 	);
 $person_id = $_GET['id'];
 $person_info = array(
 	'id' => $person_id,
 	'name' => $row[3]
 	);
+
+$game_definition = array();
+if (!$tournament_info['multi_game'] && $tournament_info['game0']) {
+	$sql = "SELECT use_scenario
+		FROM game_definition
+		WHERE id=".db_quote($tournament_info['game0']);
+	$query = mysqli_query($database, $sql);
+	$row = mysqli_fetch_row($query);
+	$game_definition['use_scenario'] = $row[0]=='Y';
+}
+else {
+	$game_definition['use_scenario'] = true;
+}
+$tournament_info['use_scenario'] = $game_definition['use_scenario'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
@@ -37,7 +55,9 @@ $go_back_url = isset($_REQUEST['next_url']) ? $_REQUEST['next_url'] : 'tournamen
 </p>
 <?php
 
-include('rating_chart.inc.php');
+if ($tournament_info['ratings']) {
+	include('rating_chart.inc.php');
+}
 
 $sql = "SELECT c.id,
 	session_num,
@@ -66,12 +86,14 @@ $query = mysqli_query($database, $sql)
 ?>
 <table border="1">
 <tr>
-<?php if ($tournament_info['multi_session']=='Y'){?>
+<?php if ($tournament_info['multi_session']){?>
 <th>Session</th>
 <?php }?>
 <th>Date</th>
 <th>Round-Board</th>
+<?php if ($tournament_info['use_scenario']){ ?>
 <th>Scenario</th>
+<?php } ?>
 <th>Against</th>
 <th>Placement</th>
 <th>W Points</th>
@@ -105,12 +127,14 @@ while ($row = mysqli_fetch_row($query)) {
 
 ?>
 <tr>
-<?php if ($tournament_info['multi_session']=='Y'){?>
+<?php if ($tournament_info['multi_session']){?>
 <td class="session_num_col"><?php h($session_num)?></td>
 <?php }?>
 <td class="started_date_col"><?php h($started_date)?></td>
 <td class="contest_name_col"><a href="<?php h($url)?>"><?php h($contest_name)?></a></td>
+<?php if ($tournament_info['use_scenario']){ ?>
 <td class="scenario_col"><?php format_scenario($scenario)?></td>
+<?php } ?>
 <td class="opponents_col"><?php h($opponents)?></td>
 <td class="placement_col"><?php h($placement)?></td>
 <td class="w_points_col"><?php h($w_points)?></td>
