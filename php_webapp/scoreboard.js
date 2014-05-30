@@ -91,6 +91,19 @@ function in_game(play, pid)
 	}
 	return false;
 }
+
+function in_game_mulligan(play, pid)
+{
+	if (!play.mulligan_for) { return false; }
+	var a = play.mulligan_for.split(/,/);
+	for (var i = 0; i < a.length; i++) {
+		if (a[i] == pid) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function result_from_game(play, my_pid)
 {
 	return play.in_progress ? 'P' :
@@ -177,6 +190,7 @@ for (var i = 0; i < players.length; i++)
 	for (var k = 0; k < games.length; k++) {
 		var g = games[k];
 		if (!in_game(g, pr.pid)) { continue; }
+		if (in_game_mulligan(g, pr.pid)) { continue; }
 
 		var result = result_from_game(g, pr.pid);
 		if (result != 'P') {

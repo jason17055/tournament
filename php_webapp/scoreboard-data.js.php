@@ -180,26 +180,40 @@ while ($row=mysqli_fetch_row($query)) {
 		$g['round'] = $round;
 	}
 
-	$sql = "SELECT a.player,a.placement,a.seat
+	$sql = "SELECT a.player,a.placement,a.seat,a.participant_status
 		FROM contest_participant a
 		WHERE a.contest=".db_quote($contest_id);
 	$query1 = mysqli_query($database, $sql)
 		or die("SQL error: ".db_error($database));
 	$seat_count=0;
 	$all_seats = array();
+	$mulligans = array();
 	while ($row1 = mysqli_fetch_row($query1))
 	{
-		$a_seat = $row1[2] ?: (++$seat_count);
-		$g['player.'.$a_seat] = $row1[0];
+		$pid = $row1[0];
+		$placement = $row1[1];
+		$seat = $row1[2];
+		$participant_status = $row1[3];
+
+		if ($participant_status=='M') {
+			$mulligans[] = $pid;
+		}
+
+		$a_seat = $seat ?: (++$seat_count);
+		$g['player.'.$a_seat] = $pid;
 		$all_seats[] = $a_seat;
 
-		if ($row1[1] == 1) {
+		if ($placement == 1) {
 			$g['winner'] = $a_seat;
 		}
 	}
 
 	if ($g['winner'] && $nwinners > 1) {
 		$g['winner'] = 'TIE';
+	}
+
+	if (count($mulligans)) {
+		$g['mulligan_for'] = implode(',', $mulligans);
 	}
 
 	$g['seats'] = implode(',', $all_seats);
