@@ -145,13 +145,16 @@ for (var k = 0; k < games.length; k++) {
 	var g = games[k];
 	if (S.MULTI_ROUND && g.round && !seen_rounds[g.round]) {
 		seen_rounds[g.round] = "round_"+k;
-		var $td = $('<td class="per_round_col"></td>');
-		$td.attr('data-round', seen_rounds[g.round]);
-		$('#scoreboard_row .score_col').after($td);
 
-		var $th = $('<th class="per_round_col"></th>');
+		var $t = $('#th_row .per_round_col.template');
+		var $th = $t.clone().removeClass('template');
 		$th.text(g.round);
-		$('#th_row .score_col').after($th);
+		$t.before($th);
+
+		var $t = $('#scoreboard_row .per_round_col.template');
+		var $td = $t.clone().removeClass('template');
+		$td.attr('data-round', seen_rounds[g.round]);
+		$t.before($td);
 	}
 }
 
