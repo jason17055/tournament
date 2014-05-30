@@ -95,6 +95,25 @@ while ($row = mysqli_fetch_row($query)) {
 <?php
 $row_count = 0;
 
+function output_contest_info($d)
+{
+	$round = $d['round'];
+	if (preg_match('/^\d+$/', $round)) {
+		$round = "R$round";
+	}
+
+	?><div>
+	<span class="round"><?php h($round)?></span>
+	<?php
+	contest_status_icon($d['status']);
+	?><span class="participants"><?php
+	h($d['participant_ordinals']);
+	?></span>
+	<a href="<?php h($d['url'])?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a>
+	</div>
+<?php
+}
+
 function output_current_scheduler_row()
 {
 	global $row_count;
@@ -122,11 +141,7 @@ function output_current_scheduler_row()
 			$a = array($DUMMY_GAME);
 		}
 		foreach ($a as $d) {
-			?><div>
-			<a href="<?php h($d['url'])?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a>
-				<?php h($d['id'])?>
-			</div>
-			<?php
+			output_contest_info($d);
 		}
 		?>
 		</td>
@@ -138,7 +153,10 @@ function output_current_scheduler_row()
 	$by_venue = array();
 }
 
-$sql = "SELECT c.id,c.status,venue,starts
+$sql = "SELECT c.id,c.status,venue,starts,round,
+	(SELECT GROUP_CONCAT(ordinal SEPARATOR 'v') FROM contest_participant cp
+			JOIN person p ON p.id=cp.player
+			WHERE cp.contest=c.id) AS participant_ordinals
 	FROM contest c
 	WHERE c.tournament=".db_quote($tournament_id)."
 	AND starts IS NOT NULL
@@ -152,7 +170,9 @@ while ($row = mysqli_fetch_row($query)) {
 	'id' => $row[0],
 	'status' => $row[1],
 	'venue' => $row[2],
-	'starts' => $row[3]
+	'starts' => $row[3],
+	'round' => $row[4],
+	'participant_ordinals' => $row[5]
 	);
 	$d['url'] = 'contest.php?id='.urlencode($d['id'])
 		. '&next_url='.urlencode($_SERVER['REQUEST_URI']);

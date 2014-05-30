@@ -73,12 +73,17 @@ function format_seat_name($seat)
 	}
 }
 
-function format_contest_status($status)
+function contest_status_icon($status)
 {
 	if ($status == 'proposed' || $status == 'completed' || $status == 'started') {
 		$f = "images/contest_${status}_icon.png";
 		?><img src="<?php h($f)?>" width="14" height="14" alt=""><?php
 	}
+}
+
+function format_contest_status($status)
+{
+	contest_status_icon($status);
 	h($status);
 }
 
