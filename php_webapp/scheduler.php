@@ -29,20 +29,42 @@ begin_page($page_title);
 
 $by_venue = array();
 $granularity = $tournament_info['schedule_granularity'] ?: 3600;
-$cur_row_time = time();
-$cur_row_time -= $cur_row_time % $granularity;
+if (isset($_REQUEST['start'])) {
+	split_datetime($_REQUEST['start'], $_REQUEST['start_date'], $_REQUEST['start_time']);
+	$cur_row_time = strtotime("$_REQUEST[start_date] $_REQUEST[start_time]");
+}
+else {
+	$cur_row_time = time();
+	$cur_row_time -= $cur_row_time % $granularity;
+}
+
+$num_rows = $_REQUEST['rows'] ?: 16;
+
+$ONE_DAY = 86400;
+$url_com = 'tournament='.urlencode($tournament_id).
+	($_REQUEST['rows'] ? '&rows='.urlencode($_REQUEST['rows']) : '');
+$previous_day_url = 'scheduler.php?'.$url_com
+	.'&start='.urlencode(make_datetime($cur_row_time-$ONE_DAY));
+$earlier_url = 'scheduler.php?'.$url_com
+	.'&start='.urlencode(make_datetime($cur_row_time-$num_rows*$granularity));
+$next_day_url = 'scheduler.php?'.$url_com
+	.'&start='.urlencode(make_datetime($cur_row_time+$ONE_DAY));
+$later_url = 'scheduler.php?'.$url_com
+	.'&start='.urlencode(make_datetime($cur_row_time+$num_rows*$granularity));
+
+
 ?>
 <table class="scheduler_table">
 <caption>
 	<div style="float:left">
 	<a href="<?php h($previous_day_url)?>">Previous Day</a>
 	|
-	<a href="<?php h($previous_url)?>">Earlier</a>
+	<a href="<?php h($earlier_url)?>">Earlier</a>
 	</div>
 	<div style="float:right">
-	<a href="<?php h($next_day_url)?>">Next Day</a>
+	<a href="<?php h($later_url)?>">Later</a>
 	|
-	<a href="<?php h($next_url)?>">Later</a>
+	<a href="<?php h($next_day_url)?>">Next Day</a>
 	</div>
 	<span class="scheduler_day"><?php h(strftime('%A, %h %e, %Y', $cur_row_time))?></span>
 </caption>
@@ -138,14 +160,14 @@ while ($row = mysqli_fetch_row($query)) {
 	while ($d['starts'] >= make_datetime($cur_row_time+$granularity)) {
 		output_current_scheduler_row();
 		$cur_row_time += $granularity;
-		if ($row_count >= 10) {
+		if ($row_count >= $num_rows) {
 			break;
 		}
 	}
 
 	$by_venue[$d['venue']][] = $d;
 }
-while ($row_count < 10) {
+while ($row_count < $num_rows) {
 	output_current_scheduler_row();
 	$cur_row_time += $granularity;
 }
