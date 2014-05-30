@@ -80,7 +80,10 @@ if ($tournament_info['use_person_member_number']) { $person_columns[]='member_nu
 if ($tournament_info['use_person_entry_rank'])    { $person_columns[]='entry_rank';}
 if ($tournament_info['use_person_home_location']) { $person_columns[]='home_location';}
 if ($tournament_info['use_person_mail'])          { $person_columns[]='mail';}
-if ($tournament_info['use_person_phone'])         { $person_columns[]='phone';}
+if ($tournament_info['use_person_phone']) {
+	if ($tournament_info['use_teams']) { $person_columns[]='member_phones';}
+	else                               { $person_columns[]='phone';}
+}
 
 $person_column_names = array(
 	'ordinal' => ($tournament_info['use_teams'] ? 'Team Number' : 'Player Number'),
@@ -89,7 +92,8 @@ $person_column_names = array(
 	'entry_rank' => 'Entry Rank',
 	'home_location' => 'Home Location',
 	'mail' => 'Email Address',
-	'phone' => 'Telephone'
+	'phone' => 'Telephone',
+	'member_phones' => 'Phone(s)'
 	);
 
 ?>
@@ -142,7 +146,9 @@ $sql = "SELECT p.id,p.name,p.status,
 	IFNULL(r.post_rating,r.prior_rating) AS rating,
 	p.member_number,p.entry_rank,p.home_location,
 	p.mail,p.phone,p.ordinal,
-	p.is_team
+	p.is_team,
+	IFNULL((SELECT GROUP_CONCAT(phone SEPARATOR ', ') FROM person pp
+		WHERE pp.member_of=p.id AND phone IS NOT NULL), p.phone) AS member_phones
 	FROM person p
 	JOIN tournament t
 		ON t.id=p.tournament
@@ -173,7 +179,8 @@ while ($row = mysqli_fetch_row($query)) {
 	'mail' => $row[12],
 	'phone' => $row[13],
 	'ordinal' => $row[14],
-	'is_team' => ($row[15]=='Y')
+	'is_team' => ($row[15]=='Y'),
+	'member_phones' => $row[16]
 	);
 
 	$edit_url = $d['is_team'] ? 
