@@ -5,11 +5,15 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/format.php');
 
-//define('LONG_DATE_FORMAT', '%A, %h %e, %Y');
-//define('TIME_FMT', '%l:%M%P');
-//Windows format specifiers
-define('LONG_DATE_FORMAT', '%#x');
-define('TIME_FMT', '%#I:%M%p');
+if (strtoupper(substr(PHP_OS,0,3)) == 'WIN') {
+	//Windows format specifiers
+	define('LONG_DATE_FORMAT', '%#x');
+	define('TIME_FMT', '%#I:%M%p');
+} else {
+	//Unix/Linux format specifiers
+	define('LONG_DATE_FORMAT', '%A, %h %e, %Y');
+	define('TIME_FMT', '%l:%M%P');
+}
 
 $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,schedule_granularity
