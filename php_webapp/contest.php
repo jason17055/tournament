@@ -509,7 +509,7 @@ if (isset($_GET['id'])) {
 			'turn_order' => $turn_order,
 			'score' => $score,
 			'placement' => $placement,
-			'status' => $status
+			'participant_status' => $status
 			)
 			);
 	} // end foreach participant
