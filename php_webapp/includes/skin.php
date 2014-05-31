@@ -99,6 +99,7 @@ function select_person_widget($args)
 	$id_html = isset($args['id']) ? ' id="'.htmlspecialchars($args['id']).'"':'';
 	?><select name="<?php h($args['name'])?>"<?php echo($id_html)?>>
 <?php
+	select_option('', '--unspecified--', '' == $args['value']);
 	while ($row = mysqli_fetch_row($query)) {
 		$person_id = $row[0];
 		$ordinal = $row[1];
