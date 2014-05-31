@@ -5,5 +5,7 @@ CREATE TABLE person_attrib_float (
 	FOREIGN KEY (person) REFERENCES person (id),
 	PRIMARY KEY (person, attrib)
 	);
+ALTER TABLE person DROP COLUMN score;
+ALTER TABLE person DROP COLUMN score_alt;
 
 UPDATE master SET version=7;
