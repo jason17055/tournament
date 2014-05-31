@@ -535,7 +535,7 @@ if ($can_edit && $game_definition['seat_names']) {
 			'turn_order' => '',
 			'score' => '',
 			'placement' => '',
-			'status' => ''
+			'participant_status' => ''
 			)
 			);
 	}
