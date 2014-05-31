@@ -78,6 +78,8 @@ CREATE TABLE contest (
 --      C = confirmed
 --      M = mulligan
 --     or NULL = unspecified
+-- w_points: what the result is worth to this player in
+--     the overall tournament
 --
 CREATE TABLE contest_participant (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
