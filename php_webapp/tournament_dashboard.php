@@ -58,6 +58,13 @@ if ($tournament_info['use_person_phone']) {
 	if ($tournament_info['use_teams']) { $person_columns[]='member_phones';}
 	else                               { $person_columns[]='phone';}
 }
+$person_columns[]='status';
+$person_columns[]='games_played';
+$person_columns[]='games_won';
+$person_columns[]='raw_score';
+if ($tournament_info['ratings']) {
+	$person_columns[] = 'current_rating';
+}
 
 $person_column_names = array(
 	'ordinal' => ($tournament_info['use_teams'] ? 'Team Number' : 'Player Number'),
@@ -67,7 +74,12 @@ $person_column_names = array(
 	'home_location' => 'Home Location',
 	'mail' => 'Email Address',
 	'phone' => 'Telephone',
-	'member_phones' => 'Phone(s)'
+	'member_phones' => 'Phone(s)',
+	'raw_score' => 'Score',
+	'games_played' => 'Games Played',
+	'games_won' => 'Games Won',
+	'status' => 'Status',
+	'current_rating' => 'Current Rating'
 	);
 
 ?>
@@ -81,13 +93,6 @@ $person_column_names = array(
 foreach ($person_columns as $col) { ?>
 <th><?php h($person_column_names[$col])?></th>
 <?php }//end foreach column ?>
-<th>Status</th>
-<th>Games Played</th>
-<th>Games Won</th>
-<th>Points</th>
-<?php if ($tournament_info['ratings']) { ?>
-<th>Current Rating</th>
-<?php } ?>
 </tr>
 <?php
 $sql = "SELECT p.id,p.name,p.status,
@@ -122,7 +127,8 @@ $sql = "SELECT p.id,p.name,p.status,
 	p.mail,p.phone,p.ordinal,
 	p.is_team,
 	IFNULL((SELECT GROUP_CONCAT(phone SEPARATOR ', ') FROM person pp
-		WHERE pp.member_of=p.id AND phone IS NOT NULL), p.phone) AS member_phones
+		WHERE pp.member_of=p.id AND phone IS NOT NULL), p.phone) AS member_phones,
+	(SELECT s.score FROM score s WHERE s.player=p.id AND s.score_method='raw_score') AS raw_score
 	FROM person p
 	JOIN tournament t
 		ON t.id=p.tournament
@@ -138,15 +144,16 @@ while ($row = mysqli_fetch_row($query)) {
 
 	$person_id = $row[0];
 	$name = $row[1];
-	$status = $row[2];
-	$games_played = $row[3];
-	$games_won = $row[4];
-	$games_won_this_session = $row[5];
 	$w_points = $row[6] ?: 0;
 	$w_points_this_session = $row[7] ?: 0;
 	$cur_rating = $row[8];
 
 	$d = array(
+	'status' => $row[2],
+	'games_played' => $row[3],
+	'games_won' => $row[4],
+	'games_won_this_session' => $row[5],
+	'current_rating' => $row[8],
 	'member_number' => $row[9],
 	'entry_rank' => $row[10],
 	'home_location' => $row[11],
@@ -154,7 +161,8 @@ while ($row = mysqli_fetch_row($query)) {
 	'phone' => $row[13],
 	'ordinal' => $row[14],
 	'is_team' => ($row[15]=='Y'),
-	'member_phones' => $row[16]
+	'member_phones' => $row[16],
+	'raw_score' => $row[17]
 	);
 
 	$edit_url = $d['is_team'] ? 
@@ -171,27 +179,28 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="name_col"><img src="<?php
 	h($d['is_team']?'images/team_icon.png':'images/person_icon.png')?>">
 	<?php h($name)?></td>
+<?php } else if ($col == 'status') { ?>
+<td class="status_col"><?php
+	if ($d['status'] == 'ready') {
+		?><img src="images/plus.png" width="14" height="14" alt=""><?php
+	} else if ($d['status'] == 'absent') {
+		?><img src="images/minus.png" width="14" height="14" alt=""><?php
+	}
+	h($d['status'])?>
+	</td>
+<?php } else if ($col == 'games_played') { ?>
+<td class="game_count_col"><?php h($d['games_played'])?></td>
+<?php } else if ($col == 'games_won') { ?>
+<td class="game_count_col"><?php h($tournament_info['multi_session']?"$d[games_won] (+$d[games_won_this_session])":"$d[games_won]")?></td>
+<?php } else if ($col == 'current_rating') { ?>
+<td class="rating_col"><?php
+	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
+		}?></td>
 <?php } else { ?>
 <td class="<?php h($col)?>_col"><?php h($d[$col])?></td>
 <?php } //end switch $col ?>
 <?php } //end each $col ?>
 
-<td class="status_col"><?php
-	if ($status == 'ready') {
-		?><img src="images/plus.png" width="14" height="14" alt=""><?php
-	} else if ($status == 'absent') {
-		?><img src="images/minus.png" width="14" height="14" alt=""><?php
-	}
-	h($status)?>
-	</td>
-<td class="game_count_col"><?php h($games_played)?></td>
-<td class="game_count_col"><?php h($tournament_info['multi_session']?"$games_won (+$games_won_this_session)":"$games_won")?></td>
-<td class="w_points_col"><?php h($tournament_info['multi_session']?"$w_points (+$w_points_this_session)":"$w_points")?></td>
-<?php if ($tournament_info['ratings']) { ?>
-<td class="rating_col"><?php
-	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
-		}?></td>
-<?php } ?>
 </tr>
 <?php
 } //end foreach person
