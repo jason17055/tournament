@@ -181,8 +181,11 @@ for (var i = 0; i < players.length; i++)
 	$row.removeClass('template');
 	$row.attr('class', (i % 2 == 0) ? 'oddrow' : 'evenrow');
 	$row.attr('id', "scoreboard_row"+i);
-	$('.fullname_cell', $row).text(pr.name + (pr.entryRank != null ? (' ' + pr.entryRank) : "") +
-		(pr.ordinal != null ? (' (' + pr.ordinal + ')') : ''));
+	$('.fullname_cell', $row).text(
+		pr.rank + ". " +
+		pr.name +
+		(pr.entryRank != null ? (' ' + pr.entryRank) : "") +
+		(pr.ordinal != null ? (' (#' + pr.ordinal + ')') : ''));
 
 	var count_wins = 0;
 	var count_plays = 0;

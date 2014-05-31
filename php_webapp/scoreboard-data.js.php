@@ -34,7 +34,8 @@ $sql = "SELECT p.id,
 		p.ordinal,
 		last_g.id AS last_contest,
 		cur_g.id AS cur_contest,
-		s1.value AS raw_score
+		s1.value AS raw_score,
+		s2.value AS sum_opponent_scores
 	FROM person p
 	LEFT JOIN contest last_g
 		ON last_g.id=(SELECT id FROM contest c
@@ -53,12 +54,13 @@ $sql = "SELECT p.id,
 			LIMIT 1
 			)
 	LEFT JOIN person_attrib_float s1 ON s1.person=p.id AND s1.attrib='raw_score'
+	LEFT JOIN person_attrib_float s2 ON s2.person=p.id AND s2.attrib='sum_opponent_scores'
 	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.status IS NOT NULL
 	AND p.status NOT IN ('prereg')
 	";
 
-$scoreboard_order = "raw_score DESC,ordinal ASC";
+$scoreboard_order = "raw_score DESC,sum_opponent_scores DESC,ordinal ASC";
 $sql = "SELECT * FROM ($sql) tmp_s1 ORDER BY $scoreboard_order";
 
 $query = mysqli_query($database, $sql)
@@ -66,6 +68,8 @@ $query = mysqli_query($database, $sql)
 
 echo '"players":[';
 $count = 0;
+$last_person_score = "X";
+$rank = 0;
 while ($row = mysqli_fetch_row($query)) {
 	if ($count++) { echo ",\n"; }
 	$p = array(
@@ -77,6 +81,15 @@ while ($row = mysqli_fetch_row($query)) {
 		);
 	$last_contest_id = $row[5];
 	$cur_contest_id = $row[6];
+	$raw_score = $row[7];
+	$sos_score = $row[8];
+
+	$this_score = $raw_score;
+	if ($this_score != $last_person_score) {
+		$last_person_score = $this_score;
+		$rank = $count;
+	}
+	$p['rank'] = $rank;
 
 	if ($last_contest_id) {
 		$sql = "SELECT s.placement,
