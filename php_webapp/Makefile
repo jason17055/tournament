@@ -61,6 +61,7 @@ php_scripts = \
 	includes/format.php \
 	includes/pairing_functions.php \
 	includes/ratings_functions.php \
+	includes/scores.php \
 	includes/skin.php
 
 all:

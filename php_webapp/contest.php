@@ -5,6 +5,7 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
 require_once('includes/form.php');
+require_once('includes/scores.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
@@ -171,7 +172,7 @@ function update_contest_participants($contest_id)
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-	$next_url = $_REQUEST['next_url'] ?: 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
+	$next_url = isset($_REQUEST['next_url']) ? $_REQUEST['next_url'] : 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
 
 	if (isset($_REQUEST['action:cancel'])) {
 		header("Location: $next_url");
@@ -209,6 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		$contest_id = mysqli_insert_id($database);
 
 		update_contest_participants($contest_id);
+		update_all_player_scores();
+
 		mysqli_commit($database);
 
 		header("Location: $next_url");
@@ -244,6 +247,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			or die("SQL error: ".db_error($database));
 
 		update_contest_participants($_GET['id']);
+		update_all_player_scores();
+
 		mysqli_commit($database);
 
 		header("Location: $next_url");
