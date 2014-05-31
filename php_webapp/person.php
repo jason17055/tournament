@@ -226,6 +226,32 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 
 <?php
 if (isset($_GET['id'])) {
+
+$sql = "SELECT attrib,value FROM person_attrib_float
+	WHERE person=".db_quote($_GET['id'])."
+	ORDER BY attrib";
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+if (mysqli_num_rows($query) != 0) {
+?>
+<div>Other Attributes:</div>
+<table border="1">
+<?php
+
+while ($row = mysqli_fetch_row($query)) {
+	$attrib_name = $row[0];
+	$value = $row[1];
+	?><tr>
+<td><?php h($attrib_name)?></td>
+<td><?php h($value)?></td>
+</tr>
+<?php
+}//end each attribute
+?>
+</table>
+<?php
+} //end if any attributes
+
 $scorecard_url = "player_scorecard.php?id=".urlencode($_REQUEST['id']).
 	'&next_url='.urlencode($_SERVER['REQUEST_URI']);
 ?>
