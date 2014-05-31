@@ -231,7 +231,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		if ($tournament_info['multi_round']=='Y') {
 		$updates[] = "round=".db_quote($_REQUEST['round']);
 		}
-		$updates[] = "scenario=".db_quote($_REQUEST['scenario']);
+		if (array_key_exists('scenario', $_REQUEST)) {
+			$updates[] = "scenario=".db_quote($_REQUEST['scenario']);
+		}
 		$updates[] = "notes=".db_quote($_REQUEST['notes']);
 		$updates[] = "starts=".db_quote($_REQUEST['starts']);
 		$updates[] = "started=".db_quote($_REQUEST['started']);
