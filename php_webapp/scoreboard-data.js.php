@@ -27,9 +27,14 @@ header("Content-Type: text/json");
 echo "{\n";
 echo '"tournament":'.json_encode($tournament_info).",\n";
 
-$sql = "SELECT p.id,p.name,p.entry_rank,p.member_number,p.ordinal,
+$sql = "SELECT p.id,
+		p.name,
+		p.entry_rank,
+		p.member_number,
+		p.ordinal,
 		last_g.id AS last_contest,
-		cur_g.id AS cur_contest
+		cur_g.id AS cur_contest,
+		s1.score AS raw_score
 	FROM person p
 	LEFT JOIN contest last_g
 		ON last_g.id=(SELECT id FROM contest c
@@ -47,10 +52,15 @@ $sql = "SELECT p.id,p.name,p.entry_rank,p.member_number,p.ordinal,
 			ORDER BY started ASC, id ASC
 			LIMIT 1
 			)
+	LEFT JOIN score s1 ON s1.player=p.id AND s1.score_method='raw_score'
 	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.status IS NOT NULL
 	AND p.status NOT IN ('prereg')
-	ORDER BY p.entry_rank DESC, p.name ASC";
+	";
+
+$scoreboard_order = "raw_score DESC,ordinal ASC";
+$sql = "SELECT * FROM ($sql) tmp_s1 ORDER BY $scoreboard_order";
+
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 
