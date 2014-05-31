@@ -118,16 +118,16 @@ function result_from_game(play, my_pid)
 function fmt_rank(rank)
 {
 	if (rank%10 == 1 && rank!=11) {
-		return rank+'st';
+		return rank+'<sup>st</sup>';
 	}
 	else if (rank%10 == 2 && rank != 12) {
-		return rank+'nd';
+		return rank+'<sup>nd</sup>';
 	}
 	else if (rank%10 == 3 && rank != 13) {
-		return rank+'rd';
+		return rank+'<sup>rd</sup>';
 	}
 	else {
-		return rank+'th';
+		return rank+'<sup>th</sup>';
 	}
 }
 
@@ -138,7 +138,7 @@ function on_players_fetched(data)
 	players = data.players;
 	games = data.games;
 
-	players = players.sort(cmp_rank);
+	//players = players.sort(cmp_rank);
 	do_short_names(players);
 
 	var player_by_pid = {};
@@ -200,8 +200,9 @@ for (var i = 0; i < players.length; i++)
 	$row.removeClass('template');
 	$row.attr('class', (i % 2 == 0) ? 'oddrow' : 'evenrow');
 	$row.attr('id', "scoreboard_row"+i);
+	$('.rank_col', $row).html(fmt_rank(pr.rank));
+
 	$('.fullname_cell', $row).text(
-		fmt_rank(pr.rank) + ". " +
 		pr.name +
 		(pr.entryRank != null ? (' ' + pr.entryRank) : "") +
 		' ('+pr.shortName+')'
