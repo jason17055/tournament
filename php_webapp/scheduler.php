@@ -5,6 +5,12 @@ require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/format.php');
 
+//define('LONG_DATE_FORMAT', '%A, %h %e, %Y');
+//define('TIME_FMT', '%l:%M%P');
+//Windows format specifiers
+define('LONG_DATE_FORMAT', '%#x');
+define('TIME_FMT', '%#I:%M%p');
+
 $tournament_id = $_GET['tournament'];
 $sql = "SELECT name,schedule_granularity
 	FROM tournament t
@@ -66,7 +72,7 @@ $later_url = 'scheduler.php?'.$url_com
 	|
 	<a href="<?php h($next_day_url)?>">Next Day</a>
 	</div>
-	<span class="scheduler_day"><?php h(strftime('%A, %h %e, %Y', $cur_row_time))?></span>
+	<span class="scheduler_day"><?php h(strftime(LONG_DATE_FORMAT, $cur_row_time))?></span>
 </caption>
 <tr>
 <th class="time_hdr">Time</th>
@@ -129,7 +135,7 @@ function output_current_scheduler_row()
 	$tr_class = $row_count % 2 == 0 ? 'even' : 'odd';
 	?>
 <tr class="<?php h($tr_class)?>">
-<td class="time_col"><?php h(strftime('%l:%M%P',$cur_row_time))?></td>
+<td class="time_col"><?php h(strftime(TIME_FMT,$cur_row_time))?></td>
 <?php
 	foreach ($venues_in_order as $venue_id) {
 
