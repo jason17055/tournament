@@ -34,7 +34,7 @@ $sql = "SELECT p.id,
 		p.ordinal,
 		last_g.id AS last_contest,
 		cur_g.id AS cur_contest,
-		s1.score AS raw_score
+		s1.value AS raw_score
 	FROM person p
 	LEFT JOIN contest last_g
 		ON last_g.id=(SELECT id FROM contest c
@@ -52,7 +52,7 @@ $sql = "SELECT p.id,
 			ORDER BY started ASC, id ASC
 			LIMIT 1
 			)
-	LEFT JOIN score s1 ON s1.player=p.id AND s1.score_method='raw_score'
+	LEFT JOIN person_attrib_float s1 ON s1.person=p.id AND s1.attrib='raw_score'
 	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.status IS NOT NULL
 	AND p.status NOT IN ('prereg')

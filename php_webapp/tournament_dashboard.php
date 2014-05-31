@@ -128,7 +128,7 @@ $sql = "SELECT p.id,p.name,p.status,
 	p.is_team,
 	IFNULL((SELECT GROUP_CONCAT(phone SEPARATOR ', ') FROM person pp
 		WHERE pp.member_of=p.id AND phone IS NOT NULL), p.phone) AS member_phones,
-	(SELECT s.score FROM score s WHERE s.player=p.id AND s.score_method='raw_score') AS raw_score
+	(SELECT value FROM person_attrib_float WHERE person=p.id AND attrib='raw_score') AS raw_score
 	FROM person p
 	JOIN tournament t
 		ON t.id=p.tournament

@@ -34,7 +34,7 @@ function update_all_player_scores()
 		or die("SQL error (in update_scores): ".db_error($database));
 				
 	$sql = "
-		INSERT INTO score (player,score_method,score)
+		INSERT INTO person_attrib_float (person,attrib,value)
 		SELECT id,'raw_score',
 			IFNULL((SELECT SUM(w_points)
 				FROM contest_participant cp
@@ -47,7 +47,7 @@ function update_all_player_scores()
 		WHERE p.tournament=".db_quote($tournament_id)."
 		AND p.member_of IS NULL
 		AND p.status IS NOT NULL
-		ON DUPLiCATE KEY UPDATE score=VALUES(score)
+		ON DUPLiCATE KEY UPDATE value=VALUES(value)
 		";
 	mysqli_query($database, $sql)
 		or die("SQL error (in update_scores): ".db_error($database));

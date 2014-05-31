@@ -1,9 +1,9 @@
-CREATE TABLE score (
-	player INTEGER NOT NULL,
-	score_method VARCHAR(20) NOT NULL,
-	score FLOAT NOT NULL,
-	FOREIGN KEY (player) REFERENCES person (id),
-	PRIMARY KEY (player, score_method)
+CREATE TABLE person_attrib_float (
+	person INTEGER NOT NULL,
+	attrib VARCHAR(20) NOT NULL,
+	value FLOAT NOT NULL,
+	FOREIGN KEY (person) REFERENCES person (id),
+	PRIMARY KEY (person, attrib)
 	);
 
 UPDATE master SET version=7;
