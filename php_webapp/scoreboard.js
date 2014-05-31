@@ -36,6 +36,9 @@ function do_short_names(players_arr)
 		if (!p.shortName) {
 			if (p.ordinal) {
 				p.shortName = ""+p.ordinal;
+				if (p.shortName.length == 1) {
+					p.shortName = "0"+p.shortName;
+				}
 			}
 			else {
 				p.shortName = generate_short_name(p);
@@ -112,6 +115,22 @@ function result_from_game(play, my_pid)
 		'L';
 }
 
+function fmt_rank(rank)
+{
+	if (rank%10 == 1 && rank!=11) {
+		return rank+'st';
+	}
+	else if (rank%10 == 2 && rank != 12) {
+		return rank+'nd';
+	}
+	else if (rank%10 == 3 && rank != 13) {
+		return rank+'rd';
+	}
+	else {
+		return rank+'th';
+	}
+}
+
 function on_players_fetched(data)
 {
 	S.ROUND_ROBIN = data.tournament.scoreboard_roundrobin_style;
@@ -182,10 +201,11 @@ for (var i = 0; i < players.length; i++)
 	$row.attr('class', (i % 2 == 0) ? 'oddrow' : 'evenrow');
 	$row.attr('id', "scoreboard_row"+i);
 	$('.fullname_cell', $row).text(
-		pr.rank + ". " +
+		fmt_rank(pr.rank) + ". " +
 		pr.name +
 		(pr.entryRank != null ? (' ' + pr.entryRank) : "") +
-		(pr.ordinal != null ? (' (#' + pr.ordinal + ')') : ''));
+		' ('+pr.shortName+')'
+		);
 
 	var count_wins = 0;
 	var count_plays = 0;
