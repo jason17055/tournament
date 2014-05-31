@@ -135,11 +135,16 @@ function output_current_scheduler_row()
 
 		?><td class="scheduler_cell" data-venue-id="<?php h($venue_id)?>">
 		<?php
-		$a = $by_venue[$venue_id];
-		if (count($a) == 0) {
+		if (isset($by_venue[$venue_id])) {
+			$a = $by_venue[$venue_id];
+		}
+		else {
 			$DUMMY_GAME = array(
 				'url' => 'contest.php?tournament='.urlencode($tournament_id).'&starts='.urlencode(make_datetime($cur_row_time)).'&venue='.urlencode($venue_id)
-				. '&next_url='.urlencode($_SERVER['REQUEST_URI'])
+				. '&next_url='.urlencode($_SERVER['REQUEST_URI']),
+				'round' =>  '',
+				'status' => '',
+				'participant_ordinals' => ''
 				);
 			$a = array($DUMMY_GAME);
 		}
