@@ -66,6 +66,10 @@ $person_column_names = array(
 	'status' => 'Status',
 	'current_rating' => 'Current Rating'
 	);
+$person_column_sortable = array(
+	'ordinal' => TRUE,
+	'raw_score' => TRUE
+	);
 
 $person_columns = array('ordinal','name');
 if ($tournament_info['use_person_member_number']) { $person_columns[]='member_number';}
@@ -99,10 +103,22 @@ if ($tournament_info['ratings']) {
 <?php } ?>
 <?php
 foreach ($person_columns as $col) { ?>
-<th class="<?php h($col.'_col')?>"><?php h($person_column_names[$col])?></th>
+<th class="<?php h($col.'_col')?>"><?php
+	if (isset($person_column_sortable[$col])) {
+		$sort_url = 'tournament_dashboard.php?tournament='.urlencode($tournament_id)
+				. '&order_by='.urlencode($col);
+		?><a class="column_sort_link" href="<?php h($sort_url)?>"><?php h($person_column_names[$col])?></a>
+<?php } else {
+		h($person_column_names[$col]);
+} ?></th>
 <?php }//end foreach column ?>
 </tr>
 <?php
+if (isset($_REQUEST['order_by']) && $_REQUEST['order_by']=='raw_score') {
+	$order_by_sql = 'raw_score DESC';
+} else {
+	$order_by_sql = 'ordinal ASC, name ASC, id ASC';
+}
 $sql = "SELECT p.id,p.name,p.status,
 	(SELECT COUNT(DISTINCT contest) FROM contest_participant
 			WHERE player=p.id) AS games_played,
@@ -145,7 +161,7 @@ $sql = "SELECT p.id,p.name,p.status,
 		AND r.session_num=t.current_session
 	WHERE tournament=".db_quote($tournament_id)."
 	AND p.status IS NOT NULL
-	ORDER BY rating DESC, name ASC";
+	ORDER BY $order_by_sql";
 $query = mysqli_query($database, $sql)
 	or die("SQL error: ".db_error($database));
 while ($row = mysqli_fetch_row($query)) {

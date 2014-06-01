@@ -179,3 +179,6 @@ td.performance_col {
 	min-width: 75px;
 	text-align: center;
 }
+.column_sort_link {
+	color: black;
+}
