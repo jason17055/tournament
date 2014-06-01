@@ -92,8 +92,10 @@ while ($row = mysqli_fetch_row($query)) {
 	$pid = $row[8];
 	$last_round = $row[9];
 
+	$edit_person_url = "person.php?id=".urlencode($pid).
+		"&next_url=".urlencode($_SERVER['REQUEST_URI']);
 	?><tr>
-<td class="ordinal_col"><?php h($ordinal)?></td>
+<td class="ordinal_col"><a href="<?php h($edit_person_url)?>"><?php h($ordinal)?></a></td>
 <td class="name_col"><?php h($name)?></td>
 <td class="status_col"><?php format_person_status($status)?></td>
 <td class="record_col"><?php h($record)?></td>
@@ -108,16 +110,18 @@ while ($row = mysqli_fetch_row($query)) {
 	}?></td>
 <td>
 	<?php
+	if ($status == 'ready' && !$next_c) {
 	$next_round = $last_round ? ($last_round+1) : 1;
 	$drop_out_url = "person.php?id=".urlencode($pid)."&status=absent".
 		"&next_url=".urlencode($_SERVER['REQUEST_URI']);
-	$schedule_url = "scheduler.php?tournament=".db_quote($tournament_id).
+	$schedule_url = "scheduler.php?tournament=".urlencode($tournament_id).
 		"&add_player=".urlencode($pid).
 		"&new_contest_round=".urlencode($next_round).
 		"&new_contest_label=".urlencode($record);
 ?><a href="<?php h($schedule_url)?>">Schedule Next Match</a>
 |
 <a href="<?php h($drop_out_url)?>">Drop Out</a>
+<?php	} ?>
 </td>
 </tr>
 <?php
