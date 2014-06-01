@@ -4,6 +4,7 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
+require_once('includes/form.php');
 
 if (isset($_GET['tournament'])) {
 	$tournament_id = $_GET['tournament'];
@@ -39,7 +40,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['home_location'] = $row[5];
 		$_REQUEST['mail'] = $row[6];
 		$_REQUEST['phone'] = $row[7];
-		$_REQUEST['status'] = $row[8];
+		default_form_property('status', $row[8]);
 		$_REQUEST['ordinal'] = $row[9];
 	}
 }
