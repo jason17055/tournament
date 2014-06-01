@@ -41,8 +41,12 @@ else {
 $num_rows = isset($_REQUEST['rows']) ? $_REQUEST['rows'] : 16;
 
 $ONE_DAY = 86400;
-$url_com = 'tournament='.urlencode($tournament_id).
-	(isset($_REQUEST['rows']) ? '&rows='.urlencode($_REQUEST['rows']) : '');
+$url_com = 'tournament='.urlencode($tournament_id);
+foreach (array('rows','add_player','new_contest_round','new_contest_label') as $k) {
+	if (array_key_exists($k, $_GET)) {
+		$url_com .= '&'.$k.'='.urlencode($_REQUEST[$k]);
+	}
+}
 $previous_day_url = 'scheduler.php?'.$url_com
 	.'&start='.urlencode(make_datetime($cur_row_time-$ONE_DAY));
 $earlier_url = 'scheduler.php?'.$url_com
