@@ -109,10 +109,10 @@ function output_contest_info($d)
 	?>
 	<span class="round"><?php h($round)?></span><?php
 	}
-	if (isset($d['w_tag'])) {
-		h("[".$d['w_tag']."]");
+	if (isset($d['label'])) {
+		h("[".$d['label']."]");
 	}
-	if ($round || isset($d['w_tag'])) { echo ": "; }
+	if ($round || isset($d['label'])) { echo ": "; }
 ?>
 	<span class="participants"><?php
 	h($d['participant_ordinals']);
@@ -170,13 +170,7 @@ $sql = "SELECT c.id,c.status,venue,starts,round,
 	(SELECT GROUP_CONCAT(ordinal SEPARATOR 'v') FROM contest_participant cp
 			JOIN person p ON p.id=cp.player
 			WHERE cp.contest=c.id) AS participant_ordinals,
-	(SELECT MIN(wins_losses)
-		FROM (
-		SELECT cp.contest AS contest,value AS wins_losses
-		FROM contest_participant cp
-		LEFT JOIN person_attrib_value v ON v.person=cp.player AND v.attrib='wins_losses'
-		) tmp1
-		WHERE contest=c.id) AS w_tag
+	c.label
 	FROM contest c
 	WHERE c.tournament=".db_quote($tournament_id)."
 	AND starts IS NOT NULL
@@ -193,7 +187,7 @@ while ($row = mysqli_fetch_row($query)) {
 	'starts' => $row[3],
 	'round' => $row[4],
 	'participant_ordinals' => $row[5],
-	'w_tag' => $row[6]
+	'label' => $row[6]
 	);
 	$d['url'] = 'contest.php?id='.urlencode($d['id'])
 		. '&next_url='.urlencode($_SERVER['REQUEST_URI']);
