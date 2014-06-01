@@ -31,8 +31,9 @@ if (isset($_GET['tournament'])) {
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		default_form_property('venue', '');
 		default_form_property('starts', '');
+		default_form_property('round', '');
+		default_form_property('label', '');
 		$_REQUEST['session_num'] = $tournament_info['current_session'];
-		$_REQUEST['round'] = "";
 		$_REQUEST['game'] = $tournament_info['default_game'];
 		$_REQUEST['scenario'] = "";
 		$_REQUEST['status'] = "";
@@ -46,7 +47,7 @@ else if (isset($_GET['id'])) {
 		session_num,round,venue,
 		game,scenario,status,
 		starts,started,finished,
-		notes,
+		notes,label,
 		vocab_table,multi_venue,use_teams
 		FROM contest c
 		JOIN tournament t ON t.id=c.tournament
@@ -60,9 +61,9 @@ else if (isset($_GET['id'])) {
 		'multi_game' => $row[1],
 		'multi_session' => $row[2],
 		'multi_round' => $row[3],
-		'vocab_table' => $row[14],
-		'multi_venue' => $row[15]=='Y',
-		'use_teams' => $row[16]=='Y'
+		'vocab_table' => $row[15],
+		'multi_venue' => $row[16]=='Y',
+		'use_teams' => $row[17]=='Y'
 		);
 
 	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -76,6 +77,7 @@ else if (isset($_GET['id'])) {
 		$_REQUEST['started'] = $row[11];
 		$_REQUEST['finished'] = $row[12];
 		$_REQUEST['notes'] = $row[13];
+		$_REQUEST['label'] = $row[14];
 	}
 }
 else {
@@ -191,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		mysqli_autocommit($database, FALSE);
 
-		$sql = "INSERT INTO contest (tournament,session_num,round,game,scenario,status,starts,started,finished,notes,venue)
+		$sql = "INSERT INTO contest (tournament,session_num,round,game,scenario,status,starts,started,finished,notes,venue,label)
 			VALUES (
 			".db_quote($tournament_id).",
 			".db_quote($_REQUEST['session_num']).",
@@ -203,7 +205,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			".db_quote($_REQUEST['started']).",
 			".db_quote($_REQUEST['finished']).",
 			".db_quote($_REQUEST['notes']).",
-			".db_quote($_REQUEST['venue'])."
+			".db_quote($_REQUEST['venue']).",
+			".db_quote($_REQUEST['label'])."
 			)";
 		mysqli_query($database, $sql)
 			or die(db_error($database));
@@ -241,6 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		if (isset($_REQUEST['venue'])) {
 		$updates[] = "venue=".db_quote($_REQUEST['venue']);
 		}
+		$updates[] = "label=".db_quote($_REQUEST['label']);
 
 		$sql = "UPDATE contest
 		SET ".implode(',',$updates)."
@@ -321,6 +325,10 @@ begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 <td><input type="text" id="round_entry" name="round" value="<?php h($_REQUEST['round'])?>"></td>
 </tr>
 <?php }//endif multi_round tournament?>
+<tr>
+<td><label for="label_entry">Label:</label></td>
+<td><input type="text" id="label_entry" name="label" value="<?php h($_REQUEST['label'])?>"></td>
+</tr>
 <?php if ($tournament_info['multi_venue']) {?>
 <tr>
 <td><label for="venue_cb">Venue:</label></td>

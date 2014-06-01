@@ -17,4 +17,6 @@ CREATE TABLE person_attrib_value (
 ALTER TABLE person DROP COLUMN score;
 ALTER TABLE person DROP COLUMN score_alt;
 
+ALTER TABLE contest ADD COLUMN label VARCHAR(20);
+
 UPDATE master SET version=7;
