@@ -32,7 +32,45 @@ function update_all_player_scores()
 		";
 	mysqli_query($database, $sql)
 		or die("SQL error (in update_scores): ".db_error($database));
-				
+
+	$sql = "
+		INSERT INTO person_attrib_value (person,attrib,value)
+		SELECT id,'wins_losses',
+			CONCAT(IFNULL((SELECT COUNT(*)
+				FROM contest_participant cp
+				JOIN contest c ON c.id=cp.contest
+				WHERE cp.player=p.id
+				AND IFNULL(cp.participant_status,'C') NOT IN ('M')
+				AND c.status='completed'
+				AND w_points=1.0
+				), '0'),
+				'-',
+				IFNULL((SELECT COUNT(*)
+				FROM contest_participant cp
+				JOIN contest c ON c.id=cp.contest
+				WHERE cp.player=p.id
+				AND IFNULL(cp.participant_status,'C') NOT IN ('M')
+				AND c.status='completed'
+				AND w_points=0.0
+				), '0'),
+				IFNULL((SELECT CONCAT('-',SUM(1))
+				FROM contest_participant cp
+				JOIN contest c ON c.id=cp.contest
+				WHERE cp.player=p.id
+				AND IFNULL(cp.participant_status,'C') NOT IN ('M')
+				AND c.status='completed'
+				AND w_points NOT IN (0,1)
+				), '')
+			)
+		FROM person p
+		WHERE p.tournament=".db_quote($tournament_id)."
+		AND p.member_of IS NULL
+		AND p.status IS NOT NULL
+		ON DUPLICATE KEY UPDATE value=VALUES(value)
+		";
+	mysqli_query($database, $sql)
+		or die("SQL error (in update_scores): ".db_error($database));
+
 	$sql = "
 		INSERT INTO person_attrib_float (person,attrib,value)
 		SELECT id,'raw_score',
