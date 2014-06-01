@@ -204,14 +204,7 @@ while ($row = mysqli_fetch_row($query)) {
 	h($d['is_team']?'images/team_icon.png':'images/person_icon.png')?>">
 	<?php h($name)?></td>
 <?php } else if ($col == 'status') { ?>
-<td class="status_col"><?php
-	if ($d['status'] == 'ready') {
-		?><img src="images/plus.png" width="14" height="14" alt=""><?php
-	} else if ($d['status'] == 'absent') {
-		?><img src="images/minus.png" width="14" height="14" alt=""><?php
-	}
-	h($d['status'])?>
-	</td>
+<td class="status_col"><?php format_person_status($d['status'])?></td>
 <?php } else if ($col == 'games_played') { ?>
 <td class="game_count_col"><?php h($d['games_played'])?></td>
 <?php } else if ($col == 'games_won') { ?>

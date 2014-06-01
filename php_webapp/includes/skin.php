@@ -139,6 +139,16 @@ function format_contest_status($status)
 	h($status);
 }
 
+function format_person_status($status)
+{
+	if ($status == 'ready') {
+		?><img src="images/plus.png" width="14" height="14" alt=""><?php
+	} else if ($status == 'absent') {
+		?><img src="images/minus.png" width="14" height="14" alt=""><?php
+	}
+	h($status);
+}
+
 function format_scenario($raw_text)
 {
 	if (substr($raw_text,0,1)=='{') {

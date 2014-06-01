@@ -14,6 +14,15 @@ function db_quote($str)
 	}
 }
 
+function db_quote_list($a)
+{
+	$l = array();
+	foreach ($a as $v) {
+		$l[] = db_quote($v);
+	}
+	return implode(',', $l);
+}
+
 function db_error($obj)
 {
 	global $database;

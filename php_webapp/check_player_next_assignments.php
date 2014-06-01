@@ -42,11 +42,40 @@ begin_page("Check players assignments");
 ?>
 <table border="1">
 <tr>
-<th><?php h($tournament_info['use_teams'] ? 'Team' : 'Player')?></th>
-<th>Status</th>
-<th>Record</th>
-<th>Next Game</th>
+<th class="ordinal_col"><?php h($tournament_info['use_teams'] ? 'Team Number' : 'Ordinal')?></th>
+<th class="name_col"><?php h($tournament_info['use_teams'] ? 'Team Name' : 'Player')?></th>
+<th class="status_col">Status</th>
+<th class="record_col">Record</th>
+<th class="next_assignment_col">Next Game</th>
 </tr>
+<?php
+
+$sql = "SELECT is_team,ordinal,name,status,
+		(SELECT value FROM person_attrib_value WHERE person=p.id AND attrib='wins_losses') AS record
+	FROM person p
+	WHERE tournament=".db_quote($tournament_id)."
+	AND id IN (".db_quote_list(explode(',',$_REQUEST['players'])).")
+	ORDER BY ordinal,name
+	";
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+while ($row = mysqli_fetch_row($query)) {
+	$is_team = $row[0]=='Y';
+	$ordinal = $row[1];
+	$name = $row[2];
+	$status = $row[3];
+	$record = $row[4];
+
+	?><tr>
+<td class="ordinal_col"><?php h($ordinal)?></td>
+<td class="name_col"><?php h($name)?></td>
+<td class="status_col"><?php format_person_status($status)?></td>
+<td class="record_col"><?php h($record)?></td>
+</tr>
+<?php
+}
+
+?>
 </table>
 
 <?php 
