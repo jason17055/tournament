@@ -107,6 +107,7 @@ function on_clear_participant_clicked(evt)
 	$("input[type=text]", row_el).attr('value', '');
 	$('.player_col input[type=hidden]', row_el).attr('value','');
 	$('.player_col input.player_sel', row_el).removeAttr('data-player_id');
+	$('.player_col select', row_el).each(function(idx,el) { el.value = ''; });
 }
 
 function on_delete_participant_clicked(evt)
