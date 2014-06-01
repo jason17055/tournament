@@ -155,6 +155,18 @@ function output_contest_info($d)
 		$round = "R$round";
 	}
 
+	$url = $d['url'];
+	$icon = 'images/edit.gif';
+
+	if (isset($_REQUEST['add_player'])) {
+		$url .= '&add_player='.urlencode($_REQUEST['add_player']);
+		if (!isset($d['id'])) {
+			$url .= '&round='.urlencode($_REQUEST['new_contest_round']);
+			$url .= '&label='.urlencode($_REQUEST['new_contest_label']);
+		}
+		$icon = 'images/create_doc.png';
+	}
+
 	?><div>
 	<?php
 	contest_status_icon($d['status']);
@@ -172,7 +184,7 @@ function output_contest_info($d)
 	h($d['participant_ordinals']);
 	?></span>
 	<?php } ?>
-	<a href="<?php h($d['url'])?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a>
+	<a href="<?php h($url)?>"><img src="<?php h($icon)?>" width="18" height="18" border="0"></a>
 	</div>
 <?php
 }

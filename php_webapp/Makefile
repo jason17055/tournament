@@ -28,7 +28,8 @@ data_files = \
 	images/contest_proposed_icon.png \
 	images/contest_started_icon.png \
 	images/seat_gb_icon.png \
-	images/seat_yb_icon.png
+	images/seat_yb_icon.png \
+	images/create_doc.png
 
 php_scripts = \
 	assignments-data.js.php \
