@@ -10,7 +10,8 @@ $sql = "SELECT name,multi_game,multi_session,current_session,vocab_table,
 	ratings,use_person_member_number,use_person_entry_rank,
 	use_person_home_location,use_person_mail,use_person_phone,
 	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0,
-	use_teams
+	use_teams,
+	(SELECT GROUP_CONCAT(DISTINCT round) FROM contest WHERE round IS NOT NULL AND tournament=t.id) rounds
 	FROM tournament t
 	WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
@@ -30,7 +31,8 @@ $tournament_info = array(
 	'use_person_mail' => $row[9]=='Y',
 	'use_person_phone' => $row[10]=='Y',
 	'game0' => $row[11],
-	'use_teams' => $row[12]=='Y'
+	'use_teams' => $row[12]=='Y',
+	'rounds' => $row[13]
 	);
 
 $game_definition = array();
@@ -49,23 +51,6 @@ begin_page($page_title);
 
 $can_edit_players = is_director($tournament_id);
 
-$person_columns = array('ordinal','name');
-if ($tournament_info['use_person_member_number']) { $person_columns[]='member_number';}
-if ($tournament_info['use_person_entry_rank'])    { $person_columns[]='entry_rank';}
-if ($tournament_info['use_person_home_location']) { $person_columns[]='home_location';}
-if ($tournament_info['use_person_mail'])          { $person_columns[]='mail';}
-if ($tournament_info['use_person_phone']) {
-	if ($tournament_info['use_teams']) { $person_columns[]='member_phones';}
-	else                               { $person_columns[]='phone';}
-}
-$person_columns[]='status';
-$person_columns[]='games_played';
-$person_columns[]='games_won';
-$person_columns[]='raw_score';
-if ($tournament_info['ratings']) {
-	$person_columns[] = 'current_rating';
-}
-
 $person_column_names = array(
 	'ordinal' => ($tournament_info['use_teams'] ? 'Team Number' : 'Player Number'),
 	'name' => ($tournament_info['use_teams'] ? 'Team Name' : 'Player Name'),
@@ -82,8 +67,31 @@ $person_column_names = array(
 	'current_rating' => 'Current Rating'
 	);
 
+$person_columns = array('ordinal','name');
+if ($tournament_info['use_person_member_number']) { $person_columns[]='member_number';}
+if ($tournament_info['use_person_entry_rank'])    { $person_columns[]='entry_rank';}
+if ($tournament_info['use_person_home_location']) { $person_columns[]='home_location';}
+if ($tournament_info['use_person_mail'])          { $person_columns[]='mail';}
+if ($tournament_info['use_person_phone']) {
+	if ($tournament_info['use_teams']) { $person_columns[]='member_phones';}
+	else                               { $person_columns[]='phone';}
+}
+$person_columns[]='status';
+
+foreach (explode(',',$tournament_info['rounds']) as $round) {
+	$person_columns[]='round.'.$round;
+	$person_column_names['round.'.$round] = "R$round";
+}
+
+//$person_columns[]='games_played';
+//$person_columns[]='games_won';
+$person_columns[]='raw_score';
+if ($tournament_info['ratings']) {
+	$person_columns[] = 'current_rating';
+}
+
 ?>
-<table border="1">
+<table class="tournament_roster_table" border="1">
 <caption><?php h($tournament_info['use_teams'] ? 'Teams' : 'Players')?></caption>
 <tr>
 <?php if ($can_edit_players) { ?>
@@ -91,7 +99,7 @@ $person_column_names = array(
 <?php } ?>
 <?php
 foreach ($person_columns as $col) { ?>
-<th><?php h($person_column_names[$col])?></th>
+<th class="<?php h($col.'_col')?>"><?php h($person_column_names[$col])?></th>
 <?php }//end foreach column ?>
 </tr>
 <?php
@@ -196,6 +204,22 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="rating_col"><?php
 	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
 		}?></td>
+<?php } else if (preg_match('/^round\.(.*)$/', $col, $m)) { ?>
+<td class="round_result_col"><?php
+		$sql = "
+			SELECT SUM(w_points)
+			FROM contest_participant cp
+			JOIN contest c ON c.id=cp.contest
+			WHERE cp.player=".db_quote($person_id)."
+			AND c.status='completed'
+			AND IFNULL(cp.participant_status,'C') NOT IN ('M')
+			AND c.round=".db_quote($m[1])."
+			";
+		$q2 = mysqli_query($database, $sql);
+		$r2 = mysqli_fetch_row($q2);
+		h($r2[0]);
+?>
+</td>
 <?php } else { ?>
 <td class="<?php h($col)?>_col"><?php h($d[$col])?></td>
 <?php } //end switch $col ?>

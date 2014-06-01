@@ -165,3 +165,17 @@ td.performance_col {
 }
 .scheduler_table th, .scheduler_table td {
 }
+
+.tournament_roster_table .status_col {
+	min-width: 75px;
+	text-align: center;
+}
+.tournament_roster_table .raw_score_col {
+	min-width: 75px;
+	text-align: center;
+	font-weight: bold;
+}
+.round_result_col {
+	min-width: 75px;
+	text-align: center;
+}
