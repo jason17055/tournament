@@ -52,6 +52,55 @@ $next_day_url = 'scheduler.php?'.$url_com
 $later_url = 'scheduler.php?'.$url_com
 	.'&start='.urlencode(make_datetime($cur_row_time+$num_rows*$granularity));
 
+if (isset($_REQUEST['add_player'])) {
+	$sql = "SELECT ordinal,name,is_team
+		FROM person p
+		WHERE tournament=".db_quote($tournament_id)."
+		AND id=".db_quote($_REQUEST['add_player']);
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	$row = mysqli_fetch_row($query)
+		or die("Player $_REQUEST[add_player] not found.");
+
+	$ordinal = $row[0];
+	$name = $row[1];
+	$is_team = $row[2];
+	?>
+<div class="add_player_info">
+<div>
+Select a time/location for the <?php h('R'.$_REQUEST['new_contest_round'])?>
+<?php h(isset($_REQUEST['new_contest_label'])?"[$_REQUEST[new_contest_label]]":'')
+?> match for
+<img src="images/team_icon.png">
+<?php h($name)?> (Team <?php h($ordinal)?>).
+</div>
+<?php
+	$sql = "
+		SELECT c.round, pp.is_team, pp.ordinal, pp.name
+		FROM contest_participant cp
+		JOIN contest c ON c.id=cp.contest
+		JOIN contest_participant cp1
+			ON cp1.contest=c.id AND cp1.player<>cp.player
+		JOIN person pp ON pp.id=cp1.player
+		WHERE cp.player=".db_quote($_REQUEST['add_player'])."
+		ORDER BY pp.ordinal, pp.name, c.round";
+	$query = mysqli_query($database, $sql)
+		or die("SQL error: ".db_error($database));
+	?>
+<div>Has already played:</div>
+<ul class="opponent_list">
+	<?php
+	while ($row = mysqli_fetch_row($query)) {
+		$round = $row[0];
+		$opp_is_team = $row[1];
+		$opp_ordinal = $row[2];
+		$opp_name = $row[3];
+		?><li><img src="images/team_icon.png"><?php h($opp_name.' (Team '.$opp_ordinal.') - R'.$round)?></li>
+	<?php } ?>
+</ul>
+</div><!--/add_player_info-->
+<?php
+}
 
 ?>
 <table class="scheduler_table">

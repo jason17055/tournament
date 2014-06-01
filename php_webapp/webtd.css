@@ -182,3 +182,16 @@ td.performance_col {
 .column_sort_link {
 	color: black;
 }
+
+.add_player_info {
+	margin-left: 1in;
+	margin-right: 1in;
+	border: 2px solid black;
+	background-color: #ddf;
+	color: black;
+}
+.add_player_info ul.opponent_list {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
