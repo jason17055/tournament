@@ -3,7 +3,7 @@
 if (strtoupper(substr(PHP_OS,0,3)) == 'WIN') {
 	//Windows format specifiers
 	define('LONG_DATE_FORMAT', '%#x');
-	define('DATETIME_FMT', '%#I:%M%p %h %e');
+	define('DATETIME_FMT', '%#I:%M%p %b %#d');
 	define('TIME_FMT', '%#I:%M%p');
 	define('TIME_12H_FMT', '%#I:%M');
 } else {
@@ -32,7 +32,7 @@ function format_time_s($datetime_str)
 		return strftime(TIME_FMT, $time);
 	}
 	else {
-		return strftime('%l:%M%P %h %e', $time);
+		return strftime(DATETIME_FMT, $time);
 	}
 }
 
