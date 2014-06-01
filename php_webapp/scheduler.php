@@ -112,11 +112,13 @@ function output_contest_info($d)
 	if (isset($d['label'])) {
 		h("[".$d['label']."]");
 	}
-	if ($round || isset($d['label'])) { echo ": "; }
+	if (($round || isset($d['label'])) && $d['participant_ordinals']) { echo ": "; }
+	if ($d['participant_ordinals']) {
 ?>
 	<span class="participants"><?php
 	h($d['participant_ordinals']);
 	?></span>
+	<?php } ?>
 	<a href="<?php h($d['url'])?>"><img src="images/edit.gif" width="18" height="18" alt="Edit" border="0"></a>
 	</div>
 <?php
@@ -167,8 +169,8 @@ function output_current_scheduler_row()
 }
 
 $sql = "SELECT c.id,c.status,venue,starts,round,
-	(SELECT GROUP_CONCAT(ordinal SEPARATOR 'v') FROM contest_participant cp
-			JOIN person p ON p.id=cp.player
+	(SELECT GROUP_CONCAT(IFNULL(ordinal,'?') SEPARATOR 'v') FROM contest_participant cp
+			LEFT JOIN person p ON p.id=cp.player
 			WHERE cp.contest=c.id) AS participant_ordinals,
 	c.label
 	FROM contest c
