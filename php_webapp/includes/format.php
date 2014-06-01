@@ -1,5 +1,19 @@
 <?php
 
+if (strtoupper(substr(PHP_OS,0,3)) == 'WIN') {
+	//Windows format specifiers
+	define('LONG_DATE_FORMAT', '%#x');
+	define('DATETIME_FMT', '%#I:%M%p %h %e');
+	define('TIME_FMT', '%#I:%M%p');
+	define('TIME_12H_FMT', '%#I:%M');
+} else {
+	//Unix/Linux format specifiers
+	define('LONG_DATE_FORMAT', '%A, %h %e, %Y');
+	define('DATETIME_FMT', '%l:%M%P %h %e');
+	define('TIME_FMT', '%l:%M%P');
+	define('TIME_12H_FMT', '%l:%M');
+}
+
 function format_time_s($datetime_str)
 {
 	if (!$datetime_str) { return NULL; }
@@ -12,10 +26,10 @@ function format_time_s($datetime_str)
 	$cur_time = time();
 
 	if (abs($time-$cur_time) < 2*3600) {
-		return strftime('%l:%M', $time);
+		return strftime(TIME_12H_FMT, $time);
 	}
 	else if (strftime('%Y-%m-%d',$time) == strftime('%Y-%m-%d',$cur_time)) {
-		return strftime('%l:%M%P', $time);
+		return strftime(TIME_FMT, $time);
 	}
 	else {
 		return strftime('%l:%M%P %h %e', $time);
