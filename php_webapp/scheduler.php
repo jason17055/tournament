@@ -247,14 +247,16 @@ while ($row = mysqli_fetch_row($query)) {
 	$d['url'] = 'contest.php?id='.urlencode($d['id'])
 		. '&next_url='.urlencode($_SERVER['REQUEST_URI']);
 
-	while ($d['starts'].':Z' >= make_datetime($cur_row_time+$granularity)) {
+	while ($row_count < $num_rows &&
+		make_datetime($cur_row_time+$granularity) < ($d['starts']."~"))
+	{
 		output_current_scheduler_row();
 		$cur_row_time += $granularity;
-		if ($row_count >= $num_rows) {
-			break;
-		}
 	}
 
+	if ($row_count >= $num_rows) {
+		break;
+	}
 	$by_venue[$d['venue']][] = $d;
 }
 while ($row_count < $num_rows) {
