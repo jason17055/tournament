@@ -116,6 +116,7 @@ function update_contest_participants($contest_id)
 	}
 
 	$seen_seats = array();
+	$seen_players = array();
 	foreach ($p_updates as $cpid => $cp_post) {
 
 		if (isset($cp_post['delete'])) {
@@ -129,6 +130,9 @@ function update_contest_participants($contest_id)
 
 		if ($cp_post['seat']) {
 			$seen_seats[$cp_post['seat']] = $cpid;
+		}
+		if ($cp_post['player']) {
+			$seen_players[$cp_post['player']] = $cpid;
 		}
 
 		$updates = array();
@@ -170,6 +174,13 @@ function update_contest_participants($contest_id)
 	}
 
 	// TODO- delete empty, invalid seats...
+
+	// return list of pids
+	$pids = array();
+	foreach ($seen_players as $pid => $cpid) {
+		$pids[] = $pid;
+	}
+	return implode(',',$pids);
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
@@ -212,12 +223,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			or die(db_error($database));
 		$contest_id = mysqli_insert_id($database);
 
-		update_contest_participants($contest_id);
+		$pids = update_contest_participants($contest_id);
 		update_all_player_scores();
 
 		mysqli_commit($database);
 
-		header("Location: $next_url");
+		if ($pids && $_REQUEST['status'] == 'completed') {
+			$url = "check_player_next_assignments.php?tournament=".urlencode($tournament_id).
+				"&players=".urlencode($pids).
+				"&next_url=".urlencode($next_url);
+			header("Location: $url");
+		}
+		else {
+			header("Location: $next_url");
+		}
 		exit();
 	}
 
@@ -252,12 +271,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
-		update_contest_participants($_GET['id']);
+		$pids = update_contest_participants($_GET['id']);
 		update_all_player_scores();
 
 		mysqli_commit($database);
 
-		header("Location: $next_url");
+		if ($pids && $_REQUEST['status'] == 'completed') {
+			$url = "check_player_next_assignments.php?tournament=".urlencode($tournament_id).
+				"&players=".urlencode($pids).
+				"&next_url=".urlencode($next_url);
+			header("Location: $url");
+		}
+		else {
+			header("Location: $next_url");
+		}
 		exit();
 	}
 

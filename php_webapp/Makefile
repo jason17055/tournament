@@ -34,6 +34,7 @@ php_scripts = \
 	assignments-data.js.php \
 	autocomplete-new-person.php \
 	card_stats.php \
+	check_player_next_assignments.php \
 	config-sample.php \
 	contest.php \
 	contest_participant.php \
