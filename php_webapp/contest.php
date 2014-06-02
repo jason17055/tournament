@@ -33,11 +33,11 @@ if (isset($_GET['tournament'])) {
 		default_form_property('starts', '');
 		default_form_property('round', '');
 		default_form_property('label', '');
+		default_form_property('status', 'assigned');
 		$_REQUEST['session_num'] = $tournament_info['current_session'];
 		$_REQUEST['game'] = $tournament_info['default_game'];
 		$_REQUEST['scenario'] = "";
-		$_REQUEST['status'] = "";
-		$_REQUEST['started'] = strftime('%Y-%m-%d', time());
+		$_REQUEST['started'] = "";
 		$_REQUEST['finished'] = "";
 		$_REQUEST['notes'] = "";
 	}
