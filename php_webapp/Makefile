@@ -29,7 +29,9 @@ data_files = \
 	images/contest_started_icon.png \
 	images/seat_gb_icon.png \
 	images/seat_yb_icon.png \
-	images/create_doc.png
+	images/create_doc.png \
+	images/create_doc_bad.png \
+	images/create_doc_good.png
 
 php_scripts = \
 	assignments-data.js.php \
