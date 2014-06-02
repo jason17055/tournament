@@ -95,6 +95,7 @@ Select a time/location for the <?php h('R'.$_REQUEST['new_contest_round'])?>
 <ul class="opponent_list">
 	<?php
 	$seen_opponents = array();
+	$seen_opponents[$ordinal] = TRUE;
 	while ($row = mysqli_fetch_row($query)) {
 		$round = $row[0];
 		$opp_is_team = $row[1];
