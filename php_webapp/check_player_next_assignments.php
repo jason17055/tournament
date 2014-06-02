@@ -37,6 +37,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 	die("Not implemented.");
 }
 
+$sql = "SELECT COUNT(*)
+	FROM person p
+	LEFT JOIN contest next_c
+		ON next_c.id=(
+			SELECT c1.id FROM contest c1
+			JOIN contest_participant cp
+				ON cp.contest=c1.id
+			WHERE cp.player=p.id
+			AND IFNULL(c1.status,'unknown') NOT IN ('completed')
+			ORDER BY starts
+			)
+	WHERE p.tournament=".db_quote($tournament_id)."
+	AND p.id IN (".db_quote_list(explode(',',$_REQUEST['players'])).")
+	AND p.status IN ('ready')
+	AND next_c.id IS NULL
+	";
+$query = mysqli_query($database, $sql)
+	or die("SQL error: ".db_error($database));
+$row = mysqli_fetch_row($query);
+if ($row[0] == 0) {
+	// no assignments to make
+	$next_url = isset($_REQUEST['next_url']) ? $_REQUEST['next_url'] : 'tournament_dashboard.php?tournament='.urlencode($tournament_id);
+	header("Location: $next_url");
+	exit();
+}
+
 begin_page("Check assignments");
 
 ?>
