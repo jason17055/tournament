@@ -42,7 +42,7 @@ $num_rows = isset($_REQUEST['rows']) ? $_REQUEST['rows'] : 16;
 
 $ONE_DAY = 86400;
 $url_com = 'tournament='.urlencode($tournament_id);
-foreach (array('rows','add_player','new_contest_round','new_contest_label') as $k) {
+foreach (array('rows','add_player','new_contest_round','new_contest_label','next_url') as $k) {
 	if (array_key_exists($k, $_GET)) {
 		$url_com .= '&'.$k.'='.urlencode($_REQUEST[$k]);
 	}
@@ -169,6 +169,7 @@ function output_contest_info($d)
 			$url .= '&round='.urlencode($_REQUEST['new_contest_round']);
 			$url .= '&label='.urlencode($_REQUEST['new_contest_label']);
 		}
+		$url .= '&on_success='.urlencode($_REQUEST['next_url']);
 		$icon = 'images/create_doc.png';
 
 		if (isset($d['label']) && isset($_REQUEST['new_contest_label'])) {

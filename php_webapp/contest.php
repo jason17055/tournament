@@ -228,6 +228,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		mysqli_commit($database);
 
+		if (isset($_REQUEST['on_success'])) {
+			$next_url = $_REQUEST['on_success'];
+		}
+
 		if ($pids && $_REQUEST['status'] == 'completed') {
 			$url = "check_player_next_assignments.php?tournament=".urlencode($tournament_id).
 				"&players=".urlencode($pids).
@@ -275,6 +279,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		update_all_player_scores();
 
 		mysqli_commit($database);
+
+		if (isset($_REQUEST['on_success'])) {
+			$next_url = $_REQUEST['on_success'];
+		}
 
 		if ($pids && $_REQUEST['status'] == 'completed') {
 			$url = "check_player_next_assignments.php?tournament=".urlencode($tournament_id).

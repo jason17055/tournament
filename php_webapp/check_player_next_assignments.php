@@ -117,7 +117,8 @@ while ($row = mysqli_fetch_row($query)) {
 	$schedule_url = "scheduler.php?tournament=".urlencode($tournament_id).
 		"&add_player=".urlencode($pid).
 		"&new_contest_round=".urlencode($next_round).
-		"&new_contest_label=".urlencode($record);
+		"&new_contest_label=".urlencode($record).
+		"&next_url=".urlencode($_SERVER['REQUEST_URI']);
 ?><a href="<?php h($schedule_url)?>">Schedule Next Match</a>
 |
 <a href="<?php h($drop_out_url)?>">Drop Out</a>
