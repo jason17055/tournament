@@ -94,11 +94,13 @@ Select a time/location for the <?php h('R'.$_REQUEST['new_contest_round'])?>
 <div>Has already played:</div>
 <ul class="opponent_list">
 	<?php
+	$seen_opponents = array();
 	while ($row = mysqli_fetch_row($query)) {
 		$round = $row[0];
 		$opp_is_team = $row[1];
 		$opp_ordinal = $row[2];
 		$opp_name = $row[3];
+		$seen_opponents[$opp_ordinal] = TRUE;
 		?><li><img src="images/team_icon.png"><?php h($opp_name.' (Team '.$opp_ordinal.') - R'.$round)?></li>
 	<?php } ?>
 </ul>
@@ -150,6 +152,8 @@ $row_count = 0;
 
 function output_contest_info($d)
 {
+	global $seen_opponents;
+
 	$round = $d['round'];
 	if (preg_match('/^\d+$/', $round)) {
 		$round = "R$round";
@@ -165,6 +169,23 @@ function output_contest_info($d)
 			$url .= '&label='.urlencode($_REQUEST['new_contest_label']);
 		}
 		$icon = 'images/create_doc.png';
+
+		if (isset($d['label']) && isset($_REQUEST['new_contest_label'])) {
+			if ($d['label'] == $_REQUEST['new_contest_label']) {
+				$icon = "images/create_doc_good.png";
+			}
+		}
+		if (isset($d['round']) && isset($_REQUEST['new_contest_round'])) {
+			if ($d['round'] && $d['round'] != $_REQUEST['new_contest_round']) {
+				$icon = "images/create_doc_bad.png";
+			}
+		}
+
+		foreach (explode('v', $d['participant_ordinals']) as $opp) {
+			if (array_key_exists($opp, $seen_opponents)) {
+				$icon = "images/create_doc_bad.png";
+			}
+		}
 	}
 
 	?><div>
