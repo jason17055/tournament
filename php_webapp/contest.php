@@ -335,6 +335,11 @@ else {
 	$game_definition['can_remove_seats'] = TRUE;
 }
 
+$add_players = array();
+if (isset($_REQUEST['add_player'])) {
+	$add_players = explode(',', $_REQUEST['add_player']);
+}
+
 begin_page(isset($_GET['id']) ? "Edit Game" : "New Game");
 
 ?>
@@ -540,6 +545,10 @@ if (isset($_GET['id'])) {
 		$status = $row[8];
 		$commit = ($status == 'C');
 
+		if (!$player_id && count($add_players) > 0) {
+			$player_id = array_shift($add_players);
+		}
+
 		$seen_seats[$seat] = TRUE;
 		participant_row('participant_'.$cpid,
 			array(
@@ -561,11 +570,18 @@ if ($can_edit && $game_definition['seat_names']) {
 	$mandatory_seats = explode(',', $game_definition['seat_names']);
 	$mcount = 0;
 	foreach ($mandatory_seats as $seat) {
+
 		if (isset($seen_seats[$seat])) { continue; }
+
+		$player_id = "";
+		if (!$player_id && count($add_players) > 0) {
+			$player_id = array_shift($add_players);
+		}
+
 		participant_row('participant_m'.(++$mcount),
 			array(
 			'seat' => $seat,
-			'player_id' => NULL,
+			'player_id' => $player_id,
 			'player_name' => NULL,
 			'turn_order' => '',
 			'score' => '',
