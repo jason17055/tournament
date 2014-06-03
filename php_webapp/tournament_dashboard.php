@@ -11,7 +11,7 @@ $sql = "SELECT name,multi_game,multi_session,current_session,vocab_table,
 	use_person_home_location,use_person_mail,use_person_phone,
 	(SELECT MIN(id) FROM game_definition WHERE tournament=t.id) AS game0,
 	use_teams,
-	(SELECT GROUP_CONCAT(DISTINCT round) FROM contest WHERE round IS NOT NULL AND tournament=t.id) rounds
+	(SELECT GROUP_CONCAT(DISTINCT round ORDER BY round) FROM contest WHERE round IS NOT NULL AND tournament=t.id) rounds
 	FROM tournament t
 	WHERE id=".db_quote($tournament_id);
 $query = mysqli_query($database, $sql)
