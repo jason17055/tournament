@@ -64,7 +64,8 @@ $person_column_names = array(
 	'games_played' => 'Games Played',
 	'games_won' => 'Games Won',
 	'status' => 'Status',
-	'current_rating' => 'Current Rating'
+	'current_rating' => 'Current Rating',
+	'next_contest' => 'Next Game'
 	);
 $person_column_sortable = array(
 	'ordinal' => TRUE,
@@ -90,6 +91,7 @@ foreach (explode(',',$tournament_info['rounds']) as $round) {
 //$person_columns[]='games_played';
 //$person_columns[]='games_won';
 $person_columns[]='raw_score';
+$person_columns[]='next_contest';
 if ($tournament_info['ratings']) {
 	$person_columns[] = 'current_rating';
 }
@@ -152,14 +154,25 @@ $sql = "SELECT p.id,p.name,p.status,
 	p.is_team,
 	IFNULL((SELECT GROUP_CONCAT(phone SEPARATOR ', ') FROM person pp
 		WHERE pp.member_of=p.id AND phone IS NOT NULL), p.phone) AS member_phones,
-	(SELECT value FROM person_attrib_float WHERE person=p.id AND attrib='raw_score') AS raw_score
+	(SELECT value FROM person_attrib_float WHERE person=p.id AND attrib='raw_score') AS raw_score,
+	next_c.id AS next_contest
 	FROM person p
 	JOIN tournament t
 		ON t.id=p.tournament
 	LEFT JOIN player_rating r
 		ON r.id=p.id
 		AND r.session_num=t.current_session
-	WHERE tournament=".db_quote($tournament_id)."
+	LEFT JOIN contest next_c
+		ON next_c.id=(
+			SELECT c1.id
+			FROM contest c1
+			JOIN contest_participant cp ON cp.contest=c1.id
+			WHERE cp.player=p.id
+			AND IFNULL(status,'unknown') NOT IN ('completed')
+			ORDER BY starts
+			LIMIT 1
+			)
+	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.status IS NOT NULL
 	ORDER BY $order_by_sql";
 $query = mysqli_query($database, $sql)
@@ -186,7 +199,8 @@ while ($row = mysqli_fetch_row($query)) {
 	'ordinal' => $row[14],
 	'is_team' => ($row[15]=='Y'),
 	'member_phones' => $row[16],
-	'raw_score' => $row[17]
+	'raw_score' => $row[17],
+	'next_contest' => $row[18]
 	);
 
 	$edit_url = $d['is_team'] ? 
@@ -213,6 +227,13 @@ while ($row = mysqli_fetch_row($query)) {
 <td class="rating_col"><?php
 	if (!is_null($cur_rating)) { h(sprintf('%.0f', $cur_rating));
 		}?></td>
+<?php } else if ($col == 'next_contest') { ?>
+<td class="next_contest_col"><?php
+	if ($d['next_contest']) {
+		$contest_url = "contest.php?id=".urlencode($d['next_contest']).
+			"&next_url=".urlencode($_SERVER['REQUEST_URI']);
+	?>
+		<a href="<?php h($contest_url)?>"><img src="images/edit.gif" width="18" height="18" border="0"></a><?php } ?></td>
 <?php } else if (preg_match('/^round\.(.*)$/', $col, $m)) { ?>
 <td class="round_result_col"><?php
 		$sql = "
