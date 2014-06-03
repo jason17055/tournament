@@ -188,6 +188,10 @@ function output_contest_info($d)
 				$icon = "images/create_doc_bad.png";
 			}
 		}
+
+		if (isset($d['full'])) {
+			$icon = "images/create_doc_bad.png";
+		}
 	}
 
 	?><div>
@@ -260,8 +264,13 @@ $sql = "SELECT c.id,c.status,venue,starts,round,
 	(SELECT GROUP_CONCAT(IFNULL(ordinal,'?') SEPARATOR 'v') FROM contest_participant cp
 			LEFT JOIN person p ON p.id=cp.player
 			WHERE cp.contest=c.id) AS participant_ordinals,
-	c.label
+	c.label,
+	(SELECT COUNT(*) FROM contest_participant
+		WHERE contest=c.id
+		AND player IS NOT NULL) seats_occupied,
+	gdef.seat_names AS seat_names
 	FROM contest c
+	LEFT JOIN game_definition gdef ON gdef.id=c.game
 	WHERE c.tournament=".db_quote($tournament_id)."
 	AND starts IS NOT NULL
 	AND starts >= ".db_quote(make_datetime($cur_row_time))."
@@ -277,8 +286,14 @@ while ($row = mysqli_fetch_row($query)) {
 	'starts' => $row[3],
 	'round' => $row[4],
 	'participant_ordinals' => $row[5],
-	'label' => $row[6]
+	'label' => $row[6],
+	'seats_occupied' => $row[7],
+	'seat_names' => $row[8]
 	);
+	if ((0+$d['seats_occupied']) >= count(explode(',', $d['seat_names']))) {
+		$d['full'] = TRUE;
+	}
+
 	$d['url'] = 'contest.php?id='.urlencode($d['id'])
 		. '&next_url='.urlencode($_SERVER['REQUEST_URI']);
 
