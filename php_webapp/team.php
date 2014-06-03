@@ -4,6 +4,7 @@ require_once('config.php');
 require_once('includes/db.php');
 require_once('includes/skin.php');
 require_once('includes/auth.php');
+require_once('includes/scores.php');
 
 $NMEMBERS = 2;
 
@@ -135,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 				or die("SQL error: ".db_error($database));
 		}
 
+		update_all_player_scores();
 		mysqli_commit($database);
 
 		if (isset($_REQUEST['schedule_next_match'])) {
