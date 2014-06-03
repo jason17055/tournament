@@ -128,8 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		mysqli_autocommit($database, FALSE);
 
 		$sql = "DELETE FROM contest_participant
-			WHERE player=".db_quote($_GET['id'])."
-			AND tournament=".db_quote($tournament_id);
+			WHERE player=".db_quote($_GET['id']);
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
