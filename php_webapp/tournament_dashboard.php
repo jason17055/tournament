@@ -32,7 +32,7 @@ $tournament_info = array(
 	'use_person_phone' => $row[10]=='Y',
 	'game0' => $row[11],
 	'use_teams' => $row[12]=='Y',
-	'rounds' => $row[13]
+	'rounds' => $row[13] ?: '1'
 	);
 
 $game_definition = array();
