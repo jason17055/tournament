@@ -47,6 +47,7 @@ $sql = "SELECT COUNT(*)
 			WHERE cp.player=p.id
 			AND IFNULL(c1.status,'unknown') NOT IN ('completed')
 			ORDER BY starts
+			LIMIT 1
 			)
 	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.id IN (".db_quote_list(explode(',',$_REQUEST['players'])).")
@@ -97,6 +98,7 @@ $sql = "SELECT p.is_team,p.ordinal,p.name,p.status,
 			WHERE cp.player=p.id
 			AND IFNULL(c1.status,'unknown') NOT IN ('completed')
 			ORDER BY starts
+			LIMIT 1
 			)
 	LEFT JOIN venue next_c_v
 		ON next_c_v.id=next_c.venue
