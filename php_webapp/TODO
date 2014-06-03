@@ -6,6 +6,4 @@ tournament:
  when unchecking 'multi_session', set all session_num values to NULL
 
 scoreboard:
- make a scoreboard where each column is a different round, and the
- scoreboard just shows whether each player won or lost or did not play
- that round
+ hide, or indicate somehow, players who are marked "absent"
