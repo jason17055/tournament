@@ -308,6 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		mysqli_query($database, $sql)
 			or die("SQL error: ".db_error($database));
 
+		update_all_player_scores();
 		mysqli_commit($database);
 
 		header("Location: $next_url");
