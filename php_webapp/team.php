@@ -137,6 +137,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 		mysqli_commit($database);
 
+		if (isset($_REQUEST['schedule_next_match'])) {
+			$url = "check_player_next_assignments.php?tournament=".urlencode($tournament_id).
+				"&players=".urlencode($new_team_id).
+				"&next_url=".urlencode($next_url);
+			header("Location: $url");
+			exit();
+		}
+
 		header("Location: $next_url");
 		exit();
 	}
@@ -165,6 +173,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		}
 
 		mysqli_commit($database);
+
+		if (isset($_REQUEST['schedule_next_match'])) {
+			$url = "check_player_next_assignments.php?tournament=".urlencode($tournament_id).
+				"&players=".urlencode($_GET['id']).
+				"&next_url=".urlencode($next_url);
+			header("Location: $url");
+			exit();
+		}
 
 		header("Location: $next_url");
 		exit();
@@ -246,6 +262,11 @@ $form_id = isset($_GET['id']) ? 'edit_team_form' : 'new_team_form';
 		"absent" => "Absent"
 		)
 	))?></td>
+</tr>
+<tr>
+<td colspan="2">
+<label><input type="checkbox" name="schedule_next_match"<?php echo(!isset($_GET['id'])?' checked="checked"':'')?>>Schedule this team's next match (if needed)</label>
+</td>
 </tr>
 </table>
 
