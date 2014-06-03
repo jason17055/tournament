@@ -90,12 +90,13 @@ Select a time/location for the <?php h('R'.$_REQUEST['new_contest_round'])?>
 		ORDER BY pp.ordinal, pp.name, c.round";
 	$query = mysqli_query($database, $sql)
 		or die("SQL error: ".db_error($database));
+	$seen_opponents = array();
+	$seen_opponents[$ordinal] = TRUE;
+	if (mysqli_num_rows($query) != 0) {
 	?>
 <div>Has already played:</div>
 <ul class="opponent_list">
 	<?php
-	$seen_opponents = array();
-	$seen_opponents[$ordinal] = TRUE;
 	while ($row = mysqli_fetch_row($query)) {
 		$round = $row[0];
 		$opp_is_team = $row[1];
@@ -105,6 +106,9 @@ Select a time/location for the <?php h('R'.$_REQUEST['new_contest_round'])?>
 		?><li><img src="images/team_icon.png"><?php h($opp_name.' (Team '.$opp_ordinal.') - R'.$round)?></li>
 	<?php } ?>
 </ul>
+	<?php } else { ?>
+<div>Has not yet played.</div>
+	<?php } //end if no opponents ?>
 </div><!--/add_player_info-->
 <?php
 }
