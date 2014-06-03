@@ -207,7 +207,8 @@ $form_id = isset($_GET['id']) ? 'edit_person_form' : 'new_person_form';
 		"ready"=>"Ready",
 		"prereg"=>"Pre-Registered",
 		""=>"Unregistered",
-		"absent" => "Absent"
+		"absent" => "Absent",
+		"hidden" => "Hidden"
 		)
 	))?></td>
 </tr>

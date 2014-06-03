@@ -261,7 +261,8 @@ $form_id = isset($_GET['id']) ? 'edit_team_form' : 'new_team_form';
 		"ready"=>"Ready",
 		"prereg"=>"Pre-Registered",
 		""=>"Unregistered",
-		"absent" => "Absent"
+		"absent" => "Absent",
+		"hidden" => "Hidden"
 		)
 	))?></td>
 </tr>

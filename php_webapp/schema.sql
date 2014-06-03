@@ -34,7 +34,7 @@ CREATE TABLE tournament_role (
 	FOREIGN KEY (account) REFERENCES account (username)
 	);
 
--- status: one of 'prereg', 'ready', 'absent'
+-- status: one of 'prereg', 'ready', 'absent', 'hidden'
 CREATE TABLE person (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tournament INTEGER NOT NULL,

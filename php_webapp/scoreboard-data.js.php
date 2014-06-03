@@ -57,7 +57,7 @@ $sql = "SELECT p.id,
 	LEFT JOIN person_attrib_float s2 ON s2.person=p.id AND s2.attrib='sum_opponent_scores'
 	WHERE p.tournament=".db_quote($tournament_id)."
 	AND p.status IS NOT NULL
-	AND p.status NOT IN ('prereg')
+	AND p.status NOT IN ('prereg','hidden')
 	";
 
 $scoreboard_order = "raw_score DESC,sum_opponent_scores DESC,ordinal ASC";
